@@ -446,9 +446,12 @@ const setStaticItem = (staticItem) => {
   items.value = staticItem
 }
 
+const getCurrentItems = () => items.value
+
 defineExpose({
   getItems,
   getItemById,
+  getCurrentItems,
   openSelectModal,
   setStaticItem,
 })

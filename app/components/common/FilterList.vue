@@ -303,109 +303,115 @@
       </div>
 
       <v-dialog
-      v-model="dialogFilterMobileModel"
-      transition="dialog-bottom-transition"
-      fullscreen
-      scrim="#ffffff"
-    >
-      <div
-        class="w-100 h-100 d-flex flex-column justify-space-between overflow-y-auto bg-white position-relative"
+        v-model="dialogFilterMobileModel"
+        transition="dialog-bottom-transition"
+        fullscreen
+        scrim="#ffffff"
       >
-        <v-container class="flex-column mb-10">
-          <v-col
-            cols="12"
-            class="d-flex justify-space-between align-center"
-          >
-            <span class="text-h3 text-grey600">Filter</span>
-
-            <v-icon
-              size="x-large"
-              color="grey300"
-              @click="dialogFilterMobileModel = false"
-            >
-              md:cancel
-            </v-icon>
-          </v-col>
-          <v-col
-            cols="12"
-            class="d-flex flex-column justify-start align-center mt-4"
-          >
-            <template
-              v-for="(filter, index) in filters"
-              :key="filter.title || index"
-            >
-              <div
-                v-if="!filter.inlineOptions && !($slots['services-navigation'] && filter.queryKey === 'type')"
-                :class="`w-100 d-flex justify-space-between align-center flex-wrap pt-2 pb-2 ${
-                  filter.disabled ? `opacity-20 cursor-not-allowed` : ``
-                }`"
-                @click="openFilterSelectModal(filter)"
-              >
-              <v-badge
-                :color="filter.selectedItem ? `lightError` : `#ffffff`"
-                dot
-                floating
-              >
-                <span class="text-h4 text-grey500 font-weight-bold">{{ filter.title }} </span>
-              </v-badge>
+      <div class="mobile-filter-modal w-100 h-100 d-flex flex-column overflow-y-auto position-relative">
+        <v-container class="mobile-filter-modal__container flex-column">
+          <section class="mobile-filter-panel">
+            <div class="mobile-filter-panel__header d-flex align-center justify-space-between">
+              <span class="mobile-filter-panel__title d-flex align-center ga-2">
+                <v-icon size="18">md:filter_list</v-icon>
+                Filters
+              </span>
               <div class="d-flex align-center ga-1">
-                <v-chip
-                  v-if="filter.selectedItem"
-                  variant="flat"
-                  class="text-h5 font-weight-bold pl-5 pr-5"
-                  color="grey100"
+                <v-btn
+                  variant="text"
+                  class="mobile-filter-panel__clear"
+                  @click="clearAllFilter"
                 >
-                  <span class="text-grey500">{{ filter.selectedItem?.title }}</span>
-                </v-chip>
-
-                <v-icon
-                  v-if="filter.selectedItem && filter.closable && !filter.defaultValue"
-                  class="filter-clear-icon"
-                  color="grey500"
-                  size="18"
-                  role="button"
-                  tabindex="0"
-                  :aria-label="`Clear ${filter.title}`"
-                  @click.stop="clearFilter(index)"
-                  @keydown.enter.stop.prevent="clearFilter(index)"
-                  @keydown.space.stop.prevent="clearFilter(index)"
+                  Clear
+                </v-btn>
+                <v-btn
+                  icon
+                  variant="text"
+                  class="mobile-filter-panel__close"
+                  aria-label="Close filters"
+                  @click="dialogFilterMobileModel = false"
                 >
-                  md:cancel
-                </v-icon>
-
-                <v-icon
-                  color="grey500"
-                  size="34"
-                >
-                  md:keyboard_arrow_down
-                </v-icon>
+                  <v-icon size="20">md:close</v-icon>
+                </v-btn>
               </div>
+            </div>
 
-                <v-divider
-                  :thickness="2"
-                  class="border-opacity-100 mt-4 mb-4"
-                  color="grey100"
-                />
-              </div>
-            </template>
-          </v-col>
+            <div class="mobile-filter-control-list">
+              <template
+                v-for="(filter, index) in filters"
+                :key="`mobile-${filter.title || index}`"
+              >
+                <div
+                  v-if="!filter.inlineOptions && !($slots['services-navigation'] && filter.queryKey === 'type')"
+                  class="mobile-filter-control-wrapper"
+                  @click.capture="handleMobileFilterControlClick($event, filter)"
+                >
+                  <CommonChipSelectFilter
+                    :title="filter.title"
+                    :api="filter.api"
+                    :selected-item="filter.selectedItem"
+                    :extra-api-params="filter.extraApiParams"
+                    :static-list="filter.staticList"
+                    :item-filter="filter.itemFilter"
+                    :item-transform="filter.itemTransform"
+                    :item-sort="filter.itemSort"
+                    :list-transform="filter.listTransform"
+                    :show-item-icon="filter.showItemIcon"
+                    :icon-src="filter.iconSrc"
+                    :fallback-icon="filter.fallbackIcon"
+                    :fallback-icon-src="filter.fallbackIconSrc"
+                    :empty-fallback-icon-src="filter.emptyFallbackIconSrc"
+                    :fallback-icon-padding="filter.fallbackIconPadding"
+                    :boxed="filter.boxed"
+                    :show-clear="Boolean(filter.closable && !filter.defaultValue)"
+                    :selected-variant="filter.selectedVariant"
+                    :control-icon="filter.controlIcon"
+                    :control-icon-src="filter.controlIconSrc"
+                    :control-icon-svg="filter.controlIconSvg"
+                    :unselected-icon-color="filter.unselectedIconColor"
+                    :control-icon-padding="filter.controlIconPadding"
+                    :item-title="filter.itemTitle"
+                    :disabled="filter.disabled"
+                    :has-search="filter.hasSearch"
+                    @clear="clearFilter(index)"
+                  />
+                </div>
+              </template>
+            </div>
+
+            <div
+              v-if="hasInlineFilters"
+              class="mobile-inline-filter-group"
+            >
+              <CommonChipSelectFilter
+                v-for="(entry, inlineIndex) in inlineFilterEntries"
+                :key="`mobile-inline-${entry.filter.title || entry.index}-${getMobileFilterItems(entry.filter).length}`"
+                class="mobile-inline-filter-row"
+                :title="entry.filter.title"
+                :api="null"
+                :selected-item="entry.filter.selectedItem"
+                :static-list="getMobileFilterItems(entry.filter)"
+                :inline-options="true"
+                :inline-allow-clear="entry.filter.inlineAllowClear"
+                :inline-grouped="true"
+                :inline-items-per-row="resolveInlineItemsPerRow(entry.filter)"
+                :inline-divider-after="inlineIndex === 0 && inlineFilterEntries.length > 1"
+                :inline-leading-option-slots="entry.filter.inlineLeadingOptionSlots"
+                :item-title="entry.filter.itemTitle"
+                :disabled="entry.filter.disabled"
+                @update-selected-item="updateSelectedItem($event, entry.index)"
+              />
+            </div>
+          </section>
         </v-container>
         <div
-          class="w-100 d-flex align-center justify-center ga-3 pb-2 box-button position-fixed bottom-0 bg-white"
+          class="mobile-filter-modal__footer w-100 d-flex align-center justify-center position-fixed bottom-0"
         >
-          <v-btn
-            variant="text"
-            class="text-h5 text-grey700"
-            @click="clearAllFilter"
-          >
-            Clear All
-          </v-btn>
           <v-btn
             color="#F4B400"
             rounded="xl"
             height="40"
-            width="200"
-            class="text-h5 text-grey800"
+            class="mobile-filter-modal__show-results text-h5 text-grey800"
             :loading="loading"
             @click="dialogFilterMobileModel = false"
           >
@@ -484,6 +490,10 @@ const textSearch = ref(route.query.title ? route.query.title : '')
 const timer = ref(null)
 const hasExclusiveDisabledState = ref(false)
 let pendingServiceChange = false
+
+watch(mdAndUp, (isDesktop) => {
+  if (isDesktop) dialogFilterMobileModel.value = false
+})
 const filterControlsShell = ref(null)
 const filterControls = ref(null)
 const filterControlsContent = ref(null)
@@ -782,6 +792,20 @@ const openFilterSelectModal = (filter) => {
   if (filter.disabled) return
 
   filter.refElement.openSelectModal()
+}
+
+const handleMobileFilterControlClick = (event, filter) => {
+  const target = event.target
+  if (target instanceof Element && target.closest('.search-filter-clear-icon')) return
+
+  event.preventDefault()
+  event.stopPropagation()
+  openFilterSelectModal(filter)
+}
+
+const getMobileFilterItems = (filter) => {
+  const loadedItems = filter.refElement?.getCurrentItems?.()
+  return Array.isArray(loadedItems) ? loadedItems : (filter.staticList || [])
 }
 
 const measureStickyContent = () => {
@@ -1403,6 +1427,191 @@ const clearAllFilter = async () => {
 }
 
 @media (max-width: 959px) {
+  .mobile-filter-modal {
+    height: 100dvh !important;
+    overflow: hidden !important;
+    color: #1e2a44;
+    background: #f7f8fa;
+  }
+
+  .mobile-filter-modal__container {
+    display: block;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    min-height: 0;
+    flex: 1 1 auto;
+    padding: 0 0 calc(88px + env(safe-area-inset-bottom));
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-filter-panel {
+    width: 100%;
+    min-height: calc(100dvh - 88px);
+    overflow: visible;
+    background: #fcfcfd;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .mobile-filter-panel__header {
+    min-height: 64px;
+    padding: 16px;
+    border-bottom: 1px solid #d8dee8;
+  }
+
+  .mobile-filter-panel__title {
+    color: #1e2a44;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 24px;
+  }
+
+  .mobile-filter-panel__clear {
+    min-width: 0;
+    height: 32px !important;
+    padding: 0 8px !important;
+    color: #c93c37;
+    font-size: 12px;
+    font-weight: 650;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .mobile-filter-panel__close {
+    width: 32px !important;
+    height: 32px !important;
+    color: #667085;
+  }
+
+  .mobile-filter-control-wrapper {
+    width: 100%;
+  }
+
+  .mobile-filter-control-list :deep(.search-filter-control) {
+    width: 100%;
+    min-width: 0;
+    height: 56px !important;
+    justify-content: stretch !important;
+    padding-inline: 16px;
+    direction: ltr;
+    color: #1e2a44;
+    text-align: left;
+    background: #fcfcfd;
+    border: 0 !important;
+    border-bottom: 1px solid #eef1f5 !important;
+    border-radius: 0 !important;
+    box-shadow: none;
+  }
+
+  .mobile-filter-control-list :deep(.search-filter-control:not(.search-filter-has-icon)) {
+    padding-left: 52px;
+  }
+
+  .mobile-filter-control-list :deep(.search-filter-control .v-btn__content) {
+    justify-content: flex-start !important;
+  }
+
+  .mobile-filter-control-list :deep(.search-filter-copy) {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .mobile-filter-control-list :deep(.search-filter-control:hover) {
+    background: #f7f8fa;
+  }
+
+  .mobile-filter-control-list :deep(.search-filter-control.open-style-btn:not(.search-filter-empty)),
+  .mobile-filter-control-list :deep(.search-filter-control.dependent-selected-btn) {
+    background: #d8dee8;
+    border-color: transparent !important;
+  }
+
+  .mobile-filter-control-list :deep(.search-filter-value) {
+    max-width: min(190px, 48vw);
+  }
+
+  .mobile-inline-filter-group {
+    width: 100%;
+    padding: 0 16px;
+    background: #fcfcfd;
+  }
+
+  .mobile-inline-filter-group :deep(.inline-filter-selector) {
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 12px 0;
+    margin: 0;
+    background: #fcfcfd;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .mobile-inline-filter-group :deep(.inline-filter-row-content) {
+    display: block;
+    height: auto;
+  }
+
+  .mobile-inline-filter-group :deep(.inline-filter-label) {
+    display: block;
+    margin: 0 0 8px 36px;
+    color: #1e2a44;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+  }
+
+  .mobile-inline-filter-group :deep(.inline-filter-options) {
+    display: grid;
+    width: calc(100% - 36px);
+    gap: 6px;
+    align-items: center;
+    justify-content: start;
+    margin-left: 36px;
+  }
+
+  .mobile-inline-filter-group :deep(.inline-filter-option) {
+    min-height: 28px;
+    padding: 3px 8px !important;
+    border-color: #d8dee8 !important;
+    border-radius: 8px !important;
+    font-size: 12px;
+    line-height: 18px;
+  }
+
+  .mobile-inline-filter-group :deep(.inline-filter-option.inline-filter-option-multi-digit) {
+    padding-inline: 4px !important;
+  }
+
+  .mobile-inline-filter-group :deep(.inline-filter-divider) {
+    display: block;
+    width: calc(100% + 32px);
+    margin: 12px -16px 0;
+    border-top: 1px solid #eef1f5;
+  }
+
+  .mobile-filter-modal__footer {
+    z-index: 2;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: #fcfcfd;
+    border-top: 1px solid #d8dee8;
+  }
+
+  .mobile-filter-modal__show-results {
+    width: 100%;
+    max-width: 448px;
+  }
+
   .filter-list-sidebar-layout > .filter-list-sticky-content {
     display: contents !important;
   }
