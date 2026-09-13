@@ -46,7 +46,7 @@
             class="card-indicators d-none d-md-flex align-center flex-shrink-0"
             aria-label="Resource information"
           >
-            <DifficultyIndicator v-if="!information.is_paper" :level="information.level" :size="16" />
+            <DifficultyIndicator v-if="hasDifficulty" :level="information.level" :size="16" />
             <span
               v-if="hasAnswersAtEndOfFiles"
               class="indicator indicator-library"
@@ -55,31 +55,37 @@
               <img :src="libraryCheckIcon" alt="" class="status-icon">
             </span>
             <span
-              v-if="information.is_paper"
+              v-if="information.is_paper && information.q_file"
               class="indicator indicator-solved-paper"
-              :class="{ 'indicator-muted': !information.q_file }"
               title="Solved paper availability"
             >
               <img :src="solvedPaperIcon" alt="" class="status-icon">
             </span>
             <span
+              v-if="hasPdfAvailable"
               class="indicator indicator-pdf"
-              :class="{ 'indicator-muted': !hasPdfAvailable }"
               title="PDF availability"
             >
               <img :src="pdfCardIcon" alt="" class="status-icon">
             </span>
             <span
+              v-if="information.is_paper && information.a_file"
+              class="indicator indicator-mark-scheme"
+              title="Mark scheme availability"
+            >
+              <img :src="markSchemeIcon" alt="" class="status-icon">
+            </span>
+            <span
+              v-if="!information.is_paper && information.q_file_word"
               class="indicator indicator-word"
-              :class="{ 'indicator-muted': !information.q_file_word }"
               title="Word file availability"
             >
               <img :src="wordCardIcon" alt="" class="status-icon">
             </span>
-            <span v-if="!information.is_paper" class="indicator indicator-fire" title="Featured resource">
+            <span v-if="isFeaturedResource" class="indicator indicator-fire" title="Featured resource">
               <img :src="fireCardIcon" alt="" class="status-icon">
             </span>
-            <QualityIndicator v-if="!information.is_paper" :score="qualityScore" :size="16" />
+            <QualityIndicator v-if="hasQualityRating" :score="qualityScore" :size="16" />
           </div>
         </div>
 
@@ -180,22 +186,22 @@
         </div>
 
         <div class="card-indicators mobile-indicators d-flex d-md-none align-center">
-          <DifficultyIndicator v-if="!information.is_paper" :level="information.level" :size="16" />
+          <DifficultyIndicator v-if="hasDifficulty" :level="information.level" :size="16" />
           <span
             v-if="hasAnswersAtEndOfFiles"
             class="indicator indicator-library"
             title="Resource available"
           ><img :src="libraryCheckIcon" alt="" class="status-icon"></span>
           <span
-            v-if="information.is_paper"
+            v-if="information.is_paper && information.q_file"
             class="indicator indicator-solved-paper"
-            :class="{ 'indicator-muted': !information.q_file }"
             title="Solved paper availability"
           ><img :src="solvedPaperIcon" alt="" class="status-icon"></span>
-          <span class="indicator indicator-pdf" :class="{ 'indicator-muted': !hasPdfAvailable }"><img :src="pdfCardIcon" alt="" class="status-icon"></span>
-          <span class="indicator indicator-word" :class="{ 'indicator-muted': !information.q_file_word }"><img :src="wordCardIcon" alt="" class="status-icon"></span>
-          <span v-if="!information.is_paper" class="indicator indicator-fire"><img :src="fireCardIcon" alt="" class="status-icon"></span>
-          <QualityIndicator v-if="!information.is_paper" :score="qualityScore" :size="16" />
+          <span v-if="hasPdfAvailable" class="indicator indicator-pdf"><img :src="pdfCardIcon" alt="" class="status-icon"></span>
+          <span v-if="information.is_paper && information.a_file" class="indicator indicator-mark-scheme" title="Mark scheme availability"><img :src="markSchemeIcon" alt="" class="status-icon"></span>
+          <span v-if="!information.is_paper && information.q_file_word" class="indicator indicator-word"><img :src="wordCardIcon" alt="" class="status-icon"></span>
+          <span v-if="isFeaturedResource" class="indicator indicator-fire"><img :src="fireCardIcon" alt="" class="status-icon"></span>
+          <QualityIndicator v-if="hasQualityRating" :score="qualityScore" :size="16" />
         </div>
       </div>
     </div>
@@ -209,6 +215,7 @@ import DifficultyIndicator from './DifficultyIndicator.vue'
 import QualityIndicator from './QualityIndicator.vue'
 import fireCardIcon from '~/assets/images/search-card/fire.svg'
 import libraryCheckIcon from '~/assets/images/search-card/library-check.svg'
+import markSchemeIcon from '~/assets/images/search-card/mark-scheme.svg'
 import pdfCardIcon from '~/assets/images/search-card/pdf.svg'
 import solvedPaperIcon from '~/assets/images/search-card/solved-paper.svg'
 import wordCardIcon from '~/assets/images/search-card/word.svg'
@@ -254,6 +261,19 @@ const qualityScore = computed(() => {
   const score = Number(props.information.referee_score ?? props.information.ref_score ?? 0)
   return Number.isFinite(score) ? Math.min(5, Math.max(0, Math.round(score))) : 0
 })
+
+const hasDifficulty = computed(() =>
+  !props.information.is_paper
+  && ['1', '2', '3'].includes(String(props.information.level)),
+)
+
+const hasQualityRating = computed(() =>
+  !props.information.is_paper && qualityScore.value > 0,
+)
+
+const isFeaturedResource = computed(() =>
+  !props.information.is_paper && qualityScore.value === 5,
+)
 
 const formattedDate = computed(() => {
   if (!props.information.subdate) return ''
@@ -549,10 +569,6 @@ const openCard = (event) => {
 }
 
 @media (max-width: 959px) {
-  .card-search { height: 156px; }
-}
-
-@media (max-width: 599px) {
   .card-search { height: 174px; }
 
   .card-body {

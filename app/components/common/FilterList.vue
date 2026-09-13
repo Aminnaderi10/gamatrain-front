@@ -31,7 +31,7 @@
       v-show="!headerSearchActive"
       cols="8"
       md="12"
-      class="d-flex justify-end justify-md-center"
+      class="d-none d-md-flex justify-end justify-md-center"
       :class="{ 'header-search-teleport-source': keywordSearchInHeader }"
     >
       <Teleport
@@ -328,32 +328,6 @@
           </v-col>
           <v-col
             cols="12"
-            class="d-flex flex-wrap align-center ga-4"
-          >
-            <template v-for="(filter, index) in filters">
-              <v-chip
-                v-if="filter.selectedItem && !filter.defaultValue && !filter.inlineOptions"
-                :key="filter.title"
-                variant="flat"
-                class="text-h5 pl-5 pr-5"
-                color="grey100"
-              >
-                <span class="text-grey500">{{ filter.selectedItem?.title }}</span>
-                <template #close>
-                  <v-icon
-                    v-if="filter.closable"
-                    class="filter-clear-icon"
-                    color="grey500"
-                    @click="clearFilter(index)"
-                  >
-                    md:cancel
-                  </v-icon>
-                </template>
-              </v-chip>
-            </template>
-          </v-col>
-          <v-col
-            cols="12"
             class="d-flex flex-column justify-start align-center mt-4"
           >
             <template
@@ -383,6 +357,21 @@
                 >
                   <span class="text-grey500">{{ filter.selectedItem?.title }}</span>
                 </v-chip>
+
+                <v-icon
+                  v-if="filter.selectedItem && filter.closable && !filter.defaultValue"
+                  class="filter-clear-icon"
+                  color="grey500"
+                  size="18"
+                  role="button"
+                  tabindex="0"
+                  :aria-label="`Clear ${filter.title}`"
+                  @click.stop="clearFilter(index)"
+                  @keydown.enter.stop.prevent="clearFilter(index)"
+                  @keydown.space.stop.prevent="clearFilter(index)"
+                >
+                  md:cancel
+                </v-icon>
 
                 <v-icon
                   color="grey500"

@@ -56,7 +56,7 @@
   padding: 16px 16px 8px;
 }
 
-@media (max-width: 599px) {
+@media (max-width: 959px) {
   .card-skeleton {
     height: 134px;
   }

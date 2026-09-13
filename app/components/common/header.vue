@@ -369,6 +369,15 @@ onBeforeUnmount(() => {
   width: 120px;
   height : 32px
 }
+@media (max-width: 959px) {
+  .main-header > .v-container {
+    column-gap: 10px;
+  }
+  .logo-link,
+  .action-button {
+    flex-shrink: 0;
+  }
+}
 @media (max-width: 960px) {
   .logo-image{
     width: 80px;

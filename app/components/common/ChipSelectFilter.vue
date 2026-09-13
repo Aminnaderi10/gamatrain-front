@@ -736,7 +736,7 @@ defineExpose({
   box-shadow: 0 1px 2px rgb(30 42 68 / 16%);
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 959px) {
   .inline-filter-selector {
     align-items: flex-start;
     gap: 12px;
