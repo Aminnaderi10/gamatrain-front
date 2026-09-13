@@ -155,29 +155,49 @@ defineProps({
 
 @media (max-width: 600px) {
   .subject-directory-card {
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 14px;
+    position: relative;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 8px;
     padding: 8px 16px;
   }
 
   .subject-directory-card__main {
+    width: 100%;
+    flex: 1 1 auto;
+    gap: 10px;
+  }
+
+  .subject-directory-card__copy {
     width: 100%;
   }
 
   .subject-directory-card__title {
     font-size: 16px;
     line-height: 24px;
-    white-space: normal;
+    white-space: nowrap;
   }
 
   .subject-directory-card__subtitle {
+    overflow: hidden;
+    padding-right: 96px;
     font-size: 15px;
     line-height: 21px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .subject-directory-card__action {
-    margin-left: 62px;
+    position: absolute;
+    right: 16px;
+    bottom: 8px;
+    min-height: 24px;
+    gap: 4px;
+    padding: 2px 6px;
+    margin-left: 0;
+    font-size: 11px;
+    line-height: 16px;
+    white-space: nowrap;
   }
 }
 </style>

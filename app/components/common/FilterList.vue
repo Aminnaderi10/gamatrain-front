@@ -1427,6 +1427,10 @@ const clearAllFilter = async () => {
 }
 
 @media (max-width: 959px) {
+  .desktop-filter-controls-shell .inline-filter-group-wrapper {
+    display: none;
+  }
+
   .mobile-filter-modal {
     height: 100dvh !important;
     overflow: hidden !important;
