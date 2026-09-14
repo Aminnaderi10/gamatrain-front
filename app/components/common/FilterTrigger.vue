@@ -15,7 +15,7 @@
     >
       <span class="filter-trigger__content d-flex align-center ga-2 font-weight-bold">
         <v-icon>{{ icon }}</v-icon>
-        Filter
+        {{ label }}
       </span>
     </v-btn>
   </v-badge>
@@ -23,6 +23,10 @@
 
 <script setup>
 defineProps({
+  label: {
+    type: String,
+    default: 'Filter',
+  },
   icon: {
     type: String,
     default: 'md:tune',

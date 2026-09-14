@@ -1070,6 +1070,15 @@ onMounted(() => {
   line-height: 30px;
   text-align: left;
 }
+@media (max-width: 959px) {
+  .subject-directory-container {
+    padding-top: 0;
+  }
+
+  .search-results-title {
+    font-size: 16px;
+  }
+}
 @media (min-width: 960px) {
   .margin-top-handle {
     width: 100%;

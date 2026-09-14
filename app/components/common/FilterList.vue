@@ -87,6 +87,7 @@
           <CommonFilterTrigger
             :count="countFilterSelect"
             icon="md:filter_list"
+            label="Filters"
             @click="dialogFilterMobileModel = true"
           />
         </div>
@@ -365,17 +366,6 @@
       <div class="search-results-scroll-region">
         <template v-if="desktopSidebarLayout">
           <slot name="after-inline-filters" />
-
-          <v-col
-            cols="12"
-            class="d-flex d-md-none align-end justify-end ga-2 py-0 px-2 max-width-container"
-          >
-            <slot
-              name="results-heading"
-              :count="countDataFound"
-              :loading="loading"
-            />
-          </v-col>
         </template>
 
         <slot />
@@ -558,6 +548,11 @@ const props = defineProps({
 
 const headerSearchActive = computed(() => props.keywordSearchInHeader && searchHeaderReady.value && mdAndUp.value)
 const emits = defineEmits(['changeFilter'])
+const slots = useSlots()
+
+const getActiveFilterCount = query => Object.keys(query).filter(
+  key => !(slots['services-navigation'] && key === 'type'),
+).length
 
 const createFilterState = filterList =>
   filterList.map(filter => ({
@@ -576,7 +571,7 @@ const resolveInlineItemsPerRow = filter =>
     ? filter.inlineItemsPerRow(filters.value)
     : filter.inlineItemsPerRow
 const dialogFilterMobileModel = ref(false)
-const countFilterSelect = ref(Object.keys(route.query).length)
+const countFilterSelect = ref(getActiveFilterCount(route.query))
 const textSearch = ref(route.query.title ? route.query.title : '')
 const timer = ref(null)
 const hasExclusiveDisabledState = ref(false)
@@ -814,7 +809,7 @@ const updateQueryFromFilters = async () => {
     }
   })
 
-  countFilterSelect.value = Object.keys(query).length
+  countFilterSelect.value = getActiveFilterCount(query)
   router.replace({ query })
   emits('changeFilter', query, titles, { serviceChange: pendingServiceChange })
 }
@@ -1737,12 +1732,15 @@ const clearAllFilter = async () => {
 
 @media (max-width: 959px) {
   .mobile-quick-filter-bar {
+    position: sticky;
+    z-index: 10;
+    top: 0;
     box-sizing: border-box;
     width: 100%;
     min-width: 0;
     height: 64px;
     align-items: center;
-    gap: 8px;
+    gap: 0;
     padding: 6px 12px;
     overflow: hidden;
     background: #fcfcfd;
@@ -1750,13 +1748,16 @@ const clearAllFilter = async () => {
   }
 
   .mobile-quick-filter-bar__trigger {
+    position: relative;
+    z-index: 1;
     display: flex;
-    width: 100px;
-    min-width: 100px;
+    width: 108px;
+    min-width: 108px;
     height: 52px;
-    flex: 0 0 100px;
+    flex: 0 0 108px;
     align-items: stretch;
     justify-content: flex-start;
+    box-shadow: 4px 0 8px -4px rgb(30 42 68 / 18%);
     transition: background-color 160ms ease;
   }
 
@@ -1821,6 +1822,10 @@ const clearAllFilter = async () => {
     background: #fcfcfd;
     border-left: 1px solid #eef1f5;
     transition: background-color 160ms ease;
+  }
+
+  .mobile-quick-filter:first-child {
+    border-left: 0;
   }
 
   .mobile-quick-filter--selected {

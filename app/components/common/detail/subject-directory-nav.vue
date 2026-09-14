@@ -27,13 +27,18 @@
         <span class="subject-directory-card__title">
           {{ contentData?.lesson_title }} Subject directory
         </span>
-        <span class="subject-directory-card__subtitle">
-          All resources in one place.
+        <span class="subject-directory-card__subtitle-row">
+          <span class="subject-directory-card__subtitle">
+            All resources in one place.
+          </span>
+          <span class="subject-directory-card__action subject-directory-card__action--mobile">
+            Open directory <span aria-hidden="true">→</span>
+          </span>
         </span>
       </div>
     </div>
 
-    <span class="subject-directory-card__action">
+    <span class="subject-directory-card__action subject-directory-card__action--desktop">
       Open directory <span aria-hidden="true">→</span>
     </span>
   </nuxt-link>
@@ -132,6 +137,10 @@ defineProps({
   line-height: 20px;
 }
 
+.subject-directory-card__action.subject-directory-card__action--mobile {
+  display: none;
+}
+
 .subject-directory-card__action {
   display: inline-flex;
   min-height: 40px;
@@ -153,9 +162,10 @@ defineProps({
   border-color: #e8a800;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 959px) {
   .subject-directory-card {
     position: relative;
+    min-height: 65px;
     align-items: center;
     flex-wrap: nowrap;
     gap: 8px;
@@ -165,7 +175,19 @@ defineProps({
   .subject-directory-card__main {
     width: 100%;
     flex: 1 1 auto;
-    gap: 10px;
+    gap: 8px;
+  }
+
+  .subject-directory-card__icon {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+    border-radius: 8px;
+  }
+
+  .subject-directory-card__icon svg {
+    width: 18px;
+    height: 18px;
   }
 
   .subject-directory-card__copy {
@@ -173,30 +195,45 @@ defineProps({
   }
 
   .subject-directory-card__title {
-    font-size: 16px;
-    line-height: 24px;
+    font-size: 14px;
+    line-height: 20px;
     white-space: nowrap;
   }
 
   .subject-directory-card__subtitle {
+    max-width: 100%;
+    flex: 0 0 auto;
     overflow: hidden;
-    padding-right: 96px;
-    font-size: 15px;
-    line-height: 21px;
+    padding-right: 0;
+    font-size: 12px;
+    line-height: 16px;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .subject-directory-card__action {
-    position: absolute;
-    right: 16px;
-    bottom: 8px;
-    min-height: 24px;
-    gap: 4px;
-    padding: 2px 6px;
-    margin-left: 0;
-    font-size: 11px;
-    line-height: 16px;
+  .subject-directory-card__subtitle-row {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 4px;
+  }
+
+  .subject-directory-card__action--desktop {
+    display: none;
+  }
+
+  .subject-directory-card__action.subject-directory-card__action--mobile {
+    position: static;
+    display: inline-flex;
+    box-sizing: border-box;
+    height: 16px;
+    min-height: 16px;
+    gap: 3px;
+    padding: 0 4px;
+    margin-left: auto;
+    font-size: 7px;
+    line-height: 14px;
     white-space: nowrap;
   }
 }
