@@ -14,7 +14,7 @@
       @click="emit('click')"
     >
       <span class="filter-trigger__content d-flex align-center ga-2 font-weight-bold">
-        <v-icon>md:tune</v-icon>
+        <v-icon>{{ icon }}</v-icon>
         Filter
       </span>
     </v-btn>
@@ -23,6 +23,10 @@
 
 <script setup>
 defineProps({
+  icon: {
+    type: String,
+    default: 'md:tune',
+  },
   count: {
     type: [Number, String],
     default: 0,

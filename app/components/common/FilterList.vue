@@ -17,6 +17,7 @@
       />
     </div>
     <v-col
+      v-if="!$slots['services-navigation']"
       :cols="hasKeywordSearch ? `4` : `12`"
       md="12"
       class="d-flex d-md-none justify-start"
@@ -78,6 +79,84 @@
         name="services-navigation"
         :select-service="selectService"
       />
+      <div
+        v-if="$slots['services-navigation']"
+        class="mobile-quick-filter-bar d-flex d-md-none"
+      >
+        <div class="mobile-quick-filter-bar__trigger">
+          <CommonFilterTrigger
+            :count="countFilterSelect"
+            icon="md:filter_list"
+            @click="dialogFilterMobileModel = true"
+          />
+        </div>
+
+        <div
+          ref="mobileQuickFilters"
+          class="mobile-quick-filter-bar__scroller"
+          aria-label="Quick filters"
+        >
+          <div
+            v-for="entry in mobileQuickFilterEntries"
+            :key="`quick-${getFilterIdentity(entry.filter)}`"
+            class="mobile-quick-filter"
+            :class="{
+              'mobile-quick-filter--selected': entry.filter.selectedItem,
+              'mobile-quick-filter--disabled': entry.filter.disabled,
+            }"
+          >
+            <button
+              type="button"
+              class="mobile-quick-filter__control"
+              :aria-label="getQuickFilterAriaLabel(entry.filter)"
+              :aria-pressed="Boolean(entry.filter.selectedItem)"
+              :aria-disabled="entry.filter.disabled"
+              :disabled="entry.filter.disabled"
+              @click="openMobileQuickFilter(entry.filter)"
+            >
+              <span
+                v-if="hasFilterIcon(entry.filter)"
+                class="mobile-quick-filter__icon"
+                :style="!entry.filter.selectedItem && entry.filter.unselectedIconColor
+                  ? { color: entry.filter.unselectedIconColor }
+                  : undefined"
+                aria-hidden="true"
+              >
+                <CommonFilterControlIcon
+                  :selected-item="entry.filter.selectedItem"
+                  :show-item-icon="entry.filter.showItemIcon"
+                  :icon-src="entry.filter.iconSrc"
+                  :fallback-icon="entry.filter.fallbackIcon"
+                  :fallback-icon-src="entry.filter.fallbackIconSrc"
+                  :empty-fallback-icon-src="entry.filter.emptyFallbackIconSrc"
+                  :fallback-icon-padding="entry.filter.fallbackIconPadding"
+                  :control-icon="entry.filter.controlIcon"
+                  :control-icon-src="entry.filter.controlIconSrc"
+                  :control-icon-svg="entry.filter.controlIconSvg"
+                />
+              </span>
+
+              <span class="mobile-quick-filter__copy">
+                <span class="mobile-quick-filter__label">{{ entry.filter.title }}</span>
+                <span
+                  v-if="entry.filter.selectedItem"
+                  class="mobile-quick-filter__value"
+                >{{ getQuickFilterValue(entry.filter) }}</span>
+              </span>
+            </button>
+
+            <button
+              v-if="entry.filter.selectedItem && entry.filter.closable"
+              type="button"
+              class="mobile-quick-filter__clear"
+              :aria-label="`Clear ${entry.filter.title} filter`"
+              @click.stop="clearFilter(entry.index)"
+            >
+              <v-icon size="18">md:cancel</v-icon>
+            </button>
+          </div>
+        </div>
+      </div>
       <div
         ref="filterControlsShell"
         class="desktop-filter-controls-shell w-100 d-flex justify-center"
@@ -343,6 +422,7 @@
               >
                 <div
                   v-if="!filter.inlineOptions && !($slots['services-navigation'] && filter.queryKey === 'type')"
+                  :ref="(element) => setMobileFilterSectionRef(filter, element)"
                   class="mobile-filter-control-wrapper"
                   @click.capture="handleMobileFilterControlClick($event, filter)"
                 >
@@ -383,24 +463,29 @@
               v-if="hasInlineFilters"
               class="mobile-inline-filter-group"
             >
-              <CommonChipSelectFilter
+              <div
                 v-for="(entry, inlineIndex) in inlineFilterEntries"
                 :key="`mobile-inline-${entry.filter.title || entry.index}-${getMobileFilterItems(entry.filter).length}`"
-                class="mobile-inline-filter-row"
-                :title="entry.filter.title"
-                :api="null"
-                :selected-item="entry.filter.selectedItem"
-                :static-list="getMobileFilterItems(entry.filter)"
-                :inline-options="true"
-                :inline-allow-clear="entry.filter.inlineAllowClear"
-                :inline-grouped="true"
-                :inline-items-per-row="resolveInlineItemsPerRow(entry.filter)"
-                :inline-divider-after="inlineIndex === 0 && inlineFilterEntries.length > 1"
-                :inline-leading-option-slots="entry.filter.inlineLeadingOptionSlots"
-                :item-title="entry.filter.itemTitle"
-                :disabled="entry.filter.disabled"
-                @update-selected-item="updateSelectedItem($event, entry.index)"
-              />
+                :ref="(element) => setMobileFilterSectionRef(entry.filter, element)"
+                class="mobile-inline-filter-row-wrapper"
+              >
+                <CommonChipSelectFilter
+                  class="mobile-inline-filter-row"
+                  :title="entry.filter.title"
+                  :api="null"
+                  :selected-item="entry.filter.selectedItem"
+                  :static-list="getMobileFilterItems(entry.filter)"
+                  :inline-options="true"
+                  :inline-allow-clear="entry.filter.inlineAllowClear"
+                  :inline-grouped="true"
+                  :inline-items-per-row="resolveInlineItemsPerRow(entry.filter)"
+                  :inline-divider-after="inlineIndex === 0 && inlineFilterEntries.length > 1"
+                  :inline-leading-option-slots="entry.filter.inlineLeadingOptionSlots"
+                  :item-title="entry.filter.itemTitle"
+                  :disabled="entry.filter.disabled"
+                  @update-selected-item="updateSelectedItem($event, entry.index)"
+                />
+              </div>
             </div>
           </section>
         </v-container>
@@ -484,6 +569,8 @@ const filters = ref(createFilterState(props.filterList))
 const setFilterRef = (filter, element) => {
   filter.refElement = element
 }
+const mobileQuickFilters = ref(null)
+const mobileFilterSectionElements = new Map()
 const resolveInlineItemsPerRow = filter =>
   typeof filter.inlineItemsPerRow === 'function'
     ? filter.inlineItemsPerRow(filters.value)
@@ -965,6 +1052,38 @@ const openFilterSelectModal = (filter) => {
   filter.refElement.openSelectModal()
 }
 
+const setMobileFilterSectionRef = (filter, element) => {
+  const identity = getFilterIdentity(filter)
+  if (element) {
+    mobileFilterSectionElements.set(identity, element)
+  }
+  else {
+    mobileFilterSectionElements.delete(identity)
+  }
+}
+
+const hasFilterIcon = filter => Boolean(
+  filter.showItemIcon
+  || filter.controlIcon
+  || filter.controlIconSrc
+  || filter.controlIconSvg,
+)
+
+const getQuickFilterValue = (filter) => {
+  if (!filter.selectedItem) return ''
+
+  return filter.itemTitle?.(filter.selectedItem) || filter.selectedItem.title || ''
+}
+
+const getQuickFilterAriaLabel = (filter) => {
+  const value = getQuickFilterValue(filter)
+  return value ? `${filter.title}: ${value}` : filter.title
+}
+
+const openMobileQuickFilter = (filter) => {
+  openFilterSelectModal(filter)
+}
+
 const handleMobileFilterControlClick = (event, filter) => {
   const target = event.target
   if (target instanceof Element && target.closest('.search-filter-clear-icon')) return
@@ -1112,6 +1231,21 @@ const inlineFilterEntries = computed(() =>
     .filter(entry => entry.filter.inlineOptions),
 )
 const hasInlineFilters = computed(() => inlineFilterEntries.value.length > 0)
+const mobileQuickFilterEntries = computed(() =>
+  filters.value
+    .map((filter, index) => ({ filter, index }))
+    .filter(entry => entry.filter.queryKey !== 'type'),
+)
+const activeFilterService = computed(() =>
+  filters.value.find(filter => filter.queryKey === 'type')?.selectedItem?.id,
+)
+
+watch(activeFilterService, async (service, previousService) => {
+  if (!previousService || service === previousService) return
+
+  await nextTick()
+  if (mobileQuickFilters.value) mobileQuickFilters.value.scrollLeft = 0
+})
 
 const changeTextSearch = () => {
   if (props.hasKeywordSearch) {
@@ -1467,7 +1601,10 @@ const clearAllFilter = async () => {
   }
 
   .filter-list-sidebar-layout :deep(.search-filter-copy) {
+    width: 0;
+    flex: 1 1 auto;
     align-items: flex-start;
+    overflow: hidden;
     text-align: left;
   }
 
@@ -1488,7 +1625,8 @@ const clearAllFilter = async () => {
   }
 
   .filter-list-sidebar-layout :deep(.search-filter-value) {
-    max-width: 170px;
+    width: 100%;
+    max-width: 100%;
   }
 
   .filter-list-sidebar-layout .inline-filter-group-wrapper {
@@ -1598,6 +1736,257 @@ const clearAllFilter = async () => {
 }
 
 @media (max-width: 959px) {
+  .mobile-quick-filter-bar {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    height: 64px;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    overflow: hidden;
+    background: #fcfcfd;
+    border-bottom: 1px solid #d8dee8;
+  }
+
+  .mobile-quick-filter-bar__trigger {
+    display: flex;
+    width: 100px;
+    min-width: 100px;
+    height: 52px;
+    flex: 0 0 100px;
+    align-items: stretch;
+    justify-content: flex-start;
+    transition: background-color 160ms ease;
+  }
+
+  .mobile-quick-filter-bar__trigger:hover {
+    background: #f7f8fa;
+  }
+
+  .mobile-quick-filter-bar__trigger :deep(.height-badge) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .mobile-quick-filter-bar__trigger :deep(.filter-trigger) {
+    width: 100%;
+    height: 100% !important;
+    min-width: 0;
+    justify-content: flex-start;
+    padding-inline: 12px;
+    background: #fcfcfd;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none;
+  }
+
+  .mobile-quick-filter-bar__trigger :deep(.filter-trigger:hover) {
+    background: transparent !important;
+  }
+
+  .mobile-quick-filter-bar__trigger :deep(.filter-trigger .v-btn__overlay) {
+    opacity: 0 !important;
+  }
+
+  .mobile-quick-filter-bar__scroller {
+    display: flex;
+    min-width: 0;
+    height: 52px;
+    flex: 1 1 auto;
+    align-items: stretch;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    touch-action: pan-x pan-y;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-quick-filter-bar__scroller::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-quick-filter {
+    position: relative;
+    display: flex;
+    width: 112px;
+    min-width: 104px;
+    height: 52px;
+    flex: 0 0 auto;
+    align-items: stretch;
+    overflow: hidden;
+    color: #1e2a44;
+    background: #fcfcfd;
+    border-left: 1px solid #eef1f5;
+    transition: background-color 160ms ease;
+  }
+
+  .mobile-quick-filter--selected {
+    box-sizing: border-box;
+    width: 148px;
+    max-width: 160px;
+    height: 100%;
+    padding-right: 12px;
+    background: transparent;
+    border-radius: 0;
+  }
+
+  .mobile-quick-filter--disabled {
+    color: rgb(30 42 68 / 38%);
+  }
+
+  .mobile-quick-filter--disabled .mobile-quick-filter__control {
+    cursor: default;
+  }
+
+  .mobile-quick-filter--disabled .mobile-quick-filter__icon,
+  .mobile-quick-filter--disabled .mobile-quick-filter__copy {
+    opacity: 0.38;
+  }
+
+  .mobile-quick-filter--disabled .mobile-quick-filter__control:hover,
+  .mobile-quick-filter--disabled .mobile-quick-filter__control:active {
+    background: transparent;
+  }
+
+  .mobile-quick-filter__control {
+    display: flex;
+    min-width: 0;
+    min-height: 44px;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    overflow: hidden;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-radius: inherit;
+    cursor: pointer;
+  }
+
+  .mobile-quick-filter--selected .mobile-quick-filter__control {
+    height: 100%;
+    padding-right: 4px;
+    border-radius: 0;
+  }
+
+  .mobile-quick-filter__control:hover {
+    background: #f7f8fa;
+  }
+
+  .mobile-quick-filter--selected .mobile-quick-filter__control:hover {
+    background: transparent;
+  }
+
+  .mobile-quick-filter__control:active {
+    background: #eef1f5;
+  }
+
+  .mobile-quick-filter__control:focus-visible,
+  .mobile-quick-filter__clear:focus-visible {
+    z-index: 1;
+    outline: 3px solid rgb(244 180 0 / 28%);
+    outline-offset: -3px;
+  }
+
+  .mobile-quick-filter__icon {
+    box-sizing: border-box;
+    display: inline-flex;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    align-items: center;
+    justify-content: center;
+    color: #1e2a44;
+  }
+
+  .mobile-quick-filter__icon :deep(.v-img),
+  .mobile-quick-filter__icon :deep(.search-filter-inline-svg-icon),
+  .mobile-quick-filter__icon :deep(.search-filter-svg-icon) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .mobile-quick-filter__icon :deep(.v-icon),
+  .mobile-quick-filter__icon :deep(.search-filter-content-icon) {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    font-size: 20px !important;
+    line-height: 20px;
+  }
+
+  .mobile-quick-filter__icon :deep(.search-filter-fallback-image) {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .mobile-quick-filter__copy {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    line-height: 1.2;
+  }
+
+  .mobile-quick-filter__label,
+  .mobile-quick-filter__value {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-quick-filter__label {
+    color: #1e2a44;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+  }
+
+  .mobile-quick-filter--selected .mobile-quick-filter__label {
+    color: rgb(30 42 68 / 68%);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 14px;
+  }
+
+  .mobile-quick-filter__value {
+    color: #1e2a44;
+    font-size: 14px;
+    font-weight: 650;
+    line-height: 18px;
+  }
+
+  .mobile-quick-filter__clear {
+    display: inline-flex;
+    width: 18px;
+    min-width: 18px;
+    min-height: 44px;
+    flex: 0 0 18px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: #667085;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    cursor: pointer;
+  }
+
+  .mobile-quick-filter__clear:hover {
+    color: #c93c37;
+  }
+
   .desktop-filter-controls-shell .inline-filter-group-wrapper {
     display: none;
   }
@@ -1715,6 +2104,10 @@ const clearAllFilter = async () => {
     width: 100%;
     padding: 0 16px;
     background: #fcfcfd;
+  }
+
+  .mobile-inline-filter-row-wrapper {
+    width: 100%;
   }
 
   .mobile-inline-filter-group :deep(.inline-filter-selector) {

@@ -90,65 +90,18 @@
         !selectedItem && unselectedIconColor ? { color: unselectedIconColor } : undefined,
       ]"
     >
-      <v-img
-        v-if="showItemIcon && selectedItem?.icon && !selectedIconFailed"
-        :src="getIconSrc(selectedItem)"
-        :alt="selectedItem.title"
-        contain
-        @error="selectedIconFailed = true"
+      <CommonFilterControlIcon
+        :selected-item="selectedItem"
+        :show-item-icon="showItemIcon"
+        :icon-src="iconSrc"
+        :fallback-icon="fallbackIcon"
+        :fallback-icon-src="fallbackIconSrc"
+        :empty-fallback-icon-src="emptyFallbackIconSrc"
+        :fallback-icon-padding="fallbackIconPadding"
+        :control-icon="controlIcon"
+        :control-icon-src="controlIconSrc"
+        :control-icon-svg="controlIconSvg"
       />
-      <span
-        v-else-if="showItemIcon && selectedItem?.contentIcon"
-        :class="`${selectedItem.contentIcon} search-filter-content-icon`"
-        :style="{ color: selectedItem.color }"
-      />
-      <span
-        v-else-if="controlIconSvg"
-        class="search-filter-inline-svg-icon"
-      >
-        <svg
-          width="28"
-          height="28"
-          :viewBox="controlIconSvg.viewBox"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            v-for="path in controlIconSvg.paths"
-            :key="path"
-            :d="path"
-            fill="currentColor"
-            stroke="currentColor"
-            :stroke-width="controlIconSvg.strokeWidth"
-            stroke-linejoin="round"
-            paint-order="stroke fill"
-          />
-        </svg>
-      </span>
-      <span
-        v-else-if="controlIconSrc"
-        class="search-filter-svg-icon"
-        :style="{
-          maskImage: `url(${controlIconSrc})`,
-          WebkitMaskImage: `url(${controlIconSrc})`,
-        }"
-      />
-      <img
-        v-else-if="emptyFallbackIconSrc || fallbackIconSrc"
-        :src="!selectedItem && emptyFallbackIconSrc ? emptyFallbackIconSrc : fallbackIconSrc"
-        alt=""
-        class="search-filter-fallback-image"
-        :style="fallbackIconPadding
-          ? {
-            width: `${28 - (fallbackIconPadding * 2)}px`,
-            height: `${28 - (fallbackIconPadding * 2)}px`,
-          }
-          : undefined"
-      />
-      <v-icon
-        v-else
-        size="28"
-      >{{ controlIcon || fallbackIcon }}</v-icon>
     </span>
     <span
       v-if="boxed"
@@ -352,16 +305,6 @@ const emit = defineEmits(['UpdateSelectedItem', 'clear'])
 const items = ref([...props.staticList])
 const isShowSelectModal = ref(false)
 const loading = ref(false)
-const selectedIconFailed = ref(false)
-
-watch(
-  () => props.selectedItem?.icon,
-  () => {
-    selectedIconFailed.value = false
-  },
-)
-
-const getIconSrc = item => props.iconSrc?.(item) || item.icon
 const getInlineItemTitle = item => props.itemTitle?.(item) || item.title
 const isMultiDigitPaperOption = item =>
   props.title === 'Paper'
