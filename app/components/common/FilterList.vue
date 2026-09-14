@@ -799,20 +799,162 @@ const fetchFilterAvailableInQuery = async () => {
 
 let filterListSyncVersion = 0
 
+const getFilterIdentity = filter => `${filter.queryKey ?? ''}:${filter.title ?? ''}`
+
+const reconcileFilterState = (filterList) => {
+  const existingFilters = new Map(
+    filters.value.map(filter => [getFilterIdentity(filter), filter]),
+  )
+  const addedFilters = []
+  const retainedFilters = []
+
+  const nextFilters = filterList.map((filterConfig) => {
+    const existingFilter = existingFilters.get(getFilterIdentity(filterConfig))
+    if (!existingFilter) {
+      const newFilter = createFilterState([filterConfig])[0]
+      addedFilters.push(newFilter)
+      return newFilter
+    }
+
+    const runtimeState = {
+      selectedItem: existingFilter.selectedItem,
+      disabled: existingFilter.disabled,
+      refElement: existingFilter.refElement,
+    }
+
+    Object.assign(existingFilter, filterConfig, runtimeState, {
+      initialDisabled: filterConfig.disabled,
+    })
+    retainedFilters.push(existingFilter)
+
+    return existingFilter
+  })
+
+  return { addedFilters, nextFilters, retainedFilters }
+}
+
+const syncRetainedFilterSelection = async (filter) => {
+  const queryValue = route.query[filter.queryKey]
+  const selectedValue = filter.selectedItem?.code ?? filter.selectedItem?.id
+
+  if (!queryValue) {
+    filter.selectedItem = filter.defaultValue || null
+    return
+  }
+  if (String(selectedValue) === String(queryValue)) return
+
+  const filterKey = filter.queryKey === 'section' ? 'code' : 'id'
+  let selectedItem = filter.refElement?.getItemById(queryValue, filterKey)
+  const dependenciesReady = filter.dependencies?.every(
+    dependency => !!filters.value[dependency.parent]?.selectedItem,
+  ) ?? true
+
+  if (!selectedItem && dependenciesReady && filter.api) {
+    if (!filter.idInParams) {
+      filter.dependencies.forEach((dependency) => {
+        const parentFilter = filters.value[dependency.parent]
+        filter.extraApiParams[dependency.targetKey]
+          = parentFilter?.selectedItem?.[dependency.sourceKey] ?? null
+      })
+    }
+
+    const parentId = filter.dependencies?.[0]
+      ? filters.value[filter.dependencies[0].parent]?.selectedItem?.id
+      : ''
+    await filter.refElement?.getItems(filter.idInParams ? parentId : '')
+    selectedItem = filter.refElement?.getItemById(queryValue, filterKey)
+  }
+
+  filter.selectedItem = selectedItem || null
+}
+
+const initializeAddedFilter = async (filter) => {
+  const index = filters.value.indexOf(filter)
+  if (index === -1) return
+
+  if (filter.getStaticList) {
+    filter.refElement?.setStaticItem(filter.getStaticList())
+  }
+
+  const dependenciesReady = filter.dependencies?.every(
+    dependency => !!filters.value[dependency.parent]?.selectedItem,
+  ) ?? true
+
+  if (filter.dependencies?.length) {
+    filter.disabled = !dependenciesReady
+  }
+
+  if (
+    dependenciesReady
+    && filter.api
+    && !filter.staticList?.length
+  ) {
+    if (!filter.idInParams) {
+      filter.dependencies.forEach((dependency) => {
+        const parentFilter = filters.value[dependency.parent]
+        filter.extraApiParams[dependency.targetKey]
+          = parentFilter?.selectedItem?.[dependency.sourceKey] ?? null
+      })
+    }
+
+    const parentId = filter.dependencies?.[0]
+      ? filters.value[filter.dependencies[0].parent]?.selectedItem?.id
+      : ''
+    await filter.refElement?.getItems(filter.idInParams ? parentId : '')
+  }
+
+  const queryValue = route.query[filter.queryKey]
+  if (!queryValue) return
+
+  const filterKey = filter.queryKey === 'section' ? 'code' : 'id'
+  const selectedItem = filter.staticList?.length
+    ? filter.staticList.find(item => String(item[filterKey]) === String(queryValue))
+    : filter.refElement?.getItemById(queryValue, filterKey)
+
+  if (selectedItem) filter.selectedItem = selectedItem
+}
+
+const refreshDependencyDisabledStates = () => {
+  filters.value.forEach((filter) => {
+    if (!filter.dependencies?.length) return
+
+    const dependenciesReady = filter.dependencies.every(
+      dependency => !!filters.value[dependency.parent]?.selectedItem,
+    )
+    const disabledByDependency = dependenciesReady && filter.dependencies.some(
+      dependency => dependency.disableIds?.includes(
+        filters.value[dependency.parent]?.selectedItem?.id,
+      ),
+    )
+
+    filter.disabled = !dependenciesReady || disabledByDependency
+  })
+}
+
 watch(
   () => props.filterList,
   async (filterList) => {
     const syncVersion = ++filterListSyncVersion
-    filters.value = createFilterState(filterList)
+    const { addedFilters, nextFilters, retainedFilters }
+      = reconcileFilterState(filterList)
+    filters.value = nextFilters
     hasExclusiveDisabledState.value = false
 
     await nextTick()
     if (syncVersion !== filterListSyncVersion) return
 
-    await fetchDataRequireFilter()
-    if (syncVersion !== filterListSyncVersion) return
+    for (const filter of retainedFilters) {
+      await syncRetainedFilterSelection(filter)
+      if (syncVersion !== filterListSyncVersion) return
+      refreshDependencyDisabledStates()
+    }
 
-    await fetchFilterAvailableInQuery()
+    for (const filter of addedFilters) {
+      await initializeAddedFilter(filter)
+      if (syncVersion !== filterListSyncVersion) return
+    }
+
+    refreshDependencyDisabledStates()
   },
   { flush: 'post' },
 )
