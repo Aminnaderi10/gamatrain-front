@@ -571,8 +571,25 @@ const openCard = (event) => {
 @media (max-width: 959px) {
   .card-search { height: 174px; }
 
+  .cover-fallback {
+    align-items: flex-start !important;
+    direction: ltr;
+    text-align: left !important;
+  }
+
+  .cover-fallback > span {
+    width: 50%;
+    max-width: 50%;
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+
   .card-body {
+    position: relative;
+    z-index: 1;
+    margin-left: -74px;
     padding: 10px 12px 8px;
+    background: #fcfcfd;
   }
 
   .card-top {
