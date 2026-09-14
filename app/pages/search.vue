@@ -3,7 +3,6 @@
     <v-row class="justify-center">
       <div class="w-100 d-flex justify-center flex-wrap top-info-div">
         <CommonFilterList
-          :key="activeService"
           :filter-list="filters"
           :filter-container="ServicesFilterContainer"
           :style="{ '--search-service-color': activeServiceColor }"

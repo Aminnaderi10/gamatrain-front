@@ -133,7 +133,7 @@
                 >
                   <CommonChipSelectFilter
                     v-if="!filter.inlineOptions"
-                    :ref="(el) => (filters[index].refElement = el)"
+                    :ref="(el) => setFilterRef(filter, el)"
                     :title="filter.title"
                     :api="filter.api"
                     :selected-item="filter.selectedItem"
@@ -205,7 +205,7 @@
                 <CommonChipSelectFilter
                   v-for="(entry, inlineIndex) in inlineFilterEntries"
                   :key="`inline-${entry.filter.title || entry.index}`"
-                  :ref="(el) => (filters[entry.index].refElement = el)"
+                  :ref="(el) => setFilterRef(entry.filter, el)"
                   :title="entry.filter.title"
                   :api="entry.filter.api"
                   :selected-item="entry.filter.selectedItem"
@@ -474,12 +474,16 @@ const props = defineProps({
 const headerSearchActive = computed(() => props.keywordSearchInHeader && searchHeaderReady.value && mdAndUp.value)
 const emits = defineEmits(['changeFilter'])
 
-const filters = ref(
-  props.filterList.map(filter => ({
+const createFilterState = filterList =>
+  filterList.map(filter => ({
     ...filter,
     initialDisabled: filter.disabled,
-  })),
-)
+  }))
+
+const filters = ref(createFilterState(props.filterList))
+const setFilterRef = (filter, element) => {
+  filter.refElement = element
+}
 const resolveInlineItemsPerRow = filter =>
   typeof filter.inlineItemsPerRow === 'function'
     ? filter.inlineItemsPerRow(filters.value)
@@ -557,10 +561,15 @@ const selectService = (serviceId) => {
   if (!service || filter.selectedItem?.id === serviceId) return
 
   pendingServiceChange = true
-  return updateSelectedItem(service, index)
-    .finally(() => {
-      pendingServiceChange = false
-    })
+  filter.selectedItem = service
+  resetDescendants(index)
+
+  try {
+    return updateQueryFromFilters()
+  }
+  finally {
+    pendingServiceChange = false
+  }
 }
 
 const isExclusiveFilterSelected = (index) => {
@@ -787,6 +796,26 @@ const fetchFilterAvailableInQuery = async () => {
     }
   }
 }
+
+let filterListSyncVersion = 0
+
+watch(
+  () => props.filterList,
+  async (filterList) => {
+    const syncVersion = ++filterListSyncVersion
+    filters.value = createFilterState(filterList)
+    hasExclusiveDisabledState.value = false
+
+    await nextTick()
+    if (syncVersion !== filterListSyncVersion) return
+
+    await fetchDataRequireFilter()
+    if (syncVersion !== filterListSyncVersion) return
+
+    await fetchFilterAvailableInQuery()
+  },
+  { flush: 'post' },
+)
 
 const openFilterSelectModal = (filter) => {
   if (filter.disabled) return
