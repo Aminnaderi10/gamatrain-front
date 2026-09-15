@@ -27,7 +27,18 @@
         :class="{ 'w-100': field.full }"
       >
         <span class="label">{{ field.label }}</span>
-        <span class="value">{{ field.value }}</span>
+        <NuxtLink
+          v-if="field.key === 'postTitle' && rawData?.postId"
+          :to="`/blog/${rawData.postId}`"
+          target="_blank"
+          class="value text-primary"
+        >
+          {{ field.value }}
+        </NuxtLink>
+        <span
+          v-else
+          class="value"
+        >{{ field.value }}</span>
       </div>
     </template>
 
@@ -101,6 +112,7 @@ const { $toast } = useNuxtApp()
 const { getItemById, loadingGetItemById: loading, confirm, loadingConfirm, reject, loadingReject } = useBlogCommentAdmin()
 
 const newDataFormated = ref()
+const rawData = ref<CommnetBlogDetailAdminDTO>()
 const commentReject = ref('')
 
 const newDataFields: FieldConfig<CommnetBlogDetailAdminDTO>[] = [
@@ -156,6 +168,7 @@ const rejectItem = async () => {
 onMounted(async () => {
   const response = await getItemById(props.contributionId)
   if (response.succeeded && response.data) {
+    rawData.value = response.data as CommnetBlogDetailAdminDTO
     newDataFormated.value = createFormatedData(response.data as CommnetBlogDetailAdminDTO, newDataFields)
   }
 })
