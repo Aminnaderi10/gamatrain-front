@@ -43,7 +43,7 @@
           </div>
 
           <div
-            class="card-indicators d-none d-md-flex align-center flex-shrink-0"
+            class="card-indicators d-flex align-center flex-shrink-0"
             aria-label="Resource information"
           >
             <DifficultyIndicator v-if="hasDifficulty" :level="information.level" :size="16" />
@@ -185,24 +185,6 @@
           </span>
         </div>
 
-        <div class="card-indicators mobile-indicators d-flex d-md-none align-center">
-          <DifficultyIndicator v-if="hasDifficulty" :level="information.level" :size="16" />
-          <span
-            v-if="hasAnswersAtEndOfFiles"
-            class="indicator indicator-library"
-            title="Resource available"
-          ><img :src="libraryCheckIcon" alt="" class="status-icon"></span>
-          <span
-            v-if="information.is_paper && information.q_file"
-            class="indicator indicator-solved-paper"
-            title="Solved paper availability"
-          ><img :src="solvedPaperIcon" alt="" class="status-icon"></span>
-          <span v-if="hasPdfAvailable" class="indicator indicator-pdf"><img :src="pdfCardIcon" alt="" class="status-icon"></span>
-          <span v-if="information.is_paper && information.a_file" class="indicator indicator-mark-scheme" title="Mark scheme availability"><img :src="markSchemeIcon" alt="" class="status-icon"></span>
-          <span v-if="!information.is_paper && information.q_file_word" class="indicator indicator-word"><img :src="wordCardIcon" alt="" class="status-icon"></span>
-          <span v-if="isFeaturedResource" class="indicator indicator-fire"><img :src="fireCardIcon" alt="" class="status-icon"></span>
-          <QualityIndicator v-if="hasQualityRating" :score="qualityScore" :size="16" />
-        </div>
       </div>
     </div>
   </div>
@@ -553,11 +535,6 @@ const openCard = (event) => {
 
 .indicator-muted { opacity: 0.32; }
 
-.mobile-indicators {
-  gap: 8px;
-  margin-top: 10px;
-}
-
 @media (min-width: 960px) {
   .card-indicators { gap: 24px; }
 }
@@ -588,53 +565,25 @@ const openCard = (event) => {
     position: relative;
     z-index: 1;
     margin-left: -74px;
-    padding: 10px 12px 8px;
     background: #fcfcfd;
-  }
-
-  .card-top {
-    flex-shrink: 0;
-    margin-bottom: 4px;
-  }
-
-  .publisher-avatar {
-    width: 26px !important;
-    height: 26px !important;
-  }
-
-  .publisher-name {
-    max-width: 150px;
-    font-size: 12px;
-  }
-
-  .card-title {
-    flex-shrink: 0;
-    margin-bottom: 2px;
-    font-size: 14px;
-    line-height: 20px;
-  }
-
-  .card-description {
-    flex-shrink: 0;
-    font-size: 12px;
-    line-height: 18px;
   }
 
   .subject-tags {
     flex-wrap: nowrap !important;
-    flex-shrink: 0;
-    margin-block: 4px;
     overflow: hidden;
   }
 
-  .metadata {
-    flex-shrink: 0;
-    gap: 8px !important;
+  .tag-chip {
+    flex: 0 0 auto;
   }
 
-  .mobile-indicators {
-    flex-shrink: 0;
-    margin-top: 4px;
+  .metadata {
+    flex-wrap: nowrap !important;
+    overflow: hidden;
+  }
+
+  .metadata-item {
+    flex: 0 0 auto;
   }
 }
 </style>
