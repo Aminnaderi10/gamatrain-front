@@ -313,7 +313,7 @@ const showCancelButton = computed(() => {
 })
 
 const showResumeButton = computed(() => {
-  return userSubscription.value?.autoRenews === true && userSubscription.value.cancelAtPeriodEnd === true
+  return userSubscription.value?.cancelAtPeriodEnd === true
 })
 
 const renewalBadge = computed(() => {
