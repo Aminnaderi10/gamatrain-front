@@ -43,7 +43,7 @@
         v-model="textSearch"
         label="Search anything...."
         variant="outlined"
-        color="#F4B400"
+        color="academicGold"
         max-width="330"
         density="compact"
         hide-details
@@ -55,7 +55,7 @@
           <v-btn
             icon
             varient="text"
-            color="#F4B400"
+            color="academicGold"
             width="50"
             class="rounded-ts rounded-te-xl rounded-be-xl rounded-bs h-100 ml-n2"
             flat
@@ -133,7 +133,6 @@
                   :fallback-icon-padding="entry.filter.fallbackIconPadding"
                   :control-icon="entry.filter.controlIcon"
                   :control-icon-src="entry.filter.controlIconSrc"
-                  :control-icon-svg="entry.filter.controlIconSvg"
                 />
               </span>
 
@@ -234,7 +233,6 @@
                     :selected-variant="filter.selectedVariant"
                     :control-icon="filter.controlIcon"
                     :control-icon-src="filter.controlIconSrc"
-                    :control-icon-svg="filter.controlIconSvg"
                     :unselected-icon-color="filter.unselectedIconColor"
                     :control-icon-padding="filter.controlIconPadding"
                     :inline-options="filter.inlineOptions"
@@ -375,7 +373,7 @@
         v-model="dialogFilterMobileModel"
         transition="dialog-bottom-transition"
         fullscreen
-        scrim="#ffffff"
+        scrim="white"
       >
       <div class="mobile-filter-modal w-100 h-100 d-flex flex-column overflow-y-auto position-relative">
         <v-container class="mobile-filter-modal__container flex-column">
@@ -437,7 +435,6 @@
                     :selected-variant="filter.selectedVariant"
                     :control-icon="filter.controlIcon"
                     :control-icon-src="filter.controlIconSrc"
-                    :control-icon-svg="filter.controlIconSvg"
                     :unselected-icon-color="filter.unselectedIconColor"
                     :control-icon-padding="filter.controlIconPadding"
                     :item-title="filter.itemTitle"
@@ -483,7 +480,7 @@
           class="mobile-filter-modal__footer w-100 d-flex align-center justify-center position-fixed bottom-0"
         >
           <v-btn
-            color="#F4B400"
+            color="academicGold"
             rounded="xl"
             height="40"
             class="mobile-filter-modal__show-results text-h5 text-grey800"
@@ -576,6 +573,10 @@ const textSearch = ref(route.query.title ? route.query.title : '')
 const timer = ref(null)
 const hasExclusiveDisabledState = ref(false)
 let pendingServiceChange = false
+let filterListSyncVersion = 0
+
+const isCurrentFilterSync = syncVersion =>
+  syncVersion === undefined || syncVersion === filterListSyncVersion
 
 watch(mdAndUp, (isDesktop) => {
   if (isDesktop) dialogFilterMobileModel.value = false
@@ -709,7 +710,25 @@ const resetDescendants = (indexFilter) => {
   }
 }
 
-const enableReadyChildren = async (indexFilter) => {
+const filterDataLoadKeys = new WeakMap()
+
+const getFilterDataLoadKey = (filter, parentId = '') => JSON.stringify({
+  api: filter.api,
+  parentId: filter.idInParams ? parentId : '',
+  params: filter.extraApiParams || {},
+})
+
+const loadFilterItems = async (filter, parentId = '') => {
+  if (!filter.api || filter.staticList?.length || !filter.refElement) return
+
+  const loadKey = getFilterDataLoadKey(filter, parentId)
+  if (filterDataLoadKeys.get(filter) === loadKey) return
+
+  await filter.refElement.getItems(filter.idInParams ? parentId : '')
+  filterDataLoadKeys.set(filter, loadKey)
+}
+
+const enableReadyChildren = async (indexFilter, syncVersion) => {
   const filterParent = filters.value[indexFilter]
 
   if (filterParent.childrenForGetStaticData) {
@@ -769,12 +788,12 @@ const enableReadyChildren = async (indexFilter) => {
               = parentNode.selectedItem?.[dep.sourceKey] ?? null
           })
         }
-        await child.refElement?.getItems(
-          child.idInParams ? filterParent.selectedItem.id : '',
-        )
+        await loadFilterItems(child, filterParent.selectedItem.id)
+        if (!isCurrentFilterSync(syncVersion)) return
       }
 
-      enableReadyChildren(childIndex)
+      await enableReadyChildren(childIndex, syncVersion)
+      if (!isCurrentFilterSync(syncVersion)) return
     }
   }
 }
@@ -814,12 +833,15 @@ const updateQueryFromFilters = async () => {
   emits('changeFilter', query, titles, { serviceChange: pendingServiceChange })
 }
 
-const fetchDataRequireFilter = async () => {
+const fetchDataRequireFilter = async (syncVersion) => {
   for (let i = 0; i < filters.value.length; i++) {
+    if (!isCurrentFilterSync(syncVersion)) return
+
     const filter = filters.value[i]
     if (!filter.dependencies?.length) {
       if (filter.api && !filter.staticList?.length) {
-        await filter.refElement.getItems()
+        await loadFilterItems(filter)
+        if (!isCurrentFilterSync(syncVersion)) return
       }
     }
     if (filter.getStaticList) {
@@ -829,8 +851,10 @@ const fetchDataRequireFilter = async () => {
   }
 }
 
-const fetchFilterAvailableInQuery = async () => {
+const fetchFilterAvailableInQuery = async (syncVersion) => {
   for (let index = 0; index < filters.value.length; index++) {
+    if (!isCurrentFilterSync(syncVersion)) return
+
     const filter = filters.value[index]
     const qVal = route.query[filter.queryKey]
     // Due to the update to version 2 of the backend for the board, change filter key to id.
@@ -840,7 +864,8 @@ const fetchFilterAvailableInQuery = async () => {
 
     if (filter.defaultValue && !qVal) {
       filters.value[index].selectedItem = filter.defaultValue
-      await enableReadyChildren(index)
+      await enableReadyChildren(index, syncVersion)
+      if (!isCurrentFilterSync(syncVersion)) return
 
       const query = { ...route.query }
       query[filter.queryKey] = filter.defaultValue.id
@@ -863,7 +888,8 @@ const fetchFilterAvailableInQuery = async () => {
         disableOtherFilters(index)
         continue
       }
-      await enableReadyChildren(index)
+      await enableReadyChildren(index, syncVersion)
+      if (!isCurrentFilterSync(syncVersion)) return
     }
     else {
       const selected = await filter.refElement?.getItemById(qVal, filterKey)
@@ -873,30 +899,23 @@ const fetchFilterAvailableInQuery = async () => {
           disableOtherFilters(index)
           continue
         }
-        await enableReadyChildren(index)
+        await enableReadyChildren(index, syncVersion)
+        if (!isCurrentFilterSync(syncVersion)) return
       }
     }
   }
 }
 
-let filterListSyncVersion = 0
-
 const getFilterIdentity = filter => `${filter.queryKey ?? ''}:${filter.title ?? ''}`
 
-const reconcileFilterState = (filterList) => {
+const reconcileFilterConfiguration = (filterList) => {
   const existingFilters = new Map(
     filters.value.map(filter => [getFilterIdentity(filter), filter]),
   )
-  const addedFilters = []
-  const retainedFilters = []
 
-  const nextFilters = filterList.map((filterConfig) => {
+  return filterList.map((filterConfig) => {
     const existingFilter = existingFilters.get(getFilterIdentity(filterConfig))
-    if (!existingFilter) {
-      const newFilter = createFilterState([filterConfig])[0]
-      addedFilters.push(newFilter)
-      return newFilter
-    }
+    if (!existingFilter) return createFilterState([filterConfig])[0]
 
     const runtimeState = {
       selectedItem: existingFilter.selectedItem,
@@ -907,109 +926,8 @@ const reconcileFilterState = (filterList) => {
     Object.assign(existingFilter, filterConfig, runtimeState, {
       initialDisabled: filterConfig.disabled,
     })
-    retainedFilters.push(existingFilter)
 
     return existingFilter
-  })
-
-  return { addedFilters, nextFilters, retainedFilters }
-}
-
-const syncRetainedFilterSelection = async (filter) => {
-  const queryValue = route.query[filter.queryKey]
-  const selectedValue = filter.selectedItem?.code ?? filter.selectedItem?.id
-
-  if (!queryValue) {
-    filter.selectedItem = filter.defaultValue || null
-    return
-  }
-  if (String(selectedValue) === String(queryValue)) return
-
-  const filterKey = filter.queryKey === 'section' ? 'code' : 'id'
-  let selectedItem = filter.refElement?.getItemById(queryValue, filterKey)
-  const dependenciesReady = filter.dependencies?.every(
-    dependency => !!filters.value[dependency.parent]?.selectedItem,
-  ) ?? true
-
-  if (!selectedItem && dependenciesReady && filter.api) {
-    if (!filter.idInParams) {
-      filter.dependencies.forEach((dependency) => {
-        const parentFilter = filters.value[dependency.parent]
-        filter.extraApiParams[dependency.targetKey]
-          = parentFilter?.selectedItem?.[dependency.sourceKey] ?? null
-      })
-    }
-
-    const parentId = filter.dependencies?.[0]
-      ? filters.value[filter.dependencies[0].parent]?.selectedItem?.id
-      : ''
-    await filter.refElement?.getItems(filter.idInParams ? parentId : '')
-    selectedItem = filter.refElement?.getItemById(queryValue, filterKey)
-  }
-
-  filter.selectedItem = selectedItem || null
-}
-
-const initializeAddedFilter = async (filter) => {
-  const index = filters.value.indexOf(filter)
-  if (index === -1) return
-
-  if (filter.getStaticList) {
-    filter.refElement?.setStaticItem(filter.getStaticList())
-  }
-
-  const dependenciesReady = filter.dependencies?.every(
-    dependency => !!filters.value[dependency.parent]?.selectedItem,
-  ) ?? true
-
-  if (filter.dependencies?.length) {
-    filter.disabled = !dependenciesReady
-  }
-
-  if (
-    dependenciesReady
-    && filter.api
-    && !filter.staticList?.length
-  ) {
-    if (!filter.idInParams) {
-      filter.dependencies.forEach((dependency) => {
-        const parentFilter = filters.value[dependency.parent]
-        filter.extraApiParams[dependency.targetKey]
-          = parentFilter?.selectedItem?.[dependency.sourceKey] ?? null
-      })
-    }
-
-    const parentId = filter.dependencies?.[0]
-      ? filters.value[filter.dependencies[0].parent]?.selectedItem?.id
-      : ''
-    await filter.refElement?.getItems(filter.idInParams ? parentId : '')
-  }
-
-  const queryValue = route.query[filter.queryKey]
-  if (!queryValue) return
-
-  const filterKey = filter.queryKey === 'section' ? 'code' : 'id'
-  const selectedItem = filter.staticList?.length
-    ? filter.staticList.find(item => String(item[filterKey]) === String(queryValue))
-    : filter.refElement?.getItemById(queryValue, filterKey)
-
-  if (selectedItem) filter.selectedItem = selectedItem
-}
-
-const refreshDependencyDisabledStates = () => {
-  filters.value.forEach((filter) => {
-    if (!filter.dependencies?.length) return
-
-    const dependenciesReady = filter.dependencies.every(
-      dependency => !!filters.value[dependency.parent]?.selectedItem,
-    )
-    const disabledByDependency = dependenciesReady && filter.dependencies.some(
-      dependency => dependency.disableIds?.includes(
-        filters.value[dependency.parent]?.selectedItem?.id,
-      ),
-    )
-
-    filter.disabled = !dependenciesReady || disabledByDependency
   })
 }
 
@@ -1017,26 +935,16 @@ watch(
   () => props.filterList,
   async (filterList) => {
     const syncVersion = ++filterListSyncVersion
-    const { addedFilters, nextFilters, retainedFilters }
-      = reconcileFilterState(filterList)
-    filters.value = nextFilters
+    filters.value = reconcileFilterConfiguration(filterList)
     hasExclusiveDisabledState.value = false
 
     await nextTick()
-    if (syncVersion !== filterListSyncVersion) return
+    if (!isCurrentFilterSync(syncVersion)) return
 
-    for (const filter of retainedFilters) {
-      await syncRetainedFilterSelection(filter)
-      if (syncVersion !== filterListSyncVersion) return
-      refreshDependencyDisabledStates()
-    }
+    await fetchDataRequireFilter(syncVersion)
+    if (!isCurrentFilterSync(syncVersion)) return
 
-    for (const filter of addedFilters) {
-      await initializeAddedFilter(filter)
-      if (syncVersion !== filterListSyncVersion) return
-    }
-
-    refreshDependencyDisabledStates()
+    await fetchFilterAvailableInQuery(syncVersion)
   },
   { flush: 'post' },
 )
@@ -1060,8 +968,7 @@ const setMobileFilterSectionRef = (filter, element) => {
 const hasFilterIcon = filter => Boolean(
   filter.showItemIcon
   || filter.controlIcon
-  || filter.controlIconSrc
-  || filter.controlIconSvg,
+  || filter.controlIconSrc,
 )
 
 const getQuickFilterValue = (filter) => {
@@ -1076,6 +983,11 @@ const getQuickFilterAriaLabel = (filter) => {
 }
 
 const openMobileQuickFilter = (filter) => {
+  if (filter.inlineOptions) {
+    filter.refElement.openInlineOptionsModal()
+    return
+  }
+
   openFilterSelectModal(filter)
 }
 
@@ -1288,17 +1200,17 @@ const clearAllFilter = async () => {
 }
 
 .header-keyword-search :deep(.v-field) {
-  color: #1e2a44;
-  background: #fcfcfd;
+  color: rgb(var(--v-theme-brandNavy));
+  background: rgb(var(--v-theme-grey25));
   border-radius: 12px;
 }
 
 .header-keyword-search :deep(.v-field__outline) {
-  color: #d8dee8;
+  color: rgb(var(--v-theme-borderSubtle));
 }
 
 .header-keyword-search :deep(.v-field--focused .v-field__outline) {
-  color: #f4b400;
+  color: rgb(var(--v-theme-academicGold));
 }
 
 @media (min-width: 960px) {
@@ -1308,11 +1220,11 @@ const clearAllFilter = async () => {
 }
 
 .filter-clear-icon {
-  color: #667085 !important;
+  color: rgb(var(--v-theme-grey500)) !important;
 }
 
 .filter-clear-icon:hover {
-  color: #c93c37 !important;
+  color: rgb(var(--v-theme-errorStrong)) !important;
 }
 
 :deep(.height-badge .v-badge__wrapper .v-badge__badge) {
@@ -1333,14 +1245,14 @@ const clearAllFilter = async () => {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: #fcfcfd;
+  background: rgb(var(--v-theme-grey25));
 }
 .filter-list-sticky-host {
   display: contents !important;
 }
 .desktop-filter-controls,
 .persistent-search-content {
-  background: #fcfcfd;
+  background: rgb(var(--v-theme-grey25));
 }
 .desktop-filter-controls-content {
   transform-origin: top center;
@@ -1369,10 +1281,10 @@ const clearAllFilter = async () => {
   padding: 16px 24px 0 0;
   margin-right: auto;
   margin-top: 16px;
-  background: #fcfcfd;
-  border: 1px solid #d8dee8;
+  background: rgb(var(--v-theme-grey25));
+  border: 1px solid rgb(var(--v-theme-borderSubtle));
   border-radius: 12px;
-  box-shadow: 0 1px 2px rgb(30 42 68 / 7%);
+  box-shadow: 0 1px 2px rgba(var(--v-theme-brandNavy), 0.07);
 }
 
 .search-results-scroll-region {
@@ -1381,11 +1293,11 @@ const clearAllFilter = async () => {
 
 .desktop-filter-sidebar-header {
   padding: 16px;
-  border-bottom: 1px solid #d8dee8;
+  border-bottom: 1px solid rgb(var(--v-theme-borderSubtle));
 }
 
 .desktop-filter-sidebar-title {
-  color: #1e2a44;
+  color: rgb(var(--v-theme-brandNavy));
   font-size: 16px;
   font-weight: 700;
   line-height: 24px;
@@ -1395,7 +1307,7 @@ const clearAllFilter = async () => {
   min-width: 0;
   height: 32px !important;
   padding: 0 8px !important;
-  color: #c93c37;
+  color: rgb(var(--v-theme-errorStrong));
   font-size: 12px;
   font-weight: 650;
   letter-spacing: 0;
@@ -1461,7 +1373,7 @@ const clearAllFilter = async () => {
     align-content: start;
     margin: 0 auto;
     overflow: visible;
-    background: #fcfcfd;
+    background: rgb(var(--v-theme-grey25));
   }
 
   .search-workspace-heading {
@@ -1486,7 +1398,7 @@ const clearAllFilter = async () => {
     align-items: start;
     justify-content: stretch !important;
     overflow: visible;
-    background: #fcfcfd;
+    background: rgb(var(--v-theme-grey25));
   }
 
   .filter-list-sidebar-layout :deep(.services-navigation) {
@@ -1496,8 +1408,8 @@ const clearAllFilter = async () => {
     grid-column: 2;
     grid-row: 1;
     max-width: none;
-    background: #fcfcfd;
-    box-shadow: 0 -8px 0 #ffffff;
+    background: rgb(var(--v-theme-grey25));
+    box-shadow: 0 -8px 0 rgb(var(--v-theme-white));
   }
 
   .filter-list-sidebar-layout :deep(.services-navigation__items) {
@@ -1519,12 +1431,12 @@ const clearAllFilter = async () => {
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
-    scrollbar-color: #d8dee8 transparent;
+    scrollbar-color: rgb(var(--v-theme-borderSubtle)) transparent;
     scrollbar-width: thin;
-    background: #fcfcfd;
-    border: 1px solid #d8dee8;
+    background: rgb(var(--v-theme-grey25));
+    border: 1px solid rgb(var(--v-theme-borderSubtle));
     border-radius: 12px;
-    box-shadow: 0 1px 2px rgb(30 42 68 / 7%);
+    box-shadow: 0 1px 2px rgba(var(--v-theme-brandNavy), 0.07);
   }
 
   .filter-list-sidebar-layout .desktop-filter-controls-shell::-webkit-scrollbar {
@@ -1532,7 +1444,7 @@ const clearAllFilter = async () => {
   }
 
   .filter-list-sidebar-layout .desktop-filter-controls-shell::-webkit-scrollbar-thumb {
-    background: #d8dee8;
+    background: rgb(var(--v-theme-borderSubtle));
     border-radius: 999px;
   }
 
@@ -1542,21 +1454,21 @@ const clearAllFilter = async () => {
 
   .filter-list-sidebar-layout .desktop-filter-controls {
     min-width: 0;
-    background: #fcfcfd;
+    background: rgb(var(--v-theme-grey25));
   }
 
   .filter-list-sidebar-layout .desktop-filter-controls-content {
     display: block !important;
     min-width: 0;
     padding-bottom: 0;
-    background: #fcfcfd;
+    background: rgb(var(--v-theme-grey25));
   }
 
   .filter-list-sidebar-layout :deep(.services-filter-container) {
     display: block;
     max-width: none;
     padding: 0;
-    background: #fcfcfd;
+    background: rgb(var(--v-theme-grey25));
   }
 
   .filter-list-sidebar-layout :deep(.services-filter-container > div:first-child) {
@@ -1582,7 +1494,7 @@ const clearAllFilter = async () => {
     text-align: left;
     background: transparent;
     border: 0 !important;
-    border-bottom: 1px solid #eef1f5 !important;
+    border-bottom: 1px solid rgb(var(--v-theme-surfaceTertiary)) !important;
     border-radius: 0 !important;
     box-shadow: none;
   }
@@ -1604,19 +1516,19 @@ const clearAllFilter = async () => {
   }
 
   .filter-list-sidebar-layout :deep(.search-filter-control:hover) {
-    background: #f7f8fa;
+    background: rgb(var(--v-theme-surfaceSecondary));
   }
 
   .filter-list-sidebar-layout :deep(.search-filter-control.open-style-btn) {
-    background: #fcfcfd;
+    background: rgb(var(--v-theme-grey25));
   }
 
   .filter-list-sidebar-layout :deep(.search-filter-control.open-style-btn:not(.search-filter-empty)) {
-    background: #d8dee8;
+    background: rgb(var(--v-theme-borderSubtle));
   }
 
   .filter-list-sidebar-layout :deep(.search-filter-control.dependent-selected-btn) {
-    background: #d8dee8;
+    background: rgb(var(--v-theme-borderSubtle));
   }
 
   .filter-list-sidebar-layout :deep(.search-filter-value) {
@@ -1637,7 +1549,7 @@ const clearAllFilter = async () => {
     gap: 0 !important;
     padding: 0 16px !important;
     margin: 0 !important;
-    background: #fcfcfd;
+    background: rgb(var(--v-theme-grey25));
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none;
@@ -1663,7 +1575,7 @@ const clearAllFilter = async () => {
     top: 0;
     right: -16px;
     left: -16px;
-    border-top: 1px solid #eef1f5;
+    border-top: 1px solid rgb(var(--v-theme-surfaceTertiary));
     content: '';
     pointer-events: none;
   }
@@ -1676,7 +1588,7 @@ const clearAllFilter = async () => {
   .filter-list-sidebar-layout :deep(.inline-filter-label) {
     display: block;
     margin: 0 0 8px 36px;
-    color: #1e2a44;
+    color: rgb(var(--v-theme-brandNavy));
     font-size: 16px;
     font-weight: 600;
     line-height: 24px;
@@ -1713,9 +1625,9 @@ const clearAllFilter = async () => {
     padding: 12px;
     overflow: visible;
     background: transparent;
-    border: 1px solid #d8dee8;
+    border: 1px solid rgb(var(--v-theme-borderSubtle));
     border-radius: 12px;
-    box-shadow: 0 1px 2px rgb(30 42 68 / 7%);
+    box-shadow: 0 1px 2px rgba(var(--v-theme-brandNavy), 0.07);
   }
 
   .filter-list-sidebar-layout :deep(.subject-directory-container) {
@@ -1743,8 +1655,8 @@ const clearAllFilter = async () => {
     gap: 0;
     padding: 6px 12px;
     overflow: hidden;
-    background: #fcfcfd;
-    border-bottom: 1px solid #d8dee8;
+    background: rgb(var(--v-theme-grey25));
+    border-bottom: 1px solid rgb(var(--v-theme-borderSubtle));
   }
 
   .mobile-quick-filter-bar__trigger {
@@ -1757,12 +1669,12 @@ const clearAllFilter = async () => {
     flex: 0 0 108px;
     align-items: stretch;
     justify-content: flex-start;
-    box-shadow: 4px 0 8px -4px rgb(30 42 68 / 18%);
+    box-shadow: 4px 0 8px -4px rgba(var(--v-theme-brandNavy), 0.18);
     transition: background-color 160ms ease;
   }
 
   .mobile-quick-filter-bar__trigger:hover {
-    background: #f7f8fa;
+    background: rgb(var(--v-theme-surfaceSecondary));
   }
 
   .mobile-quick-filter-bar__trigger :deep(.height-badge) {
@@ -1776,7 +1688,7 @@ const clearAllFilter = async () => {
     min-width: 0;
     justify-content: flex-start;
     padding-inline: 12px;
-    background: #fcfcfd;
+    background: rgb(var(--v-theme-grey25));
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none;
@@ -1818,9 +1730,9 @@ const clearAllFilter = async () => {
     flex: 0 0 auto;
     align-items: stretch;
     overflow: hidden;
-    color: #1e2a44;
-    background: #fcfcfd;
-    border-left: 1px solid #eef1f5;
+    color: rgb(var(--v-theme-brandNavy));
+    background: rgb(var(--v-theme-grey25));
+    border-left: 1px solid rgb(var(--v-theme-surfaceTertiary));
     transition: background-color 160ms ease;
   }
 
@@ -1839,7 +1751,7 @@ const clearAllFilter = async () => {
   }
 
   .mobile-quick-filter--disabled {
-    color: rgb(30 42 68 / 38%);
+    color: rgba(var(--v-theme-brandNavy), 0.38);
   }
 
   .mobile-quick-filter--disabled .mobile-quick-filter__control {
@@ -1881,7 +1793,7 @@ const clearAllFilter = async () => {
   }
 
   .mobile-quick-filter__control:hover {
-    background: #f7f8fa;
+    background: rgb(var(--v-theme-surfaceSecondary));
   }
 
   .mobile-quick-filter--selected .mobile-quick-filter__control:hover {
@@ -1889,13 +1801,13 @@ const clearAllFilter = async () => {
   }
 
   .mobile-quick-filter__control:active {
-    background: #eef1f5;
+    background: rgb(var(--v-theme-surfaceTertiary));
   }
 
   .mobile-quick-filter__control:focus-visible,
   .mobile-quick-filter__clear:focus-visible {
     z-index: 1;
-    outline: 3px solid rgb(244 180 0 / 28%);
+    outline: 3px solid rgba(var(--v-theme-academicGold), 0.28);
     outline-offset: -3px;
   }
 
@@ -1907,12 +1819,10 @@ const clearAllFilter = async () => {
     flex: 0 0 20px;
     align-items: center;
     justify-content: center;
-    color: #1e2a44;
+    color: rgb(var(--v-theme-brandNavy));
   }
 
-  .mobile-quick-filter__icon :deep(.v-img),
-  .mobile-quick-filter__icon :deep(.search-filter-inline-svg-icon),
-  .mobile-quick-filter__icon :deep(.search-filter-svg-icon) {
+  .mobile-quick-filter__icon :deep(.v-img) {
     width: 100%;
     height: 100%;
   }
@@ -1952,21 +1862,21 @@ const clearAllFilter = async () => {
   }
 
   .mobile-quick-filter__label {
-    color: #1e2a44;
+    color: rgb(var(--v-theme-brandNavy));
     font-size: 14px;
     font-weight: 600;
     line-height: 20px;
   }
 
   .mobile-quick-filter--selected .mobile-quick-filter__label {
-    color: rgb(30 42 68 / 68%);
+    color: rgba(var(--v-theme-brandNavy), 0.68);
     font-size: 11px;
     font-weight: 500;
     line-height: 14px;
   }
 
   .mobile-quick-filter__value {
-    color: #1e2a44;
+    color: rgb(var(--v-theme-brandNavy));
     font-size: 14px;
     font-weight: 650;
     line-height: 18px;
@@ -1981,7 +1891,7 @@ const clearAllFilter = async () => {
     align-items: center;
     justify-content: center;
     padding: 0;
-    color: #667085;
+    color: rgb(var(--v-theme-grey500));
     background: transparent;
     border: 0;
     border-radius: 0;
@@ -1989,7 +1899,7 @@ const clearAllFilter = async () => {
   }
 
   .mobile-quick-filter__clear:hover {
-    color: #c93c37;
+    color: rgb(var(--v-theme-errorStrong));
   }
 
   .desktop-filter-controls-shell .inline-filter-group-wrapper {
@@ -1999,8 +1909,8 @@ const clearAllFilter = async () => {
   .mobile-filter-modal {
     height: 100dvh !important;
     overflow: hidden !important;
-    color: #1e2a44;
-    background: #f7f8fa;
+    color: rgb(var(--v-theme-brandNavy));
+    background: rgb(var(--v-theme-surfaceSecondary));
   }
 
   .mobile-filter-modal__container {
@@ -2022,7 +1932,7 @@ const clearAllFilter = async () => {
     width: 100%;
     min-height: calc(100dvh - 88px);
     overflow: visible;
-    background: #fcfcfd;
+    background: rgb(var(--v-theme-grey25));
     border: 0;
     border-radius: 0;
     box-shadow: none;
@@ -2031,11 +1941,11 @@ const clearAllFilter = async () => {
   .mobile-filter-panel__header {
     min-height: 64px;
     padding: 16px;
-    border-bottom: 1px solid #d8dee8;
+    border-bottom: 1px solid rgb(var(--v-theme-borderSubtle));
   }
 
   .mobile-filter-panel__title {
-    color: #1e2a44;
+    color: rgb(var(--v-theme-brandNavy));
     font-size: 16px;
     font-weight: 700;
     line-height: 24px;
@@ -2045,7 +1955,7 @@ const clearAllFilter = async () => {
     min-width: 0;
     height: 32px !important;
     padding: 0 8px !important;
-    color: #c93c37;
+    color: rgb(var(--v-theme-errorStrong));
     font-size: 12px;
     font-weight: 650;
     letter-spacing: 0;
@@ -2055,7 +1965,7 @@ const clearAllFilter = async () => {
   .mobile-filter-panel__close {
     width: 32px !important;
     height: 32px !important;
-    color: #667085;
+    color: rgb(var(--v-theme-grey500));
   }
 
   .mobile-filter-control-wrapper {
@@ -2069,11 +1979,11 @@ const clearAllFilter = async () => {
     justify-content: stretch !important;
     padding-inline: 16px;
     direction: ltr;
-    color: #1e2a44;
+    color: rgb(var(--v-theme-brandNavy));
     text-align: left;
-    background: #fcfcfd;
+    background: rgb(var(--v-theme-grey25));
     border: 0 !important;
-    border-bottom: 1px solid #eef1f5 !important;
+    border-bottom: 1px solid rgb(var(--v-theme-surfaceTertiary)) !important;
     border-radius: 0 !important;
     box-shadow: none;
   }
@@ -2092,12 +2002,12 @@ const clearAllFilter = async () => {
   }
 
   .mobile-filter-control-list :deep(.search-filter-control:hover) {
-    background: #f7f8fa;
+    background: rgb(var(--v-theme-surfaceSecondary));
   }
 
   .mobile-filter-control-list :deep(.search-filter-control.open-style-btn:not(.search-filter-empty)),
   .mobile-filter-control-list :deep(.search-filter-control.dependent-selected-btn) {
-    background: #d8dee8;
+    background: rgb(var(--v-theme-borderSubtle));
     border-color: transparent !important;
   }
 
@@ -2108,7 +2018,7 @@ const clearAllFilter = async () => {
   .mobile-inline-filter-group {
     width: 100%;
     padding: 0 16px;
-    background: #fcfcfd;
+    background: rgb(var(--v-theme-grey25));
   }
 
   .mobile-inline-filter-row-wrapper {
@@ -2125,7 +2035,7 @@ const clearAllFilter = async () => {
     gap: 0;
     padding: 12px 0;
     margin: 0;
-    background: #fcfcfd;
+    background: rgb(var(--v-theme-grey25));
     border: 0;
     border-radius: 0;
   }
@@ -2138,7 +2048,7 @@ const clearAllFilter = async () => {
   .mobile-inline-filter-group :deep(.inline-filter-label) {
     display: block;
     margin: 0 0 8px 36px;
-    color: #1e2a44;
+    color: rgb(var(--v-theme-brandNavy));
     font-size: 16px;
     font-weight: 600;
     line-height: 24px;
@@ -2156,7 +2066,7 @@ const clearAllFilter = async () => {
   .mobile-inline-filter-group :deep(.inline-filter-option) {
     min-height: 28px;
     padding: 3px 8px !important;
-    border-color: #d8dee8 !important;
+    border-color: rgb(var(--v-theme-borderSubtle)) !important;
     border-radius: 8px !important;
     font-size: 12px;
     line-height: 18px;
@@ -2170,14 +2080,14 @@ const clearAllFilter = async () => {
     display: block;
     width: calc(100% + 32px);
     margin: 12px -16px 0;
-    border-top: 1px solid #eef1f5;
+    border-top: 1px solid rgb(var(--v-theme-surfaceTertiary));
   }
 
   .mobile-filter-modal__footer {
     z-index: 2;
     padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
-    background: #fcfcfd;
-    border-top: 1px solid #d8dee8;
+    background: rgb(var(--v-theme-grey25));
+    border-top: 1px solid rgb(var(--v-theme-borderSubtle));
   }
 
   .mobile-filter-modal__show-results {

@@ -75,8 +75,43 @@
           </template>
         </v-text-field>
       </v-row>
+      <div
+        v-if="!isLoading && inlineOptions"
+        class="select-dialog-inline-options"
+        :style="{
+          gridTemplateColumns: `max-content repeat(${inlineItemsPerRow}, max-content)`,
+        }"
+      >
+        <v-btn
+          v-if="inlineAllowClear"
+          variant="outlined"
+          class="inline-filter-option"
+          :class="{ 'inline-filter-option-selected': !selectedItem }"
+          :style="{ gridColumn: 1, gridRow: 1 }"
+          :aria-pressed="!selectedItem"
+          @click="changeSelectedItem(null)"
+        >
+          All
+        </v-btn>
+        <v-btn
+          v-for="(item, itemIndex) in filteredItems"
+          :key="item.id"
+          variant="outlined"
+          class="inline-filter-option"
+          :class="{ 'inline-filter-option-selected': selectedItem?.id == item.id }"
+          :style="{
+            gridColumn: (itemIndex % inlineItemsPerRow) + (inlineAllowClear ? 2 : 1),
+            gridRow: Math.floor(itemIndex / inlineItemsPerRow) + 1,
+          }"
+          :aria-pressed="selectedItem?.id == item.id"
+          @click="changeSelectedItem(item)"
+        >
+          {{ getItemTitle(item) }}
+        </v-btn>
+      </div>
+
       <v-list
-        v-if="!isLoading"
+        v-else-if="!isLoading"
         class="select-dialog-list"
         max-height="320"
       >
@@ -275,6 +310,22 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  inlineOptions: {
+    type: Boolean,
+    default: false,
+  },
+  inlineAllowClear: {
+    type: Boolean,
+    default: false,
+  },
+  inlineItemsPerRow: {
+    type: Number,
+    default: 3,
+  },
+  itemTitle: {
+    type: Function,
+    default: null,
+  },
 })
 
 const emit = defineEmits(['update:showDialog', 'changeSelectedItem'])
@@ -291,6 +342,7 @@ watch(
 )
 
 const getIconSrc = item => props.iconSrc?.(item) || item.icon
+const getItemTitle = item => props.itemTitle?.(item) || item.title
 const markIconFailed = (item) => {
   failedIconIds.value = new Set([
     ...failedIconIds.value,
@@ -481,6 +533,17 @@ const clickOnModal = (event) => {
   padding: 8px 24px 16px;
   overflow-y: auto;
   background: transparent;
+}
+
+.select-dialog-inline-options {
+  display: grid;
+  width: max-content;
+  max-width: 100%;
+  min-height: 0;
+  gap: 8px;
+  padding: 24px;
+  overflow-x: auto;
+  overflow-y: auto;
 }
 
 .select-dialog-list :deep(.select-dialog-item) {

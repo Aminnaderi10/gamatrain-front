@@ -97,7 +97,7 @@ const formatCount = (serviceId) => {
   max-width: 1200px;
   min-width: 0;
   padding: 0;
-  border-bottom: 1px solid #d8dee8;
+  border-bottom: 1px solid rgb(var(--v-theme-borderSubtle));
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -126,8 +126,8 @@ const formatCount = (serviceId) => {
   padding: 0 20px;
   border: 0;
   border-radius: 12px 12px 0 0;
-  color: #1e2a44;
-  background: #fcfcfd;
+  color: rgb(var(--v-theme-brandNavy));
+  background: rgb(var(--v-theme-grey25));
   font-size: 15px;
   font-weight: 600;
   letter-spacing: normal;
@@ -136,17 +136,17 @@ const formatCount = (serviceId) => {
 }
 
 .services-navigation__item--active {
-  color: #ffffff;
-  background-color: #1e2a44;
-  box-shadow: inset 0 -3px 0 #f4b400;
+  color: rgb(var(--v-theme-white));
+  background-color: rgb(var(--v-theme-brandNavy));
+  box-shadow: inset 0 -3px 0 rgb(var(--v-theme-academicGold));
 }
 
 .services-navigation__item:not(.services-navigation__item--active):hover {
-  background: #f7f8fa;
+  background: rgb(var(--v-theme-surfaceSecondary));
 }
 
 .services-navigation__item:focus-visible {
-  outline: 3px solid rgb(244 180 0 / 30%);
+  outline: 3px solid rgba(var(--v-theme-academicGold), 0.3);
   outline-offset: -3px;
 }
 
@@ -171,7 +171,7 @@ const formatCount = (serviceId) => {
   letter-spacing: 0;
   line-height: 1;
   text-indent: 0;
-  color: #1e2a44;
+  color: rgb(var(--v-theme-brandNavy));
 }
 
 .services-navigation__icon img {
@@ -217,7 +217,7 @@ const formatCount = (serviceId) => {
 }
 
 .services-navigation__item--active .services-navigation__icon {
-  color: #ffffff;
+  color: rgb(var(--v-theme-white));
 }
 
 .services-navigation__icon img {
@@ -234,14 +234,14 @@ const formatCount = (serviceId) => {
 
 .services-navigation__count {
   min-height: 16px;
-  color: #f4b400;
+  color: rgb(var(--v-theme-academicGold));
   font-size: 14px;
   font-weight: 700;
   line-height: 18px;
 }
 
 .services-navigation__item:not(.services-navigation__item--active) .services-navigation__count {
-  color: rgb(30 42 68 / 68%);
+  color: rgba(var(--v-theme-brandNavy), 0.68);
 }
 
 .services-navigation__title {
@@ -392,7 +392,7 @@ const formatCount = (serviceId) => {
   }
 
   .services-navigation__item--active .services-navigation__title--full {
-    color: #ffffff;
+    color: rgb(var(--v-theme-white));
     font-size: 14px;
     font-weight: 600;
     line-height: 18px;

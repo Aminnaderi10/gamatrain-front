@@ -42,19 +42,19 @@ const emit = defineEmits(['click'])
 
 <style scoped>
 .filter-trigger {
-  color: #171633;
-  background: #ffffff;
-  border-color: #dcdde5;
+  color: rgb(var(--v-theme-brandNavy));
+  background: rgb(var(--v-theme-white));
+  border-color: rgb(var(--v-theme-borderSubtle));
   border-radius: 12px !important;
 }
 
 .filter-trigger:hover {
-  background: #fff3c4;
-  border-color: #dfb536;
+  background: rgb(var(--v-theme-softGold));
+  border-color: rgb(var(--v-theme-academicGoldHover));
 }
 
 .filter-trigger__content {
-  color: #202238;
+  color: rgb(var(--v-theme-brandNavy));
   font-size: 14px;
   line-height: 20px;
 }

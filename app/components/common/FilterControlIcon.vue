@@ -1,64 +1,21 @@
 <template>
   <span class="filter-control-icon-content">
     <v-img
-      v-if="showItemIcon && selectedItem?.icon && !selectedIconFailed"
-      :src="getIconSrc(selectedItem)"
-      :alt="selectedItem.title"
+      v-if="resolvedIcon.type === 'image'"
+      :src="resolvedIcon.src"
+      :alt="resolvedIcon.alt"
+      :class="resolvedIcon.className"
+      :style="resolvedIcon.style"
       contain
-      @error="selectedIconFailed = true"
+      @error="handleImageError"
     />
-    <span
-      v-else-if="showItemIcon && selectedItem?.contentIcon"
-      :class="`${selectedItem.contentIcon} search-filter-content-icon`"
-      :style="{ color: selectedItem.color }"
-    />
-    <span
-      v-else-if="controlIconSvg"
-      class="search-filter-inline-svg-icon"
-    >
-      <svg
-        width="28"
-        height="28"
-        :viewBox="controlIconSvg.viewBox"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          v-for="path in controlIconSvg.paths"
-          :key="path"
-          :d="path"
-          fill="currentColor"
-          stroke="currentColor"
-          :stroke-width="controlIconSvg.strokeWidth"
-          stroke-linejoin="round"
-          paint-order="stroke fill"
-        />
-      </svg>
-    </span>
-    <span
-      v-else-if="controlIconSrc"
-      class="search-filter-svg-icon"
-      :style="{
-        maskImage: `url(${controlIconSrc})`,
-        WebkitMaskImage: `url(${controlIconSrc})`,
-      }"
-    />
-    <img
-      v-else-if="emptyFallbackIconSrc || fallbackIconSrc"
-      :src="!selectedItem && emptyFallbackIconSrc ? emptyFallbackIconSrc : fallbackIconSrc"
-      alt=""
-      class="search-filter-fallback-image"
-      :style="fallbackIconPadding
-        ? {
-          width: `${28 - (fallbackIconPadding * 2)}px`,
-          height: `${28 - (fallbackIconPadding * 2)}px`,
-        }
-        : undefined"
-    >
     <v-icon
       v-else
+      :icon="resolvedIcon.icon"
+      :class="resolvedIcon.className"
+      :style="resolvedIcon.style"
       size="28"
-    >{{ controlIcon || fallbackIcon }}</v-icon>
+    />
   </span>
 </template>
 
@@ -100,10 +57,6 @@ const props = defineProps({
     type: String,
     default: '',
   },
-  controlIconSvg: {
-    type: Object,
-    default: null,
-  },
 })
 
 const selectedIconFailed = ref(false)
@@ -116,6 +69,74 @@ watch(
 )
 
 const getIconSrc = item => props.iconSrc?.(item) || item.icon
+
+const fallbackImageStyle = computed(() => props.fallbackIconPadding
+  ? {
+      width: `${28 - (props.fallbackIconPadding * 2)}px`,
+      height: `${28 - (props.fallbackIconPadding * 2)}px`,
+    }
+  : undefined)
+
+const resolvedIcon = computed(() => {
+  if (props.showItemIcon && props.selectedItem?.icon && !selectedIconFailed.value) {
+    return {
+      type: 'image',
+      src: getIconSrc(props.selectedItem),
+      alt: props.selectedItem.title,
+      className: '',
+      style: undefined,
+      selectedImage: true,
+    }
+  }
+
+  if (props.showItemIcon && props.selectedItem?.contentIcon) {
+    return {
+      type: 'icon',
+      icon: undefined,
+      className: `${props.selectedItem.contentIcon} search-filter-content-icon`,
+      style: { color: props.selectedItem.color },
+      selectedImage: false,
+    }
+  }
+
+  if (props.controlIconSrc) {
+    return {
+      type: 'image',
+      src: props.controlIconSrc,
+      alt: '',
+      className: '',
+      style: undefined,
+      selectedImage: false,
+    }
+  }
+
+  const fallbackImageSrc = !props.selectedItem && props.emptyFallbackIconSrc
+    ? props.emptyFallbackIconSrc
+    : props.fallbackIconSrc
+
+  if (fallbackImageSrc) {
+    return {
+      type: 'image',
+      src: fallbackImageSrc,
+      alt: '',
+      className: 'search-filter-fallback-image',
+      style: fallbackImageStyle.value,
+      selectedImage: false,
+    }
+  }
+
+  return {
+    type: 'icon',
+    icon: props.controlIcon || props.fallbackIcon,
+    className: '',
+    style: undefined,
+    selectedImage: false,
+  }
+})
+
+const handleImageError = () => {
+  if (resolvedIcon.value.selectedImage) selectedIconFailed.value = true
+}
 </script>
 
 <style scoped>

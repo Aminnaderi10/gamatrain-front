@@ -67,7 +67,7 @@
       { 'dependent-selected-btn': selectedItem && selectedVariant === 'dependent-green' },
       { 'search-filter-empty': !selectedItem },
       { 'search-filter-control': boxed },
-      { 'search-filter-has-icon': showItemIcon || controlIcon || controlIconSrc || controlIconSvg },
+      { 'search-filter-has-icon': showItemIcon || controlIcon || controlIconSrc },
     ]"
     variant="outlined"
     :rounded="boxed ? 'lg' : 'xl'"
@@ -78,7 +78,7 @@
     @click="isShowSelectModal = !isShowSelectModal"
   >
     <span
-      v-if="showItemIcon || controlIcon || controlIconSrc || controlIconSvg"
+      v-if="showItemIcon || controlIcon || controlIconSrc"
       class="search-filter-icon mr-2"
       :class="{ 'search-filter-icon-padded': controlIconPadding }"
       :style="[
@@ -100,7 +100,6 @@
         :fallback-icon-padding="fallbackIconPadding"
         :control-icon="controlIcon"
         :control-icon-src="controlIconSrc"
-        :control-icon-svg="controlIconSvg"
       />
     </span>
     <span
@@ -146,12 +145,16 @@
     :title-modal="title"
     :items="items"
     :selected-item="selectedItem"
-    :has-search="hasSearch"
+    :has-search="hasSearch && !inlineOptions"
     :compact-result-count="boxed"
     :show-item-icon="showItemIcon"
     :icon-src="iconSrc"
     :fallback-icon="fallbackIcon"
     :fallback-icon-src="fallbackIconSrc"
+    :inline-options="inlineOptions"
+    :inline-allow-clear="inlineAllowClear"
+    :inline-items-per-row="inlineItemsPerRow"
+    :item-title="itemTitle"
     @change-selected-item="onFilterUpdate"
   />
 </template>
@@ -257,10 +260,6 @@ const props = defineProps({
   controlIconSrc: {
     type: String,
     default: '',
-  },
-  controlIconSvg: {
-    type: Object,
-    default: null,
   },
   unselectedIconColor: {
     type: String,
@@ -385,6 +384,10 @@ const openSelectModal = () => {
   isShowSelectModal.value = true
 }
 
+const openInlineOptionsModal = () => {
+  isShowSelectModal.value = true
+}
+
 const setStaticItem = (staticItem) => {
   items.value = staticItem
 }
@@ -395,6 +398,7 @@ defineExpose({
   getItems,
   getItemById,
   getCurrentItems,
+  openInlineOptionsModal,
   openSelectModal,
   setStaticItem,
 })
@@ -406,20 +410,20 @@ defineExpose({
   height: 52px !important;
   justify-content: space-between;
   padding-inline: 16px;
-  color: #1e2a44;
-  background: #fcfcfd;
-  border-color: #d8dee8 !important;
+  color: rgb(var(--v-theme-brandNavy));
+  background: rgb(var(--v-theme-grey25));
+  border-color: rgb(var(--v-theme-borderSubtle)) !important;
   border-radius: 12px !important;
   transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .search-filter-control:hover {
-  background: #f7f8fa;
-  border-color: #e8a800 !important;
+  background: rgb(var(--v-theme-surfaceSecondary));
+  border-color: rgb(var(--v-theme-academicGoldHover)) !important;
 }
 
 .search-filter-control:focus-visible {
-  box-shadow: 0 0 0 3px rgb(244 180 0 / 28%);
+  box-shadow: 0 0 0 3px rgba(var(--v-theme-academicGold), 0.28);
 }
 
 .search-filter-icon {
@@ -452,28 +456,6 @@ defineExpose({
   line-height: 1;
 }
 
-.search-filter-svg-icon {
-  width: 100%;
-  height: 100%;
-  background-color: currentColor;
-  mask-position: center;
-  mask-repeat: no-repeat;
-  mask-size: contain;
-}
-
-.search-filter-inline-svg-icon {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: transparent;
-}
-
-.search-filter-inline-svg-icon svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
 .search-filter-icon-padded .v-icon {
   width: 100%;
   height: 100%;
@@ -494,13 +476,13 @@ defineExpose({
 .search-filter-label {
   font-size: 12px;
   font-weight: 500;
-  color: rgb(30 42 68 / 68%);
+  color: rgba(var(--v-theme-brandNavy), 0.68);
 }
 
 .search-filter-empty .search-filter-label {
   font-size: 16px;
   font-weight: 600;
-  color: #1e2a44;
+  color: rgb(var(--v-theme-brandNavy));
 }
 
 .search-filter-value {
@@ -508,7 +490,7 @@ defineExpose({
   overflow: hidden;
   font-size: 14px;
   font-weight: 650;
-  color: #1e2a44;
+  color: rgb(var(--v-theme-brandNavy));
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -526,53 +508,53 @@ defineExpose({
 }
 
 .open-style-btn {
-  background-color: #fcfcfd;
-  border: 1px solid #1e2a44;
+  background-color: rgb(var(--v-theme-grey25));
+  border: 1px solid rgb(var(--v-theme-brandNavy));
 }
 
 .open-style-btn:not(.search-filter-empty) {
-  color: #1e2a44 !important;
-  background-color: #d8dee8 !important;
+  color: rgb(var(--v-theme-brandNavy)) !important;
+  background-color: rgb(var(--v-theme-borderSubtle)) !important;
   border-color: transparent !important;
 }
 
 .open-style-btn:not(.search-filter-empty) .search-filter-label {
-  color: #1e2a44 !important;
+  color: rgb(var(--v-theme-brandNavy)) !important;
 }
 
 .open-style-btn:not(.search-filter-empty) .search-filter-value,
 .open-style-btn:not(.search-filter-empty) .v-icon,
 .open-style-btn:not(.search-filter-empty) .search-filter-content-icon {
-  color: #1e2a44 !important;
+  color: rgb(var(--v-theme-brandNavy)) !important;
 }
 
 .dependent-selected-btn {
-  color: #1e2a44 !important;
-  background-color: #d8dee8 !important;
+  color: rgb(var(--v-theme-brandNavy)) !important;
+  background-color: rgb(var(--v-theme-borderSubtle)) !important;
   border-color: transparent !important;
 }
 
 .dependent-selected-btn .search-filter-label {
-  color: #1e2a44 !important;
+  color: rgb(var(--v-theme-brandNavy)) !important;
 }
 
 .dependent-selected-btn .search-filter-value,
 .dependent-selected-btn .v-icon,
 .dependent-selected-btn .search-filter-content-icon {
-  color: #1e2a44 !important;
+  color: rgb(var(--v-theme-brandNavy)) !important;
 }
 
 .v-btn .search-filter-clear-icon {
-  color: #667085 !important;
+  color: rgb(var(--v-theme-grey500)) !important;
 }
 
 .open-style-btn:not(.search-filter-empty) .search-filter-clear-icon,
 .dependent-selected-btn .search-filter-clear-icon {
-  color: #667085 !important;
+  color: rgb(var(--v-theme-grey500)) !important;
 }
 
 .v-btn .search-filter-clear-icon:hover {
-  color: #c93c37 !important;
+  color: rgb(var(--v-theme-errorStrong)) !important;
 }
 
 .v-btn:has(.search-filter-clear-icon:hover) {
@@ -606,7 +588,7 @@ defineExpose({
   margin-right: 72px;
   font-size: 16px;
   font-weight: 650;
-  color: #1e2a44;
+  color: rgb(var(--v-theme-brandNavy));
 }
 
 .inline-filter-options {
@@ -653,7 +635,7 @@ defineExpose({
 .inline-filter-divider {
   width: 100%;
   margin: 12px 0;
-  border-top: 1px solid #d8dee8;
+  border-top: 1px solid rgb(var(--v-theme-borderSubtle));
 }
 
 .inline-filter-option {
@@ -665,9 +647,9 @@ defineExpose({
   border-radius: 12px !important;
   font-size: 14px;
   line-height: 20px;
-  color: #1e2a44;
-  background: #fcfcfd;
-  border-color: #d8dee8 !important;
+  color: rgb(var(--v-theme-brandNavy));
+  background: rgb(var(--v-theme-grey25));
+  border-color: rgb(var(--v-theme-borderSubtle)) !important;
   transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
@@ -676,10 +658,10 @@ defineExpose({
 }
 
 .inline-filter-option-selected {
-  color: #ffffff !important;
-  background: #1e2a44 !important;
-  border-color: #1e2a44 !important;
-  box-shadow: 0 1px 2px rgb(30 42 68 / 16%);
+  color: rgb(var(--v-theme-white)) !important;
+  background: rgb(var(--v-theme-brandNavy)) !important;
+  border-color: rgb(var(--v-theme-brandNavy)) !important;
+  box-shadow: 0 1px 2px rgba(var(--v-theme-brandNavy), 0.16);
 }
 
 @media only screen and (max-width: 959px) {

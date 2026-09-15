@@ -60,12 +60,12 @@ defineProps({
   gap: 24px;
   padding: 12px 16px;
   margin-top: 0;
-  color: #1e2a44;
+  color: rgb(var(--v-theme-brandNavy));
   text-decoration: none;
-  background: #fcfcfd;
-  border: 1px solid #d8dee8;
+  background: rgb(var(--v-theme-grey25));
+  border: 1px solid rgb(var(--v-theme-borderSubtle));
   border-radius: 12px;
-  box-shadow: 0 1px 2px rgb(30 42 68 / 7%);
+  box-shadow: 0 1px 2px rgba(var(--v-theme-brandNavy), 0.07);
   transition: transform 180ms ease-out, box-shadow 180ms ease-out;
 }
 
@@ -83,21 +83,21 @@ defineProps({
   flex: 0 0 44px;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
-  background: #1e2a44;
+  color: rgb(var(--v-theme-white));
+  background: rgb(var(--v-theme-brandNavy));
   border-radius: 10px;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .subject-directory-card:hover {
     transform: translateY(-1px);
-    border-color: #e8a800;
-    box-shadow: 0 6px 18px rgb(30 42 68 / 12%);
+    border-color: rgb(var(--v-theme-academicGoldHover));
+    box-shadow: 0 6px 18px rgba(var(--v-theme-brandNavy), 0.12);
   }
 }
 
 .subject-directory-card:focus-visible {
-  outline: 3px solid rgb(244 180 0 / 30%);
+  outline: 3px solid rgba(var(--v-theme-academicGold), 0.3);
   outline-offset: 2px;
 }
 
@@ -122,7 +122,7 @@ defineProps({
 
 .subject-directory-card__title {
   overflow: hidden;
-  color: #1e2a44;
+  color: rgb(var(--v-theme-brandNavy));
   font-size: 18px;
   font-weight: 700;
   line-height: 24px;
@@ -131,7 +131,7 @@ defineProps({
 }
 
 .subject-directory-card__subtitle {
-  color: rgb(30 42 68 / 68%);
+  color: rgba(var(--v-theme-brandNavy), 0.68);
   font-size: 14px;
   font-weight: 400;
   line-height: 20px;
@@ -148,18 +148,18 @@ defineProps({
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  color: #1e2a44;
+  color: rgb(var(--v-theme-brandNavy));
   font-size: 14px;
   font-weight: 600;
   line-height: 20px;
-  background: #f4b400;
-  border: 1px solid #f4b400;
+  background: rgb(var(--v-theme-academicGold));
+  border: 1px solid rgb(var(--v-theme-academicGold));
   border-radius: 10px;
 }
 
 .subject-directory-card:hover .subject-directory-card__action {
-  background: #e8a800;
-  border-color: #e8a800;
+  background: rgb(var(--v-theme-academicGoldHover));
+  border-color: rgb(var(--v-theme-academicGoldHover));
 }
 
 @media (max-width: 959px) {

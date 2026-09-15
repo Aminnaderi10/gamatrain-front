@@ -54,13 +54,13 @@
             <v-btn
               class="text-h5 font-weight-bold"
               width="250"
-              color="#F4B400"
+              color="academicGold"
               rounded="pill"
               flat
               variant="tonal"
               @click="createLinkAddConent()"
             >
-              <v-icon color="#1E2A44">
+              <v-icon color="brandNavy">
                 md:add
               </v-icon>
               Publish
@@ -420,10 +420,10 @@ const specialMonths = {
   ],
 }
 const serviceOptions = [
-  { title: 'Past Papers', id: 'paper', contentIcon: 'stat-icon icon-paper', color: '#1E2A44' },
-  { title: 'Study Materials', id: 'study-materials', icon: '/images/study-materials.svg', iconPadding: 3, color: '#1E2A44' },
-  { title: 'Exam Hub', id: 'quizhub', contentIcon: 'stat-icon icon-exam', color: '#1E2A44' },
-  { title: 'Tutorial', id: 'tutorial', contentIcon: 'stat-icon icon-tutorial', color: '#1E2A44' },
+  { title: 'Past Papers', id: 'paper', contentIcon: 'stat-icon icon-paper', color: 'rgb(var(--v-theme-brandNavy))' },
+  { title: 'Study Materials', id: 'study-materials', icon: '/images/study-materials.svg', iconPadding: 3, color: 'rgb(var(--v-theme-brandNavy))' },
+  { title: 'Exam Hub', id: 'quizhub', contentIcon: 'stat-icon icon-exam', color: 'rgb(var(--v-theme-brandNavy))' },
+  { title: 'Tutorial', id: 'tutorial', contentIcon: 'stat-icon icon-tutorial', color: 'rgb(var(--v-theme-brandNavy))' },
 ]
 
 const defaultService = serviceOptions[0]
@@ -551,7 +551,7 @@ const filters = computed(() => {
       fallbackIconSrc: '/images/board-fallback.svg',
       emptyFallbackIconSrc: '/images/board-control-fallback.svg',
       fallbackIconPadding: 4,
-      unselectedIconColor: '#1E2A44',
+      unselectedIconColor: 'rgb(var(--v-theme-brandNavy))',
       queryKey: 'section',
       children: boardChildren,
     }),
@@ -598,7 +598,7 @@ const filters = computed(() => {
       queryKey: 'topic',
       selectedVariant: 'dependent-green',
       controlIcon: 'md:sell_outlined',
-      unselectedIconColor: '#1E2A44',
+      unselectedIconColor: 'rgb(var(--v-theme-brandNavy))',
       controlIconPadding: 4,
     }),
     year: () => makeFilter({
@@ -609,15 +609,8 @@ const filters = computed(() => {
         .map(year => ({ title: `${year}`, id: year })),
       queryKey: 'edu_year',
       selectedVariant: 'dependent-green',
-      controlIconSvg: {
-        viewBox: '0 0 28 28',
-        strokeWidth: 0.6,
-        paths: [
-          'M25.375 28H2.625C1.1725 28 0 26.8275 0 25.375V4.375C0 2.9225 1.1725 1.75 2.625 1.75H25.375C26.8275 1.75 28 2.9225 28 4.375V25.375C28 26.8275 26.8275 28 25.375 28ZM2.625 3.5C2.135 3.5 1.75 3.885 1.75 4.375V25.375C1.75 25.865 2.135 26.25 2.625 26.25H25.375C25.865 26.25 26.25 25.865 26.25 25.375V4.375C26.25 3.885 25.865 3.5 25.375 3.5H2.625Z',
-          'M7.875 7C7.385 7 7 6.615 7 6.125V0.875C7 0.385 7.385 0 7.875 0C8.365 0 8.75 0.385 8.75 0.875V6.125C8.75 6.615 8.365 7 7.875 7ZM20.125 7C19.635 7 19.25 6.615 19.25 6.125V0.875C19.25 0.385 19.635 0 20.125 0C20.615 0 21 0.385 21 0.875V6.125C21 6.615 20.615 7 20.125 7ZM27.125 10.5H0.875C0.385 10.5 0 10.115 0 9.625C0 9.135 0.385 8.75 0.875 8.75H27.125C27.615 8.75 28 9.135 28 9.625C28 10.115 27.615 10.5 27.125 10.5Z',
-        ],
-      },
-      unselectedIconColor: '#1E2A44',
+      controlIconSrc: '/images/year-filter.svg',
+      unselectedIconColor: 'rgb(var(--v-theme-brandNavy))',
       controlIconPadding: 4,
     }),
     session: () => makeFilter({
@@ -978,8 +971,8 @@ onMounted(() => {
 }
 .margin-top-handle {
   min-height: 100vh;
-  color: #1e2a44;
-  background: #fcfcfd;
+  color: rgb(var(--v-theme-brandNavy));
+  background: rgb(var(--v-theme-grey25));
 }
 
 .search-empty-state {
@@ -987,7 +980,7 @@ onMounted(() => {
 }
 
 :deep(.inline-filter-group) {
-  border: 1px solid #d8dee8;
+  border: 1px solid rgb(var(--v-theme-borderSubtle));
   margin-top: 12px;
   padding: 12px 16px;
   max-width: 100%;
@@ -995,8 +988,8 @@ onMounted(() => {
   align-items: stretch;
   gap: 24px;
   border-radius: 12px;
-  background: #fcfcfd;
-  box-shadow: 0 1px 2px rgb(30 42 68 / 7%);
+  background: rgb(var(--v-theme-grey25));
+  box-shadow: 0 1px 2px rgba(var(--v-theme-brandNavy), 0.07);
 }
 
 :deep(.inline-filter-group > .inline-filter-grouped-row) {
@@ -1008,7 +1001,7 @@ onMounted(() => {
 
 :deep(.inline-filter-group > .inline-filter-grouped-row + .inline-filter-grouped-row) {
   padding-left: 24px;
-  border-left: 1px solid #d8dee8;
+  border-left: 1px solid rgb(var(--v-theme-borderSubtle));
 }
 
 :deep(.inline-filter-grouped-row .inline-filter-row-content) {
@@ -1023,8 +1016,8 @@ onMounted(() => {
 
 :deep(.inline-filter-group .inline-filter-option:not(.inline-filter-option-selected):not(:disabled):hover) {
   --v-hover-opacity: 0;
-  border-color: #1e2a44 !important;
-  background-color: #f7f8fa !important;
+  border-color: rgb(var(--v-theme-brandNavy)) !important;
+  background-color: rgb(var(--v-theme-surfaceSecondary)) !important;
 }
 
 @media (max-width: 959px) {
@@ -1036,7 +1029,7 @@ onMounted(() => {
   :deep(.inline-filter-group > .inline-filter-grouped-row + .inline-filter-grouped-row) {
     padding-top: 16px;
     padding-left: 0;
-    border-top: 1px solid #d8dee8;
+    border-top: 1px solid rgb(var(--v-theme-borderSubtle));
     border-left: 0;
   }
 }
@@ -1064,7 +1057,7 @@ onMounted(() => {
   min-width: 0;
   padding-bottom: 6px;
   margin: 0;
-  color: #1e2a44;
+  color: rgb(var(--v-theme-brandNavy));
   font-size: 22px;
   font-weight: 700;
   line-height: 30px;
