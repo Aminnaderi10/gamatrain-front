@@ -142,6 +142,15 @@ const headers: DataTableHeader<CommnetBlogAdminDTO>[] = [
     type: 'actions',
     actions: [
       {
+        icon: 'md:open_in_new',
+        tooltip: 'Open blog post',
+        // postId === 0 means "not tied to a specific post" (a site-level comment) - see the
+        // Post Id column's own note above, same reasoning applies here.
+        show: (item: CommnetBlogAdminDTO) => Boolean(item.postId),
+        href: (item: CommnetBlogAdminDTO) => `/blog/${item.postId}`,
+        target: '_blank',
+      },
+      {
         icon: 'md:settings',
         tooltip: 'More',
         onClick: (item: CommnetBlogAdminDTO) => openModalMoreAction(item),
