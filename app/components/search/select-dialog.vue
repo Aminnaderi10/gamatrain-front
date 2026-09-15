@@ -135,11 +135,11 @@
               :style="item.iconPadding ? { padding: `${item.iconPadding}px` } : undefined"
             >
               <v-img
-                v-if="item.icon && !failedIconIds.has(String(item.id))"
+                v-if="item.icon && !hasIconFailed(getIconSrc(item))"
                 :src="getIconSrc(item)"
                 :alt="item.title"
                 contain
-                @error="markIconFailed(item)"
+                @error="markIconFailed(getIconSrc(item))"
               />
               <span
                 v-else-if="item.contentIcon"
@@ -332,7 +332,7 @@ const emit = defineEmits(['update:showDialog', 'changeSelectedItem'])
 
 // Start Section Search Item In List
 const searchText = ref('')
-const failedIconIds = ref(new Set())
+const { hasIconFailed, markIconFailed } = useIconFallback()
 
 watch(
   () => props.showDialog,
@@ -343,12 +343,6 @@ watch(
 
 const getIconSrc = item => props.iconSrc?.(item) || item.icon
 const getItemTitle = item => props.itemTitle?.(item) || item.title
-const markIconFailed = (item) => {
-  failedIconIds.value = new Set([
-    ...failedIconIds.value,
-    String(item.id),
-  ])
-}
 const filteredItems = computed(() => {
   if (!searchText.value) return props.items
   return props.items.filter(item =>

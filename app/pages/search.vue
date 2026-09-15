@@ -76,6 +76,11 @@
 import ServicesFilterContainer from '~/components/search/ServicesFilterContainer.vue'
 import dayjs from 'dayjs'
 import { useRoute } from 'vue-router'
+import { EDEXCEL_BOARD_CODE } from '@/constants'
+
+definePageMeta({
+  searchExperience: true,
+})
 
 const route = useRoute()
 const router = useRouter()
@@ -636,7 +641,7 @@ const filters = computed(() => {
       inlineOptions: true,
       inlineAllowClear: true,
       inlineItemsPerRow: filterState =>
-        filterState[index.board]?.selectedItem?.title?.trim() === 'Edexcel'
+        Number(filterState[index.board]?.selectedItem?.code) === EDEXCEL_BOARD_CODE
           ? 2
           : 4,
       itemTitle: (item) => {

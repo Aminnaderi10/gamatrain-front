@@ -1,0 +1,1 @@
+export const EDEXCEL_BOARD_CODE = 6657

@@ -81,14 +81,14 @@
       <div
         class="d-flex align-center ga-3 action-button"
         :class="{
-          'search-header-actions': route.path === '/search',
-          'search-header-actions-signed-out': route.path === '/search' && !isAuthenticated,
+          'search-header-actions': isSearchExperience,
+          'search-header-actions-signed-out': isSearchExperience && !isAuthenticated,
         }"
       >
         <div
           id="search-header-keyword"
           class="search-header-keyword d-none d-md-flex"
-          :class="{ 'search-header-keyword-hidden': route.path !== '/search' }"
+          :class="{ 'search-header-keyword-hidden': !isSearchExperience }"
         />
         <v-icon
           :color="menuSetting.linkColor"
@@ -174,6 +174,7 @@ interface MenuSetting {
 
 const route = useRoute()
 const router = useRouter()
+const isSearchExperience = computed(() => route.meta.searchExperience === true)
 const theme = useTheme()
 const { isAuthenticated } = useAuth()
 const { mdAndDown } = useDisplay()

@@ -59,16 +59,11 @@ const props = defineProps({
   },
 })
 
-const selectedIconFailed = ref(false)
-
-watch(
-  () => props.selectedItem?.icon,
-  () => {
-    selectedIconFailed.value = false
-  },
-)
-
 const getIconSrc = item => props.iconSrc?.(item) || item.icon
+const { hasIconFailed, markIconFailed } = useIconFallback()
+const selectedIconSrc = computed(() => props.selectedItem
+  ? getIconSrc(props.selectedItem)
+  : '')
 
 const fallbackImageStyle = computed(() => props.fallbackIconPadding
   ? {
@@ -78,10 +73,10 @@ const fallbackImageStyle = computed(() => props.fallbackIconPadding
   : undefined)
 
 const resolvedIcon = computed(() => {
-  if (props.showItemIcon && props.selectedItem?.icon && !selectedIconFailed.value) {
+  if (props.showItemIcon && props.selectedItem?.icon && !hasIconFailed(selectedIconSrc.value)) {
     return {
       type: 'image',
-      src: getIconSrc(props.selectedItem),
+      src: selectedIconSrc.value,
       alt: props.selectedItem.title,
       className: '',
       style: undefined,
@@ -135,7 +130,7 @@ const resolvedIcon = computed(() => {
 })
 
 const handleImageError = () => {
-  if (resolvedIcon.value.selectedImage) selectedIconFailed.value = true
+  if (resolvedIcon.value.selectedImage) markIconFailed(resolvedIcon.value.src)
 }
 </script>
 

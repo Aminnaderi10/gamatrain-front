@@ -452,7 +452,7 @@
             >
               <div
                 v-for="(entry, inlineIndex) in inlineFilterEntries"
-                :key="`mobile-inline-${entry.filter.title || entry.index}-${getMobileFilterItems(entry.filter).length}`"
+                :key="`mobile-inline-${entry.filter.title || entry.index}-${getMobileFilterItemsSignature(entry.filter)}`"
                 :ref="(element) => setMobileFilterSectionRef(entry.filter, element)"
                 class="mobile-inline-filter-row-wrapper"
               >
@@ -1004,6 +1004,10 @@ const getMobileFilterItems = (filter) => {
   const loadedItems = filter.refElement?.getCurrentItems?.()
   return Array.isArray(loadedItems) ? loadedItems : (filter.staticList || [])
 }
+
+const getMobileFilterItemsSignature = filter => JSON.stringify(
+  getMobileFilterItems(filter).map(item => [item.id, item.title]),
+)
 
 const measureStickyContent = () => {
   if (filterControlsContent.value) {

@@ -204,6 +204,7 @@ import wordCardIcon from '~/assets/images/search-card/word.svg'
 
 const route = useRoute()
 const router = useRouter()
+const { $stripHtmlTags } = useNuxtApp()
 
 const props = defineProps({
   information: {
@@ -230,14 +231,10 @@ const fallbackSubject = computed(() => {
   }
 })
 
-const description = computed(() => String(props.information.description || props.information.summary || '')
-  .replace(/<[^>]*>/g, ' ')
-  .replace(/&amp;/gi, '&')
-  .replace(/&nbsp;/gi, ' ')
-  .replace(/&#39;/gi, "'")
-  .replace(/&quot;/gi, '"')
-  .replace(/\s+/g, ' ')
-  .trim())
+const description = computed(() => $stripHtmlTags(
+  String(props.information.description || props.information.summary || ''),
+  1200,
+))
 
 const qualityScore = computed(() => {
   const score = Number(props.information.referee_score ?? props.information.ref_score ?? 0)

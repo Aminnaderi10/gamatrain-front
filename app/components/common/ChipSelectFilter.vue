@@ -39,7 +39,7 @@
           class="inline-filter-option"
           :class="{
             'inline-filter-option-selected': selectedItem?.id == item.id,
-            'inline-filter-option-multi-digit': isMultiDigitPaperOption(item),
+            'inline-filter-option-multi-digit': isMultiDigitInlineOption(item),
           }"
           :style="inlineGrouped
             ? {
@@ -305,9 +305,8 @@ const items = ref([...props.staticList])
 const isShowSelectModal = ref(false)
 const loading = ref(false)
 const getInlineItemTitle = item => props.itemTitle?.(item) || item.title
-const isMultiDigitPaperOption = item =>
-  props.title === 'Paper'
-  && /^\d{2,}$/.test(String(getInlineItemTitle(item)).trim())
+const isMultiDigitInlineOption = item =>
+  /^\d{2,}$/.test(String(getInlineItemTitle(item)).trim())
 
 const onFilterUpdate = (itemSelected) => {
   isShowSelectModal.value = false

@@ -2,50 +2,49 @@
   <nav
     class="services-navigation"
     aria-label="Search services"
-    role="tablist"
   >
-    <div class="services-navigation__items">
-      <div
+    <v-tabs
+      :model-value="selectedService"
+      class="services-navigation__items"
+      color="inherit"
+      hide-slider
+      @update:model-value="selectService"
+    >
+      <v-tab
         v-for="service in services"
         :key="service.id"
+        :value="service.id"
         class="services-navigation__tab"
-        :class="{ 'services-navigation__tab--active': selectedService === service.id }"
+        :aria-label="service.title"
+        aria-controls="search-service-filters"
       >
-        <v-btn
-          class="services-navigation__item"
-          :class="{ 'services-navigation__item--active': selectedService === service.id }"
-          :aria-pressed="selectedService === service.id"
-          :aria-selected="selectedService === service.id"
-          :aria-label="service.title"
-          aria-controls="search-service-filters"
-          role="tab"
-          variant="outlined"
-          @click="selectService(service.id)"
-        >
-          <span
-            class="services-navigation__icon"
-            aria-hidden="true"
-          >
-            <img
-              v-if="service.image"
-              :src="service.image"
-              alt=""
-            >
+        <span class="services-navigation__item">
+          <span class="services-navigation__content">
             <span
-              v-else
-              :class="service.icon"
-            />
-          </span>
-          <span class="services-navigation__copy">
-            <span class="services-navigation__count">
-              {{ formatCount(service.id) }}
+              class="services-navigation__icon"
+              aria-hidden="true"
+            >
+              <img
+                v-if="service.image"
+                :src="service.image"
+                alt=""
+              >
+              <span
+                v-else
+                :class="service.icon"
+              />
             </span>
-            <span class="services-navigation__title services-navigation__title--full">{{ service.title }}</span>
+            <span class="services-navigation__copy">
+              <span class="services-navigation__count">
+                {{ formatCount(service.id) }}
+              </span>
+              <span class="services-navigation__title services-navigation__title--full">{{ service.title }}</span>
+            </span>
+            <span class="services-navigation__title services-navigation__title--short">{{ service.shortTitle }}</span>
           </span>
-          <span class="services-navigation__title services-navigation__title--short">{{ service.shortTitle }}</span>
-        </v-btn>
-      </div>
-    </div>
+        </span>
+      </v-tab>
+    </v-tabs>
   </nav>
 </template>
 
@@ -72,7 +71,7 @@ watch(
 )
 
 const selectService = (serviceId) => {
-  if (selectedService.value === serviceId) return
+  if (!serviceId || selectedService.value === serviceId) return
 
   selectedService.value = serviceId
   emit('change', serviceId)
@@ -107,22 +106,54 @@ const formatCount = (serviceId) => {
 }
 
 .services-navigation__items {
-  display: flex;
+  --v-tabs-height: 72px;
+
   width: max-content;
-  gap: 8px;
+  height: auto;
+  min-width: 0;
   margin-inline: 0;
 }
 
-.services-navigation__tab {
+.services-navigation__items :deep(.v-slide-group__container) {
+  height: 100%;
+  min-width: 0;
+}
+
+.services-navigation__items :deep(.v-slide-group__content) {
+  width: 100%;
+  min-width: 0;
+  flex: 1 1 auto;
+  align-items: stretch;
+  gap: 8px;
+  transform: none !important;
+  transition: none !important;
+}
+
+.services-navigation__tab.v-tab.v-btn {
   position: relative;
   display: flex;
+  width: 216px;
+  min-width: 0;
+  max-width: none;
+  height: 72px !important;
   flex: 0 0 216px;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 .services-navigation__item {
-  width: 216px;
-  height: 72px !important;
-  flex: 0 0 216px;
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  height: 72px;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: stretch;
   padding: 0 20px;
   border: 0;
   border-radius: 12px 12px 0 0;
@@ -135,25 +166,41 @@ const formatCount = (serviceId) => {
   transition: background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
 }
 
-.services-navigation__item--active {
-  color: rgb(var(--v-theme-white));
-  background-color: rgb(var(--v-theme-brandNavy));
-  box-shadow: inset 0 -3px 0 rgb(var(--v-theme-academicGold));
+.services-navigation__content {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  overflow: hidden;
 }
 
-.services-navigation__item:not(.services-navigation__item--active):hover {
+.services-navigation__tab.v-tab--selected .services-navigation__item {
+  color: rgb(var(--v-theme-white));
+  background-color: rgb(var(--v-theme-brandNavy));
+}
+
+.services-navigation__tab:not(.v-tab--selected):hover .services-navigation__item {
   background: rgb(var(--v-theme-surfaceSecondary));
 }
 
-.services-navigation__item:focus-visible {
+.services-navigation__tab.v-tab.v-btn:focus-visible {
   outline: 3px solid rgba(var(--v-theme-academicGold), 0.3);
   outline-offset: -3px;
 }
 
-.services-navigation__item :deep(.v-btn__content) {
+.services-navigation__tab :deep(.v-btn__overlay),
+.services-navigation__tab :deep(.v-btn__underlay) {
+  opacity: 0;
+}
+
+.services-navigation__tab :deep(.v-btn__content) {
   width: 100%;
-  justify-content: flex-start;
-  gap: 8px;
+  min-width: 0;
+  height: 100%;
 }
 
 .services-navigation__icon {
@@ -212,11 +259,11 @@ const formatCount = (serviceId) => {
   text-indent: 0;
 }
 
-.services-navigation__item--active .services-navigation__icon img {
+.services-navigation__tab.v-tab--selected .services-navigation__icon img {
   filter: brightness(0) invert(1);
 }
 
-.services-navigation__item--active .services-navigation__icon {
+.services-navigation__tab.v-tab--selected .services-navigation__icon {
   color: rgb(var(--v-theme-white));
 }
 
@@ -240,7 +287,7 @@ const formatCount = (serviceId) => {
   line-height: 18px;
 }
 
-.services-navigation__item:not(.services-navigation__item--active) .services-navigation__count {
+.services-navigation__tab:not(.v-tab--selected) .services-navigation__count {
   color: rgba(var(--v-theme-brandNavy), 0.68);
 }
 
@@ -263,27 +310,38 @@ const formatCount = (serviceId) => {
   }
 
   .services-navigation__items {
+    --v-tabs-height: 59px;
+
     width: 100%;
     max-width: none;
+  }
+
+  .services-navigation__items :deep(.v-slide-group__content) {
+    width: 100%;
+    min-width: 0;
     gap: 6px;
   }
 
-  .services-navigation__tab {
+  .services-navigation__tab.v-tab.v-btn {
+    width: auto;
     min-width: 44px;
+    max-width: none;
+    height: 59px !important;
+    flex-basis: 0;
     flex: 1 1 0;
     overflow: hidden;
     transition: flex-grow 360ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  .services-navigation__tab--active {
+  .services-navigation__tab.v-tab.v-btn.v-tab--selected {
     flex-grow: 3;
   }
 
   .services-navigation__item {
     display: flex !important;
     width: 100%;
-    min-width: 44px;
-    height: 59px !important;
+    min-width: 0;
+    height: 59px;
     flex: 1 1 auto;
     align-items: stretch;
     justify-content: stretch;
@@ -296,14 +354,17 @@ const formatCount = (serviceId) => {
       box-shadow 220ms ease;
   }
 
-  .services-navigation__item :deep(.v-btn__content) {
-    position: relative;
+  .services-navigation__tab :deep(.v-btn__content) {
     display: block;
-    width: auto;
+    width: 100%;
     min-width: 0;
-    height: auto;
+    height: 100%;
     flex: 1 1 auto;
     overflow: hidden;
+  }
+
+  .services-navigation__content {
+    display: block;
   }
 
   .services-navigation__icon,
@@ -320,17 +381,17 @@ const formatCount = (serviceId) => {
   .services-navigation__icon {
     position: absolute;
     top: 7px;
-    left: 50%;
+    inset-inline-start: 50%;
     transform: translateX(-50%);
     transition:
-      left 300ms cubic-bezier(0.22, 1, 0.36, 1),
+      inset-inline-start 300ms cubic-bezier(0.22, 1, 0.36, 1),
       transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  .services-navigation__item--active .services-navigation__icon,
-  .services-navigation__item--active .services-navigation__icon img,
-  .services-navigation__item--active .services-navigation__icon > span,
-  .services-navigation__item--active .services-navigation__icon > span::before {
+  .services-navigation__tab.v-tab--selected .services-navigation__icon,
+  .services-navigation__tab.v-tab--selected .services-navigation__icon img,
+  .services-navigation__tab.v-tab--selected .services-navigation__icon > span,
+  .services-navigation__tab.v-tab--selected .services-navigation__icon > span::before {
     width: 24px;
     height: 24px;
     flex-basis: 24px;
@@ -341,7 +402,7 @@ const formatCount = (serviceId) => {
   .services-navigation__copy {
     position: absolute;
     top: 6px;
-    left: 36px;
+    inset-inline-start: 36px;
     width: calc(100% - 36px);
     min-width: 0;
     max-width: 0;
@@ -359,9 +420,8 @@ const formatCount = (serviceId) => {
   .services-navigation__title--short {
     display: block;
     position: absolute;
-    right: 0;
     bottom: 3px;
-    left: 0;
+    inset-inline: 0;
     max-width: 100%;
     overflow: hidden;
     font-size: 11px;
@@ -373,32 +433,34 @@ const formatCount = (serviceId) => {
     transition: opacity 120ms ease;
   }
 
-  .services-navigation__item--active .services-navigation__icon {
-    left: 6px;
-    transform: translateX(0);
+  .services-navigation__tab.v-tab--selected .services-navigation__icon {
+    top: 50%;
+    inset-inline-start: 6px;
+    transform: translateY(-50%);
   }
 
-  .services-navigation__item--active .services-navigation__copy {
+  .services-navigation__tab.v-tab--selected .services-navigation__copy {
+    top: 50%;
     max-width: 150px;
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(-50%);
     transition-delay: 40ms, 70ms, 40ms;
   }
 
-  .services-navigation__item--active .services-navigation__count {
+  .services-navigation__tab.v-tab--selected .services-navigation__count {
     min-height: 14px;
     font-size: 12px;
     line-height: 14px;
   }
 
-  .services-navigation__item--active .services-navigation__title--full {
+  .services-navigation__tab.v-tab--selected .services-navigation__title--full {
     color: rgb(var(--v-theme-white));
     font-size: 14px;
     font-weight: 600;
     line-height: 18px;
   }
 
-  .services-navigation__item--active .services-navigation__title--short {
+  .services-navigation__tab.v-tab--selected .services-navigation__title--short {
     opacity: 0;
   }
 }
@@ -413,9 +475,14 @@ const formatCount = (serviceId) => {
     max-width: 836px;
   }
 
-  .services-navigation__tab {
+  .services-navigation__items :deep(.v-slide-group__content) {
+    width: 100%;
+  }
+
+  .services-navigation__tab.v-tab.v-btn {
     flex: 1 1 0;
     min-width: 0;
+    max-width: none;
   }
 
   .services-navigation__item {
