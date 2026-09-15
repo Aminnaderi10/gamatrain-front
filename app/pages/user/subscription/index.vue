@@ -309,7 +309,7 @@ const formattedExpirationDate = computed(() => {
 })
 
 const showCancelButton = computed(() => {
-  return userSubscription.value?.cancelAtPeriodEnd === false
+  return userSubscription.value?.autoRenews === true && userSubscription.value.cancelAtPeriodEnd === false
 })
 
 const showResumeButton = computed(() => {
