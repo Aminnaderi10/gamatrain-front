@@ -89,7 +89,7 @@
           </div>
         </div>
 
-        <h2 class="card-title text-black font-weight-medium text-truncate">
+        <h2 class="card-title text-black font-weight-medium">
           {{ information?.title }}
         </h2>
         <p
@@ -437,7 +437,7 @@ const openCard = (event) => {
 
 .card-body {
   flex: 1;
-  padding: 16px 16px 8px;
+  padding: 12px 16px;
 }
 
 .min-width-0 { min-width: 0; }
@@ -455,12 +455,19 @@ const openCard = (event) => {
 }
 
 .card-title {
+  display: -webkit-box;
+  height: 44px;
   max-width: 100%;
-  margin: 0 0 12px;
+  overflow: hidden;
+  margin: 0 0 4px;
   color: #1e2a44 !important;
   font-size: 18px;
   font-weight: 650 !important;
-  line-height: 26px;
+  line-height: 22px;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .card-description {
@@ -473,7 +480,7 @@ const openCard = (event) => {
 
 .subject-tags {
   gap: 4px !important;
-  margin-block: 8px;
+  margin-block: 4px;
 }
 
 .tag-chip {
@@ -565,7 +572,12 @@ const openCard = (event) => {
     position: relative;
     z-index: 1;
     margin-left: -74px;
+    padding: 12px 16px;
     background: #fcfcfd;
+  }
+
+  .card-title {
+    font-size: 16px;
   }
 
   .subject-tags {
