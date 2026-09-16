@@ -15,12 +15,14 @@
         <v-btn
           value="status"
           size="small"
+          class="text-h6"
         >
           By Status
         </v-btn>
         <v-btn
           value="kind"
           size="small"
+          class="text-h6"
         >
           By Kind
         </v-btn>
@@ -95,7 +97,7 @@ const OPACITYCOLOR = 0.5
 // switch/Points top-up - new, see docs/business/payments-and-points.md "Payment.Kind" on the
 // backend). Two independent pivots of the same underlying rows, not meant to be stacked together
 // in one bar - hence a toggle rather than adding a fifth+ series alongside the existing three.
-const viewMode = ref<'status' | 'kind'>('status')
+const viewMode = ref<'status' | 'kind'>('kind')
 
 const hexToRgba = (hex: string, opacity: number) => {
   const r = Number.parseInt(hex.slice(1, 3), 16)
