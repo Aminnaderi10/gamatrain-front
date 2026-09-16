@@ -48,20 +48,11 @@
         </v-tooltip>
         {{ score }}
       </div>
-      <div
+      <common-bookmark-button
         v-if="hasSave"
-        class="d-flex flex-column align-center justify-center ga-1 primary-gray-700 cursor-pointer text-no-wrap"
-      >
-        <v-icon color="primary-gray-700">
-          md:bookmark_outlined
-        </v-icon>
-        <v-tooltip
-          activator="parent"
-          location="top"
-        >
-          Bookmark
-        </v-tooltip>
-      </div>
+        :id="id"
+        type="papers"
+      />
       <div
         v-if="hasShare"
         class="d-flex flex-column align-center justify-center ga-1 primary-gray-700 cursor-pointer text-no-wrap"
