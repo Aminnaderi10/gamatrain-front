@@ -158,22 +158,10 @@
         </div>
       </div>
       <div
-        ref="filterControlsShell"
         class="desktop-filter-controls-shell w-100 d-flex justify-center"
-        :style="stickyMode
-          ? { height: `${filterControlsHeight}px` }
-          : undefined"
       >
         <div
-          ref="filterControls"
           class="desktop-filter-controls w-100"
-          :class="{
-            'desktop-filter-controls-fixed': stickyMode,
-            'desktop-filter-controls-collapsed': stickyMode && !stickyFiltersExpanded,
-          }"
-          :style="stickyMode
-            ? { height: stickyFiltersExpanded ? `${filterControlsHeight}px` : '0px' }
-            : undefined"
         >
           <div
             v-if="desktopSidebarLayout"
@@ -192,7 +180,6 @@
             </v-btn>
           </div>
           <div
-            ref="filterControlsContent"
             class="desktop-filter-controls-content w-100 d-flex justify-center flex-wrap"
           >
             <component
@@ -309,29 +296,11 @@
 
       <div
         v-if="!desktopSidebarLayout"
-        ref="persistentContentShell"
         class="persistent-search-content-shell w-100 d-flex justify-center"
-        :style="stickyMode ? { height: `${persistentContentHeight}px` } : undefined"
       >
         <div
-          ref="persistentContent"
           class="persistent-search-content w-100 d-flex justify-center flex-wrap"
-          :class="{ 'persistent-search-content-fixed': stickyMode }"
-          :style="stickyMode
-            ? { top: stickyFiltersExpanded ? `${filterControlsHeight}px` : '0px' }
-            : undefined"
         >
-          <div
-            v-if="stickyMode"
-            class="sticky-filter-trigger-row d-none d-md-flex w-100 max-width-container"
-            :class="{ 'sticky-filter-trigger-row-visible': !stickyFiltersExpanded }"
-          >
-            <CommonFilterTrigger
-              :count="countFilterSelect"
-              @click="expandStickyFilters"
-            />
-          </div>
-
           <slot name="after-inline-filters" />
 
           <v-col
@@ -533,10 +502,6 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  desktopStickyFilters: {
-    type: Boolean,
-    default: false,
-  },
   desktopSidebarLayout: {
     type: Boolean,
     default: false,
@@ -581,38 +546,10 @@ const isCurrentFilterSync = syncVersion =>
 watch(mdAndUp, (isDesktop) => {
   if (isDesktop) dialogFilterMobileModel.value = false
 })
-const filterControlsShell = ref(null)
-const filterControls = ref(null)
-const filterControlsContent = ref(null)
-const persistentContentShell = ref(null)
-const persistentContent = ref(null)
-const stickyMode = ref(false)
-const stickyFiltersExpanded = ref(false)
-const filterControlsHeight = ref(0)
-const persistentContentHeight = ref(0)
-let filterBoundaryObserver = null
-let filterControlsResizeObserver = null
-let persistentContentResizeObserver = null
-let desktopMediaQuery = null
-let scrollDirectionAnchor = 0
-
-const DOWNWARD_COLLAPSE_THRESHOLD = 80
-const UPWARD_BASELINE_RESET_THRESHOLD = 12
 
 onMounted(async () => {
   searchHeaderReady.value = true
-  await fetchDataRequireFilter()
-  await fetchFilterAvailableInQuery()
-  await nextTick()
-  setupDesktopStickyBehavior()
-})
-
-onBeforeUnmount(() => {
-  filterBoundaryObserver?.disconnect()
-  filterControlsResizeObserver?.disconnect()
-  persistentContentResizeObserver?.disconnect()
-  desktopMediaQuery?.removeEventListener('change', handleDesktopBreakpointChange)
-  window.removeEventListener('scroll', handleStickyScroll)
+  await syncFiltersFromQuery()
 })
 
 const updateSelectedItem = async (itemSelected, index) => {
@@ -710,7 +647,7 @@ const resetDescendants = (indexFilter) => {
   }
 }
 
-const filterDataLoadKeys = new WeakMap()
+const filterDataLoads = new WeakMap()
 
 const getFilterDataLoadKey = (filter, parentId = '') => JSON.stringify({
   api: filter.api,
@@ -722,10 +659,23 @@ const loadFilterItems = async (filter, parentId = '') => {
   if (!filter.api || filter.staticList?.length || !filter.refElement) return
 
   const loadKey = getFilterDataLoadKey(filter, parentId)
-  if (filterDataLoadKeys.get(filter) === loadKey) return
+  const existingLoad = filterDataLoads.get(filter)
+  if (existingLoad?.key === loadKey) {
+    await existingLoad.promise
+    return
+  }
 
-  await filter.refElement.getItems(filter.idInParams ? parentId : '')
-  filterDataLoadKeys.set(filter, loadKey)
+  const loadPromise = filter.refElement.getItems(filter.idInParams ? parentId : '')
+  filterDataLoads.set(filter, { key: loadKey, promise: loadPromise })
+
+  try {
+    await loadPromise
+  }
+  catch (error) {
+    if (filterDataLoads.get(filter)?.promise === loadPromise)
+      filterDataLoads.delete(filter)
+    throw error
+  }
 }
 
 const enableReadyChildren = async (indexFilter, syncVersion) => {
@@ -862,28 +812,37 @@ const fetchFilterAvailableInQuery = async (syncVersion) => {
     const filterKey = filter.queryKey == 'section' ? 'code' : 'id'
     // const filterKey = 'id'
 
-    if (filter.defaultValue && !qVal) {
-      filters.value[index].selectedItem = filter.defaultValue
-      await enableReadyChildren(index, syncVersion)
-      if (!isCurrentFilterSync(syncVersion)) return
+    if (!qVal) {
+      if (filter.defaultValue) {
+        filters.value[index].selectedItem = filter.defaultValue
+        await enableReadyChildren(index, syncVersion)
+        if (!isCurrentFilterSync(syncVersion)) return
 
-      const query = { ...route.query }
-      query[filter.queryKey] = filter.defaultValue.id
-      router.replace({ query })
+        const query = { ...route.query }
+        query[filter.queryKey] = filter.defaultValue.id
+        router.replace({ query })
+      }
+      else {
+        filters.value[index].selectedItem = null
+      }
+      continue
     }
-    if (!qVal) continue
 
     const ready = filter.dependencies?.every(
       dep => filters.value[dep.parent].selectedItem,
     )
 
-    if (!ready && filter.dependencies?.length) continue
+    if (!ready && filter.dependencies?.length) {
+      filters.value[index].selectedItem = null
+      continue
+    }
 
     if (filter.staticList?.length) {
       const selected = filter.staticList.find(
         x => String(x[filterKey]) === String(qVal),
       )
-      filters.value[index].selectedItem = selected
+      filters.value[index].selectedItem = selected || null
+      if (!selected) continue
       if (isExclusiveFilterSelected(index)) {
         disableOtherFilters(index)
         continue
@@ -893,17 +852,28 @@ const fetchFilterAvailableInQuery = async (syncVersion) => {
     }
     else {
       const selected = await filter.refElement?.getItemById(qVal, filterKey)
-      if (selected) {
-        filters.value[index].selectedItem = selected
-        if (isExclusiveFilterSelected(index)) {
-          disableOtherFilters(index)
-          continue
-        }
-        await enableReadyChildren(index, syncVersion)
-        if (!isCurrentFilterSync(syncVersion)) return
+      filters.value[index].selectedItem = selected || null
+      if (!selected) continue
+      if (isExclusiveFilterSelected(index)) {
+        disableOtherFilters(index)
+        continue
       }
+      await enableReadyChildren(index, syncVersion)
+      if (!isCurrentFilterSync(syncVersion)) return
     }
   }
+}
+
+const syncFiltersFromQuery = async () => {
+  const syncVersion = ++filterListSyncVersion
+
+  await nextTick()
+  if (!isCurrentFilterSync(syncVersion)) return
+
+  await fetchDataRequireFilter(syncVersion)
+  if (!isCurrentFilterSync(syncVersion)) return
+
+  await fetchFilterAvailableInQuery(syncVersion)
 }
 
 const getFilterIdentity = filter => `${filter.queryKey ?? ''}:${filter.title ?? ''}`
@@ -934,17 +904,9 @@ const reconcileFilterConfiguration = (filterList) => {
 watch(
   () => props.filterList,
   async (filterList) => {
-    const syncVersion = ++filterListSyncVersion
     filters.value = reconcileFilterConfiguration(filterList)
     hasExclusiveDisabledState.value = false
-
-    await nextTick()
-    if (!isCurrentFilterSync(syncVersion)) return
-
-    await fetchDataRequireFilter(syncVersion)
-    if (!isCurrentFilterSync(syncVersion)) return
-
-    await fetchFilterAvailableInQuery(syncVersion)
+    await syncFiltersFromQuery()
   },
   { flush: 'post' },
 )
@@ -1009,131 +971,9 @@ const getMobileFilterItemsSignature = filter => JSON.stringify(
   getMobileFilterItems(filter).map(item => [item.id, item.title]),
 )
 
-const measureStickyContent = () => {
-  if (filterControlsContent.value) {
-    filterControlsHeight.value = filterControlsContent.value.offsetHeight
-  }
-  if (persistentContent.value && !stickyMode.value) {
-    persistentContentHeight.value = persistentContent.value.getBoundingClientRect().height
-  }
-}
-
-const resetStickyMode = () => {
-  stickyMode.value = false
-  stickyFiltersExpanded.value = false
-  scrollDirectionAnchor = window.scrollY
-}
-
-const handleDesktopBreakpointChange = (event) => {
-  filterBoundaryObserver?.disconnect()
-  filterBoundaryObserver = null
-
-  if (!event.matches) {
-    resetStickyMode()
-    return
-  }
-
-  nextTick(() => {
-    measureStickyContent()
-    observeFilterBoundary()
-  })
-}
-
-const setupDesktopStickyBehavior = () => {
-  if (!props.desktopStickyFilters || props.desktopSidebarLayout || !import.meta.client) return
-
-  desktopMediaQuery = window.matchMedia('(min-width: 960px)')
-  desktopMediaQuery.addEventListener('change', handleDesktopBreakpointChange)
-  window.addEventListener('scroll', handleStickyScroll, { passive: true })
-
-  filterControlsResizeObserver = new ResizeObserver(() => {
-    if (filterControlsContent.value) {
-      filterControlsHeight.value = filterControlsContent.value.offsetHeight
-    }
-  })
-  persistentContentResizeObserver = new ResizeObserver(() => {
-    if (persistentContent.value && !stickyMode.value) {
-      persistentContentHeight.value = persistentContent.value.getBoundingClientRect().height
-    }
-  })
-
-  if (filterControlsContent.value) filterControlsResizeObserver.observe(filterControlsContent.value)
-  if (persistentContent.value) persistentContentResizeObserver.observe(persistentContent.value)
-
-  measureStickyContent()
-  scrollDirectionAnchor = window.scrollY
-  if (desktopMediaQuery.matches) observeFilterBoundary()
-}
-
-const observeFilterBoundary = () => {
-  const target = filterControlsShell.value
-  if (!target) return
-
-  filterBoundaryObserver = new IntersectionObserver(([entry]) => {
-    const hasPassedAboveViewport
-      = !entry.isIntersecting && entry.boundingClientRect.bottom <= 0
-
-    if (hasPassedAboveViewport && !stickyMode.value) {
-      stickyFiltersExpanded.value = true
-      stickyMode.value = true
-      scrollDirectionAnchor = window.scrollY
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (stickyMode.value) stickyFiltersExpanded.value = false
-        })
-      })
-    }
-    else if (!hasPassedAboveViewport) {
-      resetStickyMode()
-    }
-  }, { threshold: 0 })
-
-  filterBoundaryObserver.observe(target)
-}
-
-const expandStickyFilters = async () => {
-  measureStickyContent()
-  stickyFiltersExpanded.value = true
-  scrollDirectionAnchor = window.scrollY
-  await nextTick()
-  measureStickyContent()
-}
-
-const handleStickyScroll = () => {
-  if (!stickyMode.value || !stickyFiltersExpanded.value) {
-    scrollDirectionAnchor = window.scrollY
-    return
-  }
-
-  const scrollDelta = window.scrollY - scrollDirectionAnchor
-  if (scrollDelta >= DOWNWARD_COLLAPSE_THRESHOLD) {
-    stickyFiltersExpanded.value = false
-    scrollDirectionAnchor = window.scrollY
-  }
-  else if (scrollDelta <= -UPWARD_BASELINE_RESET_THRESHOLD) {
-    scrollDirectionAnchor = window.scrollY
-  }
-}
-
 watch(
   () => route.query,
-  async (query) => {
-    for (const filter of filters.value) {
-      if (!filter.inlineOptions || !filter.queryKey) continue
-
-      const queryValue = query[filter.queryKey]
-      if (!queryValue) {
-        filter.selectedItem = null
-        continue
-      }
-
-      if (String(filter.selectedItem?.id) === String(queryValue)) continue
-
-      const selected = await filter.refElement?.getItemById(queryValue, 'id')
-      if (selected) filter.selectedItem = selected
-    }
-  },
+  () => syncFiltersFromQuery(),
   { deep: true },
 )
 const inlineFilterEntries = computed(() =>
@@ -1258,18 +1098,6 @@ const clearAllFilter = async () => {
 .persistent-search-content {
   background: rgb(var(--v-theme-grey25));
 }
-.desktop-filter-controls-content {
-  transform-origin: top center;
-}
-.sticky-filter-trigger-row {
-  box-sizing: border-box;
-  height: 0;
-  overflow: hidden;
-  padding: 0;
-  opacity: 0;
-  transform: scale(0.96);
-  transform-origin: top left;
-}
 .inline-filter-group-wrapper {
   display: flex;
   width: 100%;
@@ -1316,53 +1144,6 @@ const clearAllFilter = async () => {
   font-weight: 650;
   letter-spacing: 0;
   text-transform: none;
-}
-
-@media (min-width: 960px) {
-  .desktop-filter-controls-fixed,
-  .persistent-search-content-fixed {
-    position: fixed;
-    z-index: 11;
-    top: 0;
-    left: 0;
-  }
-
-  .desktop-filter-controls-fixed {
-    z-index: 12;
-    overflow: hidden;
-    transition: height 250ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .desktop-filter-controls-fixed .desktop-filter-controls-content {
-    transition:
-      opacity 250ms cubic-bezier(0.16, 1, 0.3, 1),
-      transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .desktop-filter-controls-collapsed .desktop-filter-controls-content {
-    pointer-events: none;
-    opacity: 0;
-    transform: translateY(-8px) scale(0.98);
-  }
-
-  .persistent-search-content-fixed {
-    transition: top 250ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .sticky-filter-trigger-row {
-    transition:
-      height 250ms cubic-bezier(0.16, 1, 0.3, 1),
-      padding 250ms cubic-bezier(0.16, 1, 0.3, 1),
-      opacity 200ms ease-out,
-      transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .sticky-filter-trigger-row-visible {
-    height: 56px;
-    padding: 8px 0;
-    opacity: 1;
-    transform: scale(1);
-  }
 }
 
 @media (min-width: 960px) {

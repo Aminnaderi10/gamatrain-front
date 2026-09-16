@@ -19,7 +19,7 @@
             />
             <v-icon
               v-if="item.iconMd"
-              color="#1E2A44"
+              color="brandNavy"
               size="20"
             >
               {{ item.iconMd }}
@@ -37,7 +37,7 @@
     <div class="info-card w-100 d-flex align-center justify-start">
       <div class="info-card__icon d-flex align-center justify-center">
         <v-icon
-          color="#1E2A44"
+          color="brandNavy"
           size="16"
         >
           md:star
@@ -162,11 +162,11 @@ watch(
   min-height: 132px;
   height: auto !important;
   padding: 16px !important;
-  color: #1e2a44;
-  background: #fff;
-  border: 1px solid #d8dee8;
+  color: rgb(var(--v-theme-brandNavy));
+  background: rgb(var(--v-theme-white));
+  border: 1px solid rgb(var(--v-theme-borderSubtle));
   border-radius: 14px;
-  box-shadow: 0 2px 8px rgb(30 42 68 / 5%);
+  box-shadow: 0 2px 8px rgb(var(--v-theme-brandNavy) / 5%);
   text-decoration: none;
   opacity: 1;
   transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
@@ -186,8 +186,8 @@ watch(
 
 .card-add-option:not(.v-btn--disabled):hover {
   transform: translateY(-2px);
-  border-color: #e8a800;
-  box-shadow: 0 10px 24px rgb(30 42 68 / 12%);
+  border-color: rgb(var(--v-theme-academicGoldHover));
+  box-shadow: 0 10px 24px rgb(var(--v-theme-brandNavy) / 12%);
 }
 
 .card-add-option:not(.v-btn--disabled):active {
@@ -195,14 +195,14 @@ watch(
 }
 
 .card-add-option:focus-visible {
-  outline: 3px solid rgb(244 180 0 / 32%);
+  outline: 3px solid rgb(var(--v-theme-academicGold) / 32%);
   outline-offset: 2px;
 }
 
 .card-add-option.v-btn--active {
-  background: #fff8e1;
-  border-color: #f4b400;
-  box-shadow: 0 0 0 1px #f4b400, 0 8px 20px rgb(30 42 68 / 10%);
+  background: rgb(var(--v-theme-softGold));
+  border-color: rgb(var(--v-theme-academicGold));
+  box-shadow: 0 0 0 1px rgb(var(--v-theme-academicGold)), 0 8px 20px rgb(var(--v-theme-brandNavy) / 10%);
 }
 
 .card-add-option.v-btn--active::after {
@@ -212,11 +212,11 @@ watch(
   display: grid;
   width: 22px;
   height: 22px;
-  color: #1e2a44;
+  color: rgb(var(--v-theme-brandNavy));
   font-size: 14px;
   font-weight: 800;
   content: '\2713';
-  background: #f4b400;
+  background: rgb(var(--v-theme-academicGold));
   border-radius: 50%;
   place-items: center;
 }
@@ -228,16 +228,16 @@ watch(
 
 .card-add-option.v-btn--disabled:hover {
   transform: none;
-  border-color: #d8dee8;
-  box-shadow: 0 2px 8px rgb(30 42 68 / 5%);
+  border-color: rgb(var(--v-theme-borderSubtle));
+  box-shadow: 0 2px 8px rgb(var(--v-theme-brandNavy) / 5%);
 }
 
 .icon-div {
   width: 40px;
   height: 40px;
   flex: 0 0 40px;
-  color: #1e2a44;
-  background: #fff8e1;
+  color: rgb(var(--v-theme-brandNavy));
+  background: rgb(var(--v-theme-softGold));
   border-radius: 10px;
 }
 
@@ -246,7 +246,7 @@ watch(
 }
 
 .card-option-title {
-  color: #1e2a44;
+  color: rgb(var(--v-theme-brandNavy));
   font-size: 15px;
   font-weight: 700;
   line-height: 1.35;
@@ -257,20 +257,20 @@ watch(
   align-items: center;
   min-height: 22px;
   padding: 2px 8px;
-  color: #667085;
+  color: rgb(var(--v-theme-grey500));
   font-size: 11px;
   font-weight: 700;
   line-height: 1.2;
-  background: #f7f8fa;
-  border: 1px solid #d8dee8;
+  background: rgb(var(--v-theme-surfaceSecondary));
+  border: 1px solid rgb(var(--v-theme-borderSubtle));
   border-radius: 999px;
 }
 
 .info-card {
   gap: 12px;
   padding: 14px 16px;
-  background: #f7f8fa;
-  border: 1px solid #d8dee8;
+  background: rgb(var(--v-theme-surfaceSecondary));
+  border: 1px solid rgb(var(--v-theme-borderSubtle));
   border-radius: 14px;
 }
 
@@ -278,7 +278,7 @@ watch(
   width: 36px;
   height: 36px;
   flex: 0 0 36px;
-  background: #fff8e1;
+  background: rgb(var(--v-theme-softGold));
   border-radius: 10px;
 }
 
@@ -287,14 +287,14 @@ watch(
 }
 
 .info-card__title {
-  color: #1e2a44;
+  color: rgb(var(--v-theme-brandNavy));
   font-size: 14px;
   font-weight: 700;
   line-height: 1.35;
 }
 
 .info-card__description {
-  color: #667085;
+  color: rgb(var(--v-theme-grey500));
   font-size: 12px;
   font-weight: 500;
   line-height: 1.45;

@@ -10,7 +10,6 @@
           :loading="isInitialDataLoading"
           has-keyword-search
           keyword-search-in-header
-          desktop-sticky-filters
           desktop-sidebar-layout
           @change-filter="changeFilter"
         >

@@ -92,11 +92,11 @@ const clickOnModal = (event: MouseEvent) => {
   width: 100%;
   max-height: min(90vh, 860px);
   padding: 32px !important;
-  color: #1e2a44;
-  background: #fcfcfd !important;
-  border: 1px solid #d8dee8;
+  color: rgb(var(--v-theme-brandNavy));
+  background: rgb(var(--v-theme-grey25)) !important;
+  border: 1px solid rgb(var(--v-theme-borderSubtle));
   border-radius: 20px !important;
-  box-shadow: 0 24px 64px rgb(30 42 68 / 18%);
+  box-shadow: 0 24px 64px rgb(var(--v-theme-brandNavy) / 18%);
 }
 
 .modal-panel--publish .modal-header {
@@ -105,7 +105,7 @@ const clickOnModal = (event: MouseEvent) => {
 }
 
 .modal-panel--publish .modal-title {
-  color: #1e2a44 !important;
+  color: rgb(var(--v-theme-brandNavy)) !important;
   font-size: clamp(22px, 2.5vw, 28px) !important;
   font-weight: 700 !important;
   line-height: 1.2 !important;
@@ -113,7 +113,7 @@ const clickOnModal = (event: MouseEvent) => {
 
 .modal-panel--publish .modal-header span:not(.modal-title) {
   max-width: 520px;
-  color: #667085 !important;
+  color: rgb(var(--v-theme-grey500)) !important;
   font-size: clamp(13px, 1.6vw, 15px) !important;
   line-height: 1.5 !important;
 }
@@ -123,17 +123,17 @@ const clickOnModal = (event: MouseEvent) => {
   width: 40px;
   height: 40px;
   margin-left: 16px !important;
-  color: #1e2a44 !important;
-  background: #f7f8fa;
-  border: 1px solid #d8dee8;
+  color: rgb(var(--v-theme-brandNavy)) !important;
+  background: rgb(var(--v-theme-surfaceSecondary));
+  border: 1px solid rgb(var(--v-theme-borderSubtle));
   border-radius: 12px;
   cursor: pointer;
   transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
 }
 
 .modal-panel--publish .modal-close--publish:hover {
-  background: #eef1f5;
-  border-color: #b8c1cf;
+  background: rgb(var(--v-theme-surfaceTertiary));
+  border-color: rgb(var(--v-theme-borderStrong));
 }
 
 .modal-panel--publish .modal-close--publish:active {
@@ -141,7 +141,7 @@ const clickOnModal = (event: MouseEvent) => {
 }
 
 .modal-panel--publish .modal-close--publish:focus-visible {
-  outline: 3px solid rgb(244 180 0 / 30%);
+  outline: 3px solid rgb(var(--v-theme-academicGold) / 30%);
   outline-offset: 2px;
 }
 

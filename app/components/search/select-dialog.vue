@@ -55,8 +55,8 @@
           prepend-inner-icon="md:search"
           glow
           variant="outlined"
-          color="#F4B400"
-          icon-color="#1E2A44"
+          color="academicGold"
+          icon-color="brandNavy"
           density="compact"
           rounded="lg"
           hide-details
@@ -65,7 +65,7 @@
           <template #append-inner>
             <v-btn
               class="select-dialog-search-button mr-n2"
-              color="#F4B400"
+              color="academicGold"
               width="64"
               height="32"
               rounded="lg"
@@ -120,7 +120,7 @@
           :key="item.title"
           :value="item.title"
           :active="item.id == selectedItem?.id"
-          color="#1E2A44"
+          color="brandNavy"
           class="select-dialog-item"
           :class="{
             'select-dialog-item--main-topic': titleModal === 'Topic' && item.season,
@@ -155,7 +155,7 @@
               <v-icon
                 v-else
                 size="34"
-                color="#1E2A44"
+                color="brandNavy"
               >{{ fallbackIcon }}</v-icon>
             </span>
             <v-avatar
@@ -186,14 +186,14 @@
         <v-progress-circular
           indeterminate
           :width="3"
-          color="#F4B400"
+          color="academicGold"
         />
       </div>
 
       <v-alert
         v-if="searchText && filteredItems.length === 0 && !isLoading"
         type="info"
-        color="#1E2A44"
+        color="brandNavy"
         density="compact"
         class="select-dialog-empty"
         variant="tonal"
@@ -206,7 +206,7 @@
           searchText.length == 0 && filteredItems.length === 0 && !isLoading
         "
         type="info"
-        color="#1E2A44"
+        color="brandNavy"
         density="compact"
         class="select-dialog-empty"
         variant="tonal"
@@ -220,6 +220,8 @@
 <script setup>
 import { useDisplay } from 'vuetify'
 import { ref, computed, defineComponent, h } from 'vue'
+
+const escapeRegExp = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 // HighlightedText component for safe text highlighting
 const HighlightedText = defineComponent({
@@ -237,7 +239,7 @@ const HighlightedText = defineComponent({
     const parts = computed(() => {
       if (!props.searchText) return [{ text: props.text, highlight: false }]
 
-      const regex = new RegExp(`(${props.searchText})`, 'gi')
+      const regex = new RegExp(`(${escapeRegExp(props.searchText)})`, 'gi')
       const segments = props.text.split(regex)
 
       return segments.map(segment => ({
@@ -254,7 +256,7 @@ const HighlightedText = defineComponent({
             'span',
             {
               style: part.highlight
-                ? 'background-color: #FFF8E1; color: #1E2A44;'
+                ? 'background-color: rgb(var(--v-theme-softGold)); color: rgb(var(--v-theme-brandNavy));'
                 : '',
             },
             part.text,
@@ -353,11 +355,6 @@ const filteredResultLabel = computed(() => {
   if (filteredItems.value.length === 0) return 'No Result'
   return filteredItems.value.length === 1 ? 'Result' : 'Results'
 })
-const _highlightSearchText = (text) => {
-  if (!searchText.value) return text
-  const regex = new RegExp(`(${searchText.value})`, 'gi')
-  return text.replace(regex, '<mark>$1</mark>')
-}
 // End Section Search Item In List
 
 // Start Section Handle Status Modal
@@ -390,11 +387,11 @@ const clickOnModal = (event) => {
 .select-dialog-panel {
   max-height: min(82vh, 680px);
   overflow: hidden;
-  color: #1e2a44;
-  background: #fcfcfd !important;
-  border: 1px solid #d8dee8;
+  color: rgb(var(--v-theme-brandNavy));
+  background: rgb(var(--v-theme-grey25)) !important;
+  border: 1px solid rgb(var(--v-theme-borderSubtle));
   border-radius: 16px;
-  box-shadow: 0 20px 48px rgb(30 42 68 / 16%);
+  box-shadow: 0 20px 48px rgb(var(--v-theme-brandNavy) / 16%);
 }
 
 .select-dialog-header {
@@ -403,7 +400,7 @@ const clickOnModal = (event) => {
   align-items: center;
   padding: 16px 20px;
   margin: 0 !important;
-  border-bottom: 1px solid #d8dee8;
+  border-bottom: 1px solid rgb(var(--v-theme-borderSubtle));
 }
 
 .select-dialog-header > .v-col {
@@ -411,7 +408,7 @@ const clickOnModal = (event) => {
 }
 
 .select-dialog-title {
-  color: #1e2a44;
+  color: rgb(var(--v-theme-brandNavy));
   font-size: 18px;
   font-weight: 700;
   line-height: 24px;
@@ -426,7 +423,7 @@ const clickOnModal = (event) => {
   align-items: center;
   justify-content: center;
   margin-left: 8px !important;
-  color: #667085;
+  color: rgb(var(--v-theme-grey500));
   background: transparent;
   border: 1px solid transparent;
   border-radius: 8px;
@@ -439,9 +436,9 @@ const clickOnModal = (event) => {
 }
 
 .select-dialog-close:hover {
-  color: #c93c37;
-  background: #f7f8fa;
-  border-color: #d8dee8;
+  color: rgb(var(--v-theme-errorStrong));
+  background: rgb(var(--v-theme-surfaceSecondary));
+  border-color: rgb(var(--v-theme-borderSubtle));
 }
 
 .select-dialog-close:active {
@@ -449,7 +446,7 @@ const clickOnModal = (event) => {
 }
 
 .select-dialog-close:focus-visible {
-  outline: 3px solid rgb(244 180 0 / 28%);
+  outline: 3px solid rgb(var(--v-theme-academicGold) / 28%);
   outline-offset: 2px;
 }
 
@@ -461,14 +458,14 @@ const clickOnModal = (event) => {
 }
 
 .select-dialog-result-count__number {
-  color: #1e2a44;
+  color: rgb(var(--v-theme-brandNavy));
   font-size: 16px;
   font-weight: 700;
   line-height: 20px;
 }
 
 .select-dialog-result-count__label {
-  color: #667085;
+  color: rgb(var(--v-theme-grey500));
   font-size: 12px;
   font-weight: 500;
   line-height: 18px;
@@ -486,30 +483,30 @@ const clickOnModal = (event) => {
 
 .select-dialog-search :deep(.v-field) {
   min-height: 44px;
-  color: #1e2a44;
-  background: #ffffff;
+  color: rgb(var(--v-theme-brandNavy));
+  background: rgb(var(--v-theme-white));
   border-radius: 12px !important;
   box-shadow: none;
 }
 
 .select-dialog-search :deep(.v-field__outline) {
-  color: #d8dee8;
+  color: rgb(var(--v-theme-borderSubtle));
   --v-field-border-opacity: 1;
 }
 
 .select-dialog-search :deep(.v-field.v-field--focused .v-field__outline) {
-  color: #f4b400;
+  color: rgb(var(--v-theme-academicGold));
 }
 
 .select-dialog-search :deep(.v-field__prepend-inner),
 .select-dialog-search :deep(.v-field__input),
 .select-dialog-search :deep(.v-label) {
-  color: #1e2a44;
+  color: rgb(var(--v-theme-brandNavy));
 }
 
 .select-dialog-search-button {
-  color: #1e2a44 !important;
-  background: #f4b400 !important;
+  color: rgb(var(--v-theme-brandNavy)) !important;
+  background: rgb(var(--v-theme-academicGold)) !important;
   font-size: 12px;
   font-weight: 650;
   letter-spacing: 0;
@@ -518,7 +515,7 @@ const clickOnModal = (event) => {
 }
 
 .select-dialog-search-button:hover {
-  background: #e8a800 !important;
+  background: rgb(var(--v-theme-academicGoldHover)) !important;
 }
 
 .select-dialog-list {
@@ -544,7 +541,7 @@ const clickOnModal = (event) => {
   min-height: 48px;
   padding: 6px 12px;
   margin: 0;
-  color: #1e2a44;
+  color: rgb(var(--v-theme-brandNavy));
   background: transparent;
   border: 1px solid transparent;
   border-radius: 12px;
@@ -556,19 +553,19 @@ const clickOnModal = (event) => {
 }
 
 .select-dialog-list :deep(.select-dialog-item:hover) {
-  background: #f7f8fa;
-  border-color: #d8dee8;
+  background: rgb(var(--v-theme-surfaceSecondary));
+  border-color: rgb(var(--v-theme-borderSubtle));
 }
 
 .select-dialog-list :deep(.select-dialog-item.v-list-item--active) {
-  color: #1e2a44 !important;
-  background: #eef1f5 !important;
-  border-color: #d8dee8;
-  box-shadow: 0 1px 2px rgb(30 42 68 / 8%);
+  color: rgb(var(--v-theme-brandNavy)) !important;
+  background: rgb(var(--v-theme-surfaceTertiary)) !important;
+  border-color: rgb(var(--v-theme-borderSubtle));
+  box-shadow: 0 1px 2px rgb(var(--v-theme-brandNavy) / 8%);
 }
 
 .select-dialog-list :deep(.select-dialog-item:not(:last-child)) {
-  border-bottom: 1px solid #eef1f5;
+  border-bottom: 1px solid rgb(var(--v-theme-surfaceTertiary));
 }
 
 .select-dialog-list :deep(.select-dialog-item .v-list-item__overlay) {
@@ -607,9 +604,9 @@ const clickOnModal = (event) => {
 
 .select-dialog-empty {
   margin: 8px 20px 20px;
-  color: #1e2a44;
-  background: #f7f8fa !important;
-  border: 1px solid #d8dee8;
+  color: rgb(var(--v-theme-brandNavy));
+  background: rgb(var(--v-theme-surfaceSecondary)) !important;
+  border: 1px solid rgb(var(--v-theme-borderSubtle));
   border-radius: 12px;
 }
 

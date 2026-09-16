@@ -233,7 +233,7 @@ const blackMenuSetting: MenuSetting = {
 const whiteMenuSetting: MenuSetting = {
   logo: 'gamatrain-logo-black.svg',
   bgColor: theme.current.value.colors['white']!,
-  boxShadow: '0px 1px 10px 0px #424A5340',
+  boxShadow: '0px 1px 10px 0px rgba(var(--v-theme-shadowNeutral), 0.25)',
   linkColor: theme.current.value.colors['grey800']!,
 }
 const menuSetting = ref<MenuSetting>(whiteMenuSetting)
