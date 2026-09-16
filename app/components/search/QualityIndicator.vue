@@ -52,6 +52,6 @@ const sizeStyle = computed(() => ({
   justify-content: center;
 }
 
-path { fill: #d0d5dd; }
-path.filled { fill: #ffb600; }
+path { fill: rgb(var(--v-theme-grey300)); }
+path.filled { fill: rgb(var(--v-theme-academicGold)); }
 </style>

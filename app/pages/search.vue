@@ -153,6 +153,7 @@ const buildSearchParams = (query, page, perpage) => {
   const params = {
     page,
     perpage,
+    noTypesStats: 1,
     title: query.title,
     section: query.section,
     base: query.base,
@@ -436,32 +437,65 @@ const activeServiceColor = computed(() =>
   (serviceOptions.find(service => service.id === activeService.value) || defaultService).color,
 )
 
+const buildTypeStatsParams = (query, isPaper) => ({
+  title: query.title,
+  section: query.section,
+  base: query.base,
+  lesson: query.lesson,
+  topic: query.topic,
+  test_type: query.test_type,
+  variant: query.variant,
+  exam_type: query.exam_type,
+  content_type: query.content_type,
+  edu_year: query.edu_year,
+  edu_month: query.edu_month,
+  is_paper: isPaper,
+})
+
+const getTypesStatsData = result =>
+  result.status === 'fulfilled'
+    ? result.value?.data?.types_stats ?? result.value?.data
+    : null
+
+const getStatsCount = (stats, ...keys) => {
+  const value = keys
+    .map(key => stats?.[key])
+    .find(candidate => candidate !== undefined && candidate !== null)
+  const count = Number.parseInt(value, 10)
+  return Number.isFinite(count) ? count : 0
+}
+
 const refreshServiceResultCounts = async (query) => {
   const requestId = ++serviceCountRequestId
-  const selectedService = getEquivalentNewType(query.type)
-  const responses = await Promise.allSettled(
-    serviceOptions.map(async (service) => {
-      const serviceQuery = { ...query, type: service.id }
-      if (
-        service.id !== selectedService
-        && (service.id === 'paper' || service.id === 'study-materials')
-      ) {
-        delete serviceQuery.test_type
-      }
-
-      const params = buildSearchParams(serviceQuery, 1, 1)
-      const response = await useApiService.get('/api/v1/search', params, { public: true })
-      return [service.id, Number.parseInt(response.data?.num) || 0]
-    }),
-  )
+  const [paperResult, studyMaterialsResult] = await Promise.allSettled([
+    useApiService.get(
+      '/api/v1/search/typesstats',
+      buildTypeStatsParams(query, 1),
+      { public: true },
+    ),
+    useApiService.get(
+      '/api/v1/search/typesstats',
+      buildTypeStatsParams(query, 0),
+      { public: true },
+    ),
+  ])
 
   if (requestId !== serviceCountRequestId) return
 
-  const counts = Object.fromEntries(
-    responses
-      .filter(result => result.status === 'fulfilled')
-      .map(result => result.value),
-  )
+  const paperStats = getTypesStatsData(paperResult)
+  const studyMaterialsStats = getTypesStatsData(studyMaterialsResult)
+  const sharedStats = paperStats || studyMaterialsStats
+  const counts = {}
+
+  if (paperStats)
+    counts.paper = getStatsCount(paperStats, 'papers')
+  if (studyMaterialsStats)
+    counts['study-materials'] = getStatsCount(studyMaterialsStats, 'papers')
+  if (sharedStats) {
+    counts.quizhub = getStatsCount(sharedStats, 'exams', 'azmoon')
+    counts.tutorial = getStatsCount(sharedStats, 'tutorials', 'dars')
+  }
+
   serviceResultCounts.value = {
     ...serviceResultCounts.value,
     ...counts,
@@ -697,7 +731,7 @@ const scrollToPageTop = async () => {
   await new Promise(resolve => requestAnimationFrame(resolve))
 }
 
-const changeFilter = async (query, titles, context = {}) => {
+const changeFilter = async (query, titles) => {
   if (titles !== undefined) {
     appliedFilterTitles.value = {
       query: { ...query },
@@ -711,9 +745,7 @@ const changeFilter = async (query, titles, context = {}) => {
   firstLoadedPageNumber.value = 1
   latestLoadedPageNumber.value = 1
   querySearch.value = { ...query, page: 1 }
-  const countsRequest = context.serviceChange
-    ? null
-    : refreshServiceResultCounts(query)
+  const countsRequest = refreshServiceResultCounts(query)
   await scrollToPageTop()
   const responseList = await getDataList()
   data.value = responseList
