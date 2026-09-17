@@ -14,7 +14,7 @@
       :icon="resolvedIcon.icon"
       :class="resolvedIcon.className"
       :style="resolvedIcon.style"
-      size="28"
+      :size="resolvedIcon.size || 28"
     />
   </span>
 </template>
@@ -37,23 +37,11 @@ const props = defineProps({
     type: String,
     default: 'md:school',
   },
-  fallbackIconSrc: {
-    type: String,
-    default: '',
-  },
-  emptyFallbackIconSrc: {
-    type: String,
-    default: '',
-  },
   fallbackIconPadding: {
     type: Number,
     default: 0,
   },
   controlIcon: {
-    type: String,
-    default: '',
-  },
-  controlIconSrc: {
     type: String,
     default: '',
   },
@@ -65,12 +53,7 @@ const selectedIconSrc = computed(() => props.selectedItem
   ? getIconSrc(props.selectedItem)
   : '')
 
-const fallbackImageStyle = computed(() => props.fallbackIconPadding
-  ? {
-      width: `${28 - (props.fallbackIconPadding * 2)}px`,
-      height: `${28 - (props.fallbackIconPadding * 2)}px`,
-    }
-  : undefined)
+const fallbackIconSize = computed(() => 28 - (props.fallbackIconPadding * 2))
 
 const resolvedIcon = computed(() => {
   if (props.showItemIcon && props.selectedItem?.icon && !hasIconFailed(selectedIconSrc.value)) {
@@ -94,37 +77,12 @@ const resolvedIcon = computed(() => {
     }
   }
 
-  if (props.controlIconSrc) {
-    return {
-      type: 'image',
-      src: props.controlIconSrc,
-      alt: '',
-      className: '',
-      style: undefined,
-      selectedImage: false,
-    }
-  }
-
-  const fallbackImageSrc = !props.selectedItem && props.emptyFallbackIconSrc
-    ? props.emptyFallbackIconSrc
-    : props.fallbackIconSrc
-
-  if (fallbackImageSrc) {
-    return {
-      type: 'image',
-      src: fallbackImageSrc,
-      alt: '',
-      className: 'search-filter-fallback-image',
-      style: fallbackImageStyle.value,
-      selectedImage: false,
-    }
-  }
-
   return {
     type: 'icon',
     icon: props.controlIcon || props.fallbackIcon,
-    className: '',
+    className: 'filter-control-material-icon',
     style: undefined,
+    size: props.controlIcon ? 28 : fallbackIconSize.value,
     selectedImage: false,
   }
 })
@@ -137,5 +95,10 @@ const handleImageError = () => {
 <style scoped>
 .filter-control-icon-content {
   display: contents;
+}
+
+.filter-control-material-icon {
+  color: rgb(var(--v-theme-brandNavy));
+  background: transparent !important;
 }
 </style>

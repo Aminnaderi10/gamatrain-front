@@ -67,7 +67,7 @@
       { 'dependent-selected-btn': selectedItem && selectedVariant === 'dependent-green' },
       { 'search-filter-empty': !selectedItem },
       { 'search-filter-control': boxed },
-      { 'search-filter-has-icon': showItemIcon || controlIcon || controlIconSrc },
+      { 'search-filter-has-icon': showItemIcon || controlIcon },
     ]"
     variant="outlined"
     :rounded="boxed ? 'lg' : 'xl'"
@@ -78,7 +78,7 @@
     @click="isShowSelectModal = !isShowSelectModal"
   >
     <span
-      v-if="showItemIcon || controlIcon || controlIconSrc"
+      v-if="showItemIcon || controlIcon"
       class="search-filter-icon mr-2"
       :class="{ 'search-filter-icon-padded': controlIconPadding }"
       :style="[
@@ -95,11 +95,8 @@
         :show-item-icon="showItemIcon"
         :icon-src="iconSrc"
         :fallback-icon="fallbackIcon"
-        :fallback-icon-src="fallbackIconSrc"
-        :empty-fallback-icon-src="emptyFallbackIconSrc"
         :fallback-icon-padding="fallbackIconPadding"
         :control-icon="controlIcon"
-        :control-icon-src="controlIconSrc"
       />
     </span>
     <span
@@ -150,7 +147,6 @@
     :show-item-icon="showItemIcon"
     :icon-src="iconSrc"
     :fallback-icon="fallbackIcon"
-    :fallback-icon-src="fallbackIconSrc"
     :inline-options="inlineOptions"
     :inline-allow-clear="inlineAllowClear"
     :inline-items-per-row="inlineItemsPerRow"
@@ -229,14 +225,6 @@ const props = defineProps({
     type: String,
     default: 'md:school',
   },
-  fallbackIconSrc: {
-    type: String,
-    default: '',
-  },
-  emptyFallbackIconSrc: {
-    type: String,
-    default: '',
-  },
   fallbackIconPadding: {
     type: Number,
     default: 0,
@@ -254,10 +242,6 @@ const props = defineProps({
     default: '',
   },
   controlIcon: {
-    type: String,
-    default: '',
-  },
-  controlIconSrc: {
     type: String,
     default: '',
   },
@@ -440,11 +424,6 @@ defineExpose({
   height: 100%;
 }
 
-.search-filter-fallback-image {
-  display: block;
-  object-fit: contain;
-}
-
 .search-filter-content-icon {
   display: inline-flex;
   width: 28px;
@@ -460,8 +439,6 @@ defineExpose({
   height: 100%;
   min-width: 0;
   font-size: 20px !important;
-  -webkit-text-stroke: 0.6px currentColor;
-  paint-order: stroke fill;
 }
 
 .search-filter-copy {

@@ -128,11 +128,8 @@
                   :show-item-icon="entry.filter.showItemIcon"
                   :icon-src="entry.filter.iconSrc"
                   :fallback-icon="entry.filter.fallbackIcon"
-                  :fallback-icon-src="entry.filter.fallbackIconSrc"
-                  :empty-fallback-icon-src="entry.filter.emptyFallbackIconSrc"
                   :fallback-icon-padding="entry.filter.fallbackIconPadding"
                   :control-icon="entry.filter.controlIcon"
-                  :control-icon-src="entry.filter.controlIconSrc"
                 />
               </span>
 
@@ -212,14 +209,11 @@
                     :show-item-icon="filter.showItemIcon"
                     :icon-src="filter.iconSrc"
                     :fallback-icon="filter.fallbackIcon"
-                    :fallback-icon-src="filter.fallbackIconSrc"
-                    :empty-fallback-icon-src="filter.emptyFallbackIconSrc"
                     :fallback-icon-padding="filter.fallbackIconPadding"
                     :boxed="filter.boxed"
                     :show-clear="Boolean(filterContainer && filter.closable && !filter.defaultValue)"
                     :selected-variant="filter.selectedVariant"
                     :control-icon="filter.controlIcon"
-                    :control-icon-src="filter.controlIconSrc"
                     :unselected-icon-color="filter.unselectedIconColor"
                     :control-icon-padding="filter.controlIconPadding"
                     :inline-options="filter.inlineOptions"
@@ -396,14 +390,11 @@
                     :show-item-icon="filter.showItemIcon"
                     :icon-src="filter.iconSrc"
                     :fallback-icon="filter.fallbackIcon"
-                    :fallback-icon-src="filter.fallbackIconSrc"
-                    :empty-fallback-icon-src="filter.emptyFallbackIconSrc"
                     :fallback-icon-padding="filter.fallbackIconPadding"
                     :boxed="filter.boxed"
                     :show-clear="Boolean(filter.closable && !filter.defaultValue)"
                     :selected-variant="filter.selectedVariant"
                     :control-icon="filter.controlIcon"
-                    :control-icon-src="filter.controlIconSrc"
                     :unselected-icon-color="filter.unselectedIconColor"
                     :control-icon-padding="filter.controlIconPadding"
                     :item-title="filter.itemTitle"
@@ -943,8 +934,7 @@ const setMobileFilterSectionRef = (filter, element) => {
 
 const hasFilterIcon = filter => Boolean(
   filter.showItemIcon
-  || filter.controlIcon
-  || filter.controlIconSrc,
+  || filter.controlIcon,
 )
 
 const getQuickFilterValue = (filter) => {
@@ -1632,12 +1622,6 @@ const clearAllFilter = async () => {
     min-width: 20px;
     font-size: 20px !important;
     line-height: 20px;
-  }
-
-  .mobile-quick-filter__icon :deep(.search-filter-fallback-image) {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
   }
 
   .mobile-quick-filter__copy {

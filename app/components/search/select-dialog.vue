@@ -146,14 +146,9 @@
                 :class="`${item.contentIcon} select-item-content-icon`"
                 :style="{ color: item.color }"
               />
-              <v-img
-                v-else-if="fallbackIconSrc"
-                :src="fallbackIconSrc"
-                alt=""
-                contain
-              />
               <v-icon
                 v-else
+                class="select-item-material-icon"
                 size="34"
                 color="brandNavy"
               >{{ fallbackIcon }}</v-icon>
@@ -308,10 +303,6 @@ const props = defineProps({
     type: String,
     default: 'md:school',
   },
-  fallbackIconSrc: {
-    type: String,
-    default: '',
-  },
   inlineOptions: {
     type: Boolean,
     default: false,
@@ -448,6 +439,10 @@ const clickOnModal = (event) => {
 .select-dialog-close:focus-visible {
   outline: 3px solid rgb(var(--v-theme-academicGold) / 28%);
   outline-offset: 2px;
+}
+
+.select-item-material-icon {
+  background: transparent !important;
 }
 
 .select-dialog-result-count {

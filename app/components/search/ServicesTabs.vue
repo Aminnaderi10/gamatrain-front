@@ -24,13 +24,7 @@
               class="services-navigation__icon"
               aria-hidden="true"
             >
-              <img
-                v-if="service.image"
-                :src="service.image"
-                alt=""
-              >
               <span
-                v-else
                 :class="service.icon"
               />
             </span>
@@ -79,7 +73,7 @@ const selectService = (serviceId) => {
 
 const services = [
   { id: 'paper', title: 'Past Papers', shortTitle: 'Papers', icon: 'stat-icon icon-paper' },
-  { id: 'study-materials', title: 'Study Materials', shortTitle: 'Study', image: '/images/study-materials.svg' },
+  { id: 'study-materials', title: 'Study Materials', shortTitle: 'Study', icon: 'stat-icon icon-study-materials' },
   { id: 'quizhub', title: 'Exam Hub', shortTitle: 'Exam', icon: 'stat-icon icon-exam' },
   { id: 'tutorial', title: 'Tutorial', shortTitle: 'Tutorial', icon: 'stat-icon icon-tutorial' },
 ]
@@ -221,14 +215,6 @@ const formatCount = (serviceId) => {
   color: rgb(var(--v-theme-brandNavy));
 }
 
-.services-navigation__icon img {
-  box-sizing: border-box;
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  object-fit: contain;
-}
-
 .services-navigation__icon > span {
   box-sizing: border-box;
   display: inline-flex;
@@ -259,16 +245,8 @@ const formatCount = (serviceId) => {
   text-indent: 0;
 }
 
-.services-navigation__tab.v-tab--selected .services-navigation__icon img {
-  filter: brightness(0) invert(1);
-}
-
 .services-navigation__tab.v-tab--selected .services-navigation__icon {
   color: rgb(var(--v-theme-white));
-}
-
-.services-navigation__icon img {
-  filter: brightness(0) saturate(100%) invert(12%) sepia(7%) saturate(1051%) hue-rotate(169deg) brightness(93%) contrast(90%);
 }
 
 .services-navigation__copy {
@@ -368,7 +346,6 @@ const formatCount = (serviceId) => {
   }
 
   .services-navigation__icon,
-  .services-navigation__icon img,
   .services-navigation__icon > span,
   .services-navigation__icon > span::before {
     width: 22px;
@@ -389,7 +366,6 @@ const formatCount = (serviceId) => {
   }
 
   .services-navigation__tab.v-tab--selected .services-navigation__icon,
-  .services-navigation__tab.v-tab--selected .services-navigation__icon img,
   .services-navigation__tab.v-tab--selected .services-navigation__icon > span,
   .services-navigation__tab.v-tab--selected .services-navigation__icon > span::before {
     width: 24px;

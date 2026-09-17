@@ -55,35 +55,53 @@
               class="indicator indicator-library"
               title="Resource available"
             >
-              <img :src="libraryCheckIcon" alt="" class="status-icon">
+              <v-icon
+                icon="md:library_add_check"
+                class="status-icon status-icon-library"
+                color="greenLight500"
+                size="16"
+                aria-hidden="true"
+              />
             </span>
             <span
               v-if="information.is_paper && information.q_file"
               class="indicator indicator-solved-paper"
               title="Solved paper availability"
             >
-              <img :src="solvedPaperIcon" alt="" class="status-icon">
+              <v-icon
+                icon="md:lightbulb_2_outlined"
+                class="status-icon status-icon-solved-paper"
+                color="academicGold"
+                size="16"
+                aria-hidden="true"
+              />
             </span>
             <span
               v-if="hasPdfAvailable"
               class="indicator indicator-pdf"
               title="PDF availability"
             >
-              <img :src="pdfCardIcon" alt="" class="status-icon">
+              <span class="status-icon status-icon-pdf icon-pdf" aria-hidden="true" />
             </span>
             <span
               v-if="information.is_paper && information.a_file"
               class="indicator indicator-mark-scheme"
               title="Mark scheme availability"
             >
-              <img :src="markSchemeIcon" alt="" class="status-icon">
+              <v-icon
+                icon="md:check_box_outlined"
+                class="status-icon status-icon-mark-scheme"
+                color="teal500"
+                size="16"
+                aria-hidden="true"
+              />
             </span>
             <span
               v-if="!information.is_paper && information.q_file_word"
               class="indicator indicator-word"
               title="Word file availability"
             >
-              <img :src="wordCardIcon" alt="" class="status-icon">
+              <span class="status-icon status-icon-word icon-word" aria-hidden="true" />
             </span>
             <span v-if="isFeaturedResource" class="indicator indicator-fire" title="Featured resource">
               <img :src="fireCardIcon" alt="" class="status-icon">
@@ -199,11 +217,6 @@ import { useRoute } from 'vue-router'
 import DifficultyIndicator from './DifficultyIndicator.vue'
 import QualityIndicator from './QualityIndicator.vue'
 import fireCardIcon from '~/assets/images/search-card/fire.svg'
-import libraryCheckIcon from '~/assets/images/search-card/library-check.svg'
-import markSchemeIcon from '~/assets/images/search-card/mark-scheme.svg'
-import pdfCardIcon from '~/assets/images/search-card/pdf.svg'
-import solvedPaperIcon from '~/assets/images/search-card/solved-paper.svg'
-import wordCardIcon from '~/assets/images/search-card/word.svg'
 
 const route = useRoute()
 const { $stripHtmlTags } = useNuxtApp()
@@ -552,15 +565,54 @@ const createLinkCard = (information) => {
   justify-content: center;
 }
 
-.indicator-solved-paper {
-  width: 16px;
-  height: 16px;
-}
-
 .status-icon {
   display: block;
   width: 100%;
   height: 100%;
+}
+
+.status-icon-library {
+  background: transparent;
+  -webkit-text-stroke: 0;
+}
+
+.status-icon-mark-scheme {
+  background: transparent;
+  -webkit-text-stroke: 0;
+}
+
+.status-icon-solved-paper {
+  background: transparent;
+  -webkit-text-stroke: 0;
+}
+
+.indicator-pdf,
+.indicator-word {
+  background: rgb(var(--v-theme-grey50));
+}
+
+.indicator-pdf {
+  border-radius: 50%;
+}
+
+.indicator-word {
+  border-radius: 4px;
+}
+
+.status-icon-pdf,
+.status-icon-word {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.status-icon-pdf {
+  color: rgb(var(--v-theme-lightError));
+}
+
+.status-icon-word {
+  color: rgb(var(--v-theme-blue500));
 }
 
 .indicator-muted { opacity: 0.32; }
