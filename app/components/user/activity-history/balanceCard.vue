@@ -4,7 +4,7 @@
       class="text-h5 font-weight-regular text-grey400 cursor-pointer"
       @click="toggleBalanceVisibility"
     >
-      Main balance
+      {{ commission ? 'Total commission' : 'Main balance' }}
       <v-icon
         color="grey400"
         size="14"
@@ -13,7 +13,7 @@
     </span>
 
     <div
-      v-if="isLoading"
+      v-if="isLoading || (commission && loadingCommission)"
       class="d-flex align-center my-3"
     >
       <v-skeleton-loader
@@ -35,6 +35,23 @@
       />
     </div>
     <div
+      v-else-if="commission"
+      class="d-flex flex-column align-center my-3"
+    >
+      <div class="d-flex align-end">
+        <span class="text-h6 font-weight-semibold text-success mr-1">$</span>
+        <span class="text-h3 font-weight-bold text-white">{{ $numberFormat(commission.totalAmountUsd) }}</span>
+      </div>
+      <v-chip
+        color="success"
+        variant="tonal"
+        size="small"
+        class="font-weight-bold text-h6 mt-1"
+      >
+        {{ $numberFormat(commission.totalPoints) }} pts
+      </v-chip>
+    </div>
+    <div
       v-else
       class="d-flex align-end position-relative my-3"
     >
@@ -45,28 +62,6 @@
         src="@/assets/images/wallet/wallet-amount.png"
         alt="Wallet Amount"
       >
-    </div>
-
-    <div
-      v-if="commission"
-      class="w-100 d-flex align-center justify-space-between px-4 mb-2"
-    >
-      <span class="text-h6 font-weight-regular text-grey400">Commission</span>
-      <v-skeleton-loader
-        v-if="loadingCommission"
-        width="90"
-        height="22"
-        class="rounded-lg"
-      />
-      <v-chip
-        v-else
-        color="success"
-        variant="tonal"
-        size="small"
-        class="font-weight-bold text-h6"
-      >
-        ${{ $numberFormat(commission.totalAmountUsd) }} · {{ $numberFormat(commission.totalPoints) }} pts
-      </v-chip>
     </div>
 
     <div class="d-flex align-center justify-center">
@@ -155,7 +150,7 @@ onMounted(() => {
 .main-balance-card-div{
    background-image: url("@/assets/images/wallet/wallet-background.png");
    background-size: 100% 100%;
-   min-height: 190px;
+   height: 190px;
    max-width : 340px;
    border-radius: 16px;
 }
