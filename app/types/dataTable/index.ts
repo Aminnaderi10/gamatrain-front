@@ -7,6 +7,7 @@ export type DataTableCellType
     | 'number'
     | 'currency'
     | 'percent'
+    | 'index'
 
 type DataTableActionValue = string | boolean | undefined
 type DataTableItemResolver<TItem, TValue extends DataTableActionValue> = TValue | ((item: TItem) => TValue)

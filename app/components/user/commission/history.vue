@@ -59,8 +59,8 @@ const {
 } = useCommission()
 
 const headers: DataTableHeader<UserCommissionDTO>[] = [
+  { title: '#', key: 'rowIndex', sortable: false, width: '4vw', type: 'index' },
   { title: 'ID', key: 'id', sortable: false, width: '8vw', align: 'start', type: 'link', getTo: (item: UserCommissionDTO) => createLink(item), target: '_blank' },
-  { title: 'Downloader ID', key: 'downloaderUserId', sortable: false, width: '14vw', emptyText: 'unknown' },
   {
     title: 'Reason',
     key: 'reason',

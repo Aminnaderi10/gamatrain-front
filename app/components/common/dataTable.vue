@@ -58,6 +58,12 @@
             v-bind="slotProps"
           />
           <div
+            v-else-if="header.type === 'index'"
+            :class="getCellClass(header)"
+          >
+            {{ getRowIndex(slotProps.index) }}
+          </div>
+          <div
             v-else-if="header.type === 'chip'"
             class="w-100 d-flex justify-center align-center"
           >
@@ -296,6 +302,10 @@ const getChipColor = (item: TItem, header: TableHeader) => {
 
 const getLinkTo = (item: TItem, header: TableHeader) => {
   return header.getTo?.(item) || '#'
+}
+
+const getRowIndex = (index: number) => {
+  return (props.page - 1) * props.pageSize + index + 1
 }
 
 function resolveActionValue<TValue extends ActionValue>(item: TItem, value?: ItemResolver<TValue>) {
