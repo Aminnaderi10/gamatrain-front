@@ -36,20 +36,10 @@
     </div>
     <div
       v-else-if="commission"
-      class="d-flex flex-column align-center my-3"
+      class="d-flex align-end my-3"
     >
-      <div class="d-flex align-end">
-        <span class="text-h6 font-weight-semibold text-success mr-1">$</span>
-        <span class="text-h3 font-weight-bold text-white">{{ $numberFormat(commission.totalAmountUsd) }}</span>
-      </div>
-      <v-chip
-        color="success"
-        variant="tonal"
-        size="small"
-        class="font-weight-bold text-h6 mt-1"
-      >
-        {{ $numberFormat(commission.totalPoints) }} pts
-      </v-chip>
+      <span class="text-h6 font-weight-semibold text-success mr-1">$</span>
+      <span class="text-h3 font-weight-bold text-white">{{ $numberFormat(commission.totalAmountUsd) }}</span>
     </div>
     <div
       v-else
@@ -65,26 +55,29 @@
     </div>
 
     <div class="d-flex align-center justify-center">
-      <div
-        class="d-flex flex-column align-center justify-center ga-1 opacity-60"
-      >
-        <v-icon
-          color="grey400"
-          size="20"
+      <template v-if="!commission">
+        <div
+          class="d-flex flex-column align-center justify-center ga-1 opacity-60"
         >
-          md:upload
-        </v-icon>
-        <span class="text-h6 font-weight-regular text-primary">Top up</span>
-      </div>
-      <v-divider
-        :thickness="3"
-        color="grey900"
-        vertical
-        class="mx-3"
-      />
+          <v-icon
+            color="grey400"
+            size="20"
+          >
+            md:upload
+          </v-icon>
+          <span class="text-h6 font-weight-regular text-primary">Top up</span>
+        </div>
+        <v-divider
+          :thickness="3"
+          color="grey900"
+          vertical
+          class="mx-3"
+        />
+      </template>
       <div
         class="d-flex flex-column align-center justify-center ga-1"
-        @click="showWithdrawModal = true"
+        :class="{ 'opacity-60': commission }"
+        @click="commission ? undefined : (showWithdrawModal = true)"
       >
         <v-icon
           color="grey400"
@@ -123,7 +116,7 @@
 import { ref, onMounted } from 'vue'
 
 interface IBalanceCard {
-  commission?: { totalAmountUsd: number, totalPoints: number } | null
+  commission?: { totalAmountUsd: number } | null
   loadingCommission?: boolean
 }
 

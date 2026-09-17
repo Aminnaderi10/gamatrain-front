@@ -18,7 +18,7 @@
     <div class="w-100 d-flex flex-column flex-md-row ga-2 mt-4">
       <div class="container-chart w-100 bg-grey100 rounded-lg pa-2 d-flex flex-column flex-sm-row flex-md-column align-center justify-space-between ga-2">
         <user-activity-history-balance-card
-          :commission="{ totalAmountUsd: statistics.totalAmountUsd, totalPoints: statistics.totalPoints }"
+          :commission="{ totalAmountUsd: statistics.totalAmountUsd }"
           :loading-commission="loadingGetStatistics"
         />
         <user-commission-chart
