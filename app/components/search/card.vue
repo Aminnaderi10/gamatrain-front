@@ -259,7 +259,13 @@ const isFeaturedResource = computed(() =>
 const formattedDate = computed(() => {
   if (!props.information.subdate) return ''
   const date = new Date(props.information.subdate)
-  return Number.isNaN(date.getTime()) ? props.information.subdate : date.toLocaleDateString()
+  return Number.isNaN(date.getTime())
+    ? props.information.subdate
+    : date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      })
 })
 
 const hasAnswersAtEndOfFiles = ref(false)

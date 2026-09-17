@@ -512,8 +512,12 @@ const headerSearchActive = computed(() => props.keywordSearchInHeader && searchH
 const emits = defineEmits(['changeFilter'])
 const slots = useSlots()
 
-const getActiveFilterCount = query => Object.keys(query).filter(
-  key => !(slots['services-navigation'] && key === 'type'),
+const getActiveFilterCount = query => filters.value.filter(filter =>
+  filter.queryKey
+  && query[filter.queryKey] !== undefined
+  && query[filter.queryKey] !== null
+  && query[filter.queryKey] !== ''
+  && !(slots['services-navigation'] && filter.queryKey === 'type'),
 ).length
 
 const createFilterState = filterList =>
@@ -762,23 +766,29 @@ const clearFilter = (index) => {
 }
 
 const updateQueryFromFilters = async () => {
-  const query = {}
+  const query = { ...route.query }
+  const filterQuery = {}
   const titles = {}
 
   filters.value.forEach((f) => {
+    if (f.queryKey) delete query[f.queryKey]
+
     // Due to the update to version 2 of the backend for the board, this f.title != 'Board' has been placed.
     // if (f.queryKey && f.selectedItem?.code && f.title != 'Board') {
     if (f.queryKey && f.selectedItem?.code) {
-      query[f.queryKey] = f.selectedItem.code
+      filterQuery[f.queryKey] = f.selectedItem.code
       titles[f.queryKey] = f.selectedItem.title
     }
     else if (f.queryKey && f.selectedItem?.id) {
-      query[f.queryKey] = f.selectedItem.id
+      filterQuery[f.queryKey] = f.selectedItem.id
       titles[f.queryKey] = f.selectedItem.title
     }
   })
 
-  countFilterSelect.value = getActiveFilterCount(query)
+  delete query.page
+  Object.assign(query, filterQuery)
+
+  countFilterSelect.value = getActiveFilterCount(filterQuery)
   router.replace({ query })
   emits('changeFilter', query, titles, { serviceChange: pendingServiceChange })
 }
