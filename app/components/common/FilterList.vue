@@ -36,7 +36,7 @@
       :class="{ 'header-search-teleport-source': keywordSearchInHeader }"
     >
       <Teleport
-        :to="headerSearchActive ? '#search-header-keyword' : null"
+        :to="headerSearchActive ? keywordSearchTarget : null"
         :disabled="!headerSearchActive"
       >
       <v-text-field
@@ -493,6 +493,10 @@ const props = defineProps({
   keywordSearchInHeader: {
     type: Boolean,
     default: false,
+  },
+  keywordSearchTarget: {
+    type: String,
+    default: '#search-header-keyword',
   },
   loading: {
     type: Boolean,
@@ -1164,7 +1168,7 @@ const clearAllFilter = async () => {
     max-width: 1232px;
     height: auto;
     min-height: 100%;
-    grid-template-rows: 48px auto;
+    grid-template-rows: 64px auto;
     align-content: start;
     margin: 0 auto;
     overflow: visible;
@@ -1174,8 +1178,8 @@ const clearAllFilter = async () => {
   .search-workspace-heading {
     width: 100%;
     min-width: 0;
-    min-height: 48px;
-    align-items: center;
+    min-height: 64px;
+    align-items: flex-end;
     padding: 0 4px;
     background: transparent;
   }
@@ -1420,7 +1424,6 @@ const clearAllFilter = async () => {
     padding: 12px;
     overflow: visible;
     background: transparent;
-    border: 1px solid rgb(var(--v-theme-borderSubtle));
     border-radius: 12px;
     box-shadow: 0 1px 2px rgba(var(--v-theme-brandNavy), 0.07);
   }

@@ -10,6 +10,7 @@
           :loading="isInitialDataLoading"
           has-keyword-search
           keyword-search-in-header
+          keyword-search-target="#search-workspace-keyword"
           desktop-sidebar-layout
           @change-filter="changeFilter"
         >
@@ -26,10 +27,14 @@
             </div>
           </template>
           <template #results-heading>
-            <div class="search-results-heading w-100 d-flex flex-wrap align-center justify-space-between ga-4">
+            <div class="search-results-heading w-100 d-flex align-end justify-space-between ga-4">
               <h1 class="search-results-title">
-              {{ metadata.title }}
+                {{ metadata.title }}
               </h1>
+              <div
+                id="search-workspace-keyword"
+                class="search-workspace-keyword d-none d-md-flex"
+              />
             </div>
           </template>
           <search-list
@@ -1089,6 +1094,15 @@ onMounted(() => {
   padding: 12px 0 8px;
   margin: 0;
 }
+.search-workspace-keyword {
+  width: 330px;
+  min-width: 330px;
+  align-self: stretch;
+  align-items: center;
+}
+.search-workspace-keyword :deep(.v-field:not(.v-field--focused) .v-field__outline) {
+  color: rgb(var(--v-theme-grey400));
+}
 .search-results-title {
   min-width: 0;
   padding-bottom: 6px;
@@ -1114,7 +1128,7 @@ onMounted(() => {
     max-width: none !important;
     height: auto;
     min-height: calc(100dvh - 64px);
-    padding: 16px 24px;
+    padding: 8px 24px;
     overflow: visible;
   }
 
@@ -1129,7 +1143,9 @@ onMounted(() => {
   }
 
   .search-results-heading {
-    padding: 6px 0;
+    min-height: 64px;
+    padding: 0 0 6px;
+    align-items: flex-end !important;
   }
 }
 
