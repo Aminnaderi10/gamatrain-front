@@ -8,15 +8,15 @@ export type DataTableCellType
     | 'currency'
     | 'percent'
 
-type DataTableActionValue = string | boolean
+type DataTableActionValue = string | boolean | undefined
 type DataTableItemResolver<TItem, TValue extends DataTableActionValue> = TValue | ((item: TItem) => TValue)
 
 export interface DataTableAction<TItem> {
   icon: string
   tooltip?: string
   color?: string
-  to?: DataTableItemResolver<TItem, string>
-  href?: DataTableItemResolver<TItem, string>
+  to?: DataTableItemResolver<TItem, string | undefined>
+  href?: DataTableItemResolver<TItem, string | undefined>
   target?: string
   show?: DataTableItemResolver<TItem, boolean>
   disabled?: DataTableItemResolver<TItem, boolean>
@@ -38,7 +38,7 @@ export interface DataTableHeader<TItem extends object = Record<string, unknown>>
   align?: 'start' | 'center' | 'end'
   target?: string
   getText?: (item: TItem) => string | number
-  getTo?: (item: TItem) => string
+  getTo?: (item: TItem) => string | undefined
   getChipColor?: (item: TItem) => string
   actions?: DataTableAction<TItem>[]
 }

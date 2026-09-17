@@ -47,6 +47,28 @@
       >
     </div>
 
+    <div
+      v-if="commission"
+      class="w-100 d-flex align-center justify-space-between px-4 mb-2"
+    >
+      <span class="text-h6 font-weight-regular text-grey400">Commission</span>
+      <v-skeleton-loader
+        v-if="loadingCommission"
+        width="90"
+        height="22"
+        class="rounded-lg"
+      />
+      <v-chip
+        v-else
+        color="success"
+        variant="tonal"
+        size="small"
+        class="font-weight-bold text-h6"
+      >
+        ${{ $numberFormat(commission.totalAmountUsd) }} · {{ $numberFormat(commission.totalPoints) }} pts
+      </v-chip>
+    </div>
+
     <div class="d-flex align-center justify-center">
       <div
         class="d-flex flex-column align-center justify-center ga-1 opacity-60"
@@ -65,8 +87,6 @@
         vertical
         class="mx-3"
       />
-      <!-- Temporarily disable this area. To enable it again, add this event to the div -->
-      <!-- @click="showWithdrawModal = true" -->
       <div
         class="d-flex flex-column align-center justify-center ga-1"
         @click="showWithdrawModal = true"
@@ -107,6 +127,16 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
+interface IBalanceCard {
+  commission?: { totalAmountUsd: number, totalPoints: number } | null
+  loadingCommission?: boolean
+}
+
+withDefaults(defineProps<IBalanceCard>(), {
+  commission: null,
+  loadingCommission: false,
+})
+
 const { $numberFormat } = useNuxtApp()
 const { balance, isLoading, fetchBalance } = useCoinBalance()
 const showBalance = ref(true)
@@ -125,7 +155,7 @@ onMounted(() => {
 .main-balance-card-div{
    background-image: url("@/assets/images/wallet/wallet-background.png");
    background-size: 100% 100%;
-   height: 190px;
+   min-height: 190px;
    max-width : 340px;
    border-radius: 16px;
 }

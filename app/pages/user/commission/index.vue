@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex flex-column w-100">
     <common-gombo-box
-      v-model="filters.period"
+      v-model="period"
       label="Period"
       :items="periodOptions"
       rounded="pill"
@@ -14,41 +14,13 @@
       :has-search="false"
       @update:model-value="filterChange"
     />
-    <div class="w-100 w-sm-33 bg-grey100 rounded-lg pa-3 d-flex flex-column ga-2 mt-4">
-      <div class="w-100 d-flex align-center justify-space-between">
-        <span class="text-h6 font-weight-bold text-grey700">Commission balance</span>
-        <v-chip
-          color="success"
-          variant="tonal"
-          size="small"
-          class="font-weight-bold text-h6"
-        >
-          {{ $numberFormat(statistics.totalPoints) }} pts
-        </v-chip>
-      </div>
-
-      <div
-        v-if="loadingGetStatistics"
-        class="d-flex align-center"
-      >
-        <v-skeleton-loader
-          width="160"
-          height="28"
-          class="rounded-lg"
-        />
-      </div>
-      <div
-        v-else
-        class="d-flex align-end"
-      >
-        <span class="text-h5 font-weight-bold text-success mr-1">$</span>
-        <span class="text-h4 font-weight-bold text-success">{{ $numberFormat(statistics.totalAmountUsd) }}</span>
-      </div>
-    </div>
 
     <div class="w-100 d-flex flex-column flex-md-row ga-2 mt-4">
       <div class="container-chart w-100 bg-grey100 rounded-lg pa-2 d-flex flex-column flex-sm-row flex-md-column align-center justify-space-between ga-2">
-        <user-activity-history-balance-card />
+        <user-activity-history-balance-card
+          :commission="{ totalAmountUsd: statistics.totalAmountUsd, totalPoints: statistics.totalPoints }"
+          :loading-commission="loadingGetStatistics"
+        />
         <user-commission-chart
           v-if="!xs || isShowChart"
           :items="statistics.statistics"
@@ -83,7 +55,6 @@ useHead({
 })
 
 const { xs } = useDisplay()
-const { $numberFormat } = useNuxtApp()
 const {
   statistics,
   getStatistics,
@@ -96,22 +67,14 @@ const periodOptions = [
   { id: 'MonthOfYear', title: 'Month' },
 ]
 
-const filters = reactive<{
-  period: CommissionStatisticsPeriod
-  startDate: string
-  endDate: string
-}>({
-  period: 'MonthOfYear',
-  startDate: '',
-  endDate: '',
-})
+const period = ref<CommissionStatisticsPeriod>('MonthOfYear')
 
 const fetchStatistics = async () => {
-  await getStatistics(filters)
+  await getStatistics({ period: period.value, startDate: '', endDate: '' })
 }
 
-const filterChange = async (period: CommissionStatisticsPeriod) => {
-  filters.period = period
+const filterChange = async (newPeriod: CommissionStatisticsPeriod) => {
+  period.value = newPeriod
   await fetchStatistics()
 }
 

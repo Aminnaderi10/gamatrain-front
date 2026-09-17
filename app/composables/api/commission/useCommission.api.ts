@@ -15,7 +15,7 @@ export const useCommission = () => {
 
   const data = ref<UserCommissionDTO[]>([])
   const loadingGetData = ref(true)
-  const loadingGetStatistics = ref(false)
+  const loadingGetStatistics = ref(true)
   const totalCount = ref(0)
   const pageCount = ref(0)
   const statistics = ref<CommissionStatisticsResponseDTO>({
