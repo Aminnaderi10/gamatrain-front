@@ -38,7 +38,7 @@
       v-else-if="commission"
       class="d-flex align-end my-3"
     >
-      <span class="text-h6 font-weight-semibold text-success mr-1">$</span>
+      <span class="text-h6 font-weight-semibold text-primary mr-1">$</span>
       <span class="text-h3 font-weight-bold text-white">{{ $numberFormat(commission.totalAmountUsd) }}</span>
     </div>
     <div
