@@ -33,10 +33,10 @@
   height: 174px;
   max-width: 1200px;
   padding: 0;
-  border: 1px solid #dcdde5;
+  border: 1px solid rgb(var(--v-theme-borderSkeleton));
   border-radius: 16px !important;
-  background: #ffffff;
-  box-shadow: 0 1px 2px rgb(36 41 47 / 8%);
+  background: rgb(var(--v-theme-white));
+  box-shadow: 0 1px 2px rgb(var(--v-theme-grey900) / 8%);
 }
 
 .skeleton-cover {

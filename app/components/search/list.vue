@@ -18,7 +18,7 @@
         class="text-h5 font-weight-bold"
         height="36"
         variant="outlined"
-        color="#F4B400"
+        color="academicGold"
         rounded="xl"
         @click="loadPreviousPage"
       >

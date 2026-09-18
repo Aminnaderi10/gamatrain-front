@@ -26,7 +26,7 @@
 .services-filter-container :deep(.search-filter-control.dependent-selected-btn),
 .services-filter-container :deep(.search-filter-control.open-style-btn:not(.search-filter-empty):hover),
 .services-filter-container :deep(.search-filter-control.dependent-selected-btn:hover) {
-  background-color: #eef1f5 !important;
+  background-color: rgb(var(--v-theme-surfaceTertiary)) !important;
   border-color: transparent !important;
 }
 </style>

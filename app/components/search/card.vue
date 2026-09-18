@@ -185,7 +185,7 @@
             {{ information.tests_num }}
           </span>
           <span v-if="information.views" class="metadata-item">
-            <v-icon size="12" color="#1E2A44">md:visibility_outlined</v-icon>
+            <v-icon size="12" color="brandNavy">md:visibility_outlined</v-icon>
             {{ information.views }}
           </span>
           <span
@@ -196,7 +196,7 @@
             {{ information.reply_num }}
           </span>
           <span class="metadata-item">
-            <v-icon size="12" color="#1E2A44">md:calendar_month_outlined</v-icon>
+            <v-icon size="12" color="brandNavy">md:calendar_month_outlined</v-icon>
             {{ formattedDate }}
           </span>
         </div>
@@ -368,16 +368,16 @@ const createLinkCard = (information) => {
   height: 174px;
   max-width: 1200px;
   cursor: pointer;
-  border: 1px solid #d8dee8;
+  border: 1px solid rgb(var(--v-theme-borderSubtle));
   border-radius: 16px !important;
-  background: #fcfcfd;
-  box-shadow: 0 1px 2px rgb(30 42 68 / 7%);
+  background: rgb(var(--v-theme-grey25));
+  box-shadow: 0 1px 2px rgb(var(--v-theme-brandNavy) / 7%);
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
 .card-search:hover {
-  border-color: #d8dee8;
-  box-shadow: 0 6px 18px rgb(30 42 68 / 12%);
+  border-color: rgb(var(--v-theme-borderSubtle));
+  box-shadow: 0 6px 18px rgb(var(--v-theme-brandNavy) / 12%);
   transform: translateY(-2px);
 }
 
@@ -391,7 +391,7 @@ const createLinkCard = (information) => {
 }
 
 .card-primary-link:focus-visible {
-  outline: 3px solid rgb(244 180 0 / 34%);
+  outline: 3px solid rgb(var(--v-theme-academicGold) / 34%);
   outline-offset: -3px;
 }
 
@@ -423,7 +423,7 @@ const createLinkCard = (information) => {
   aspect-ratio: 63 / 74;
   overflow: hidden;
   border-radius: 15px 0 0 15px;
-  background: #fff8e1;
+  background: rgb(var(--v-theme-softGold));
 }
 
 .cover-image,
@@ -434,7 +434,7 @@ const createLinkCard = (information) => {
 
 .cover-fallback {
   padding: 12px;
-  background: #eef1f5;
+  background: rgb(var(--v-theme-surfaceTertiary));
   color: rgb(var(--v-theme-grey600));
 }
 
@@ -445,13 +445,13 @@ const createLinkCard = (information) => {
 
 .min-width-0 { min-width: 0; }
 
-.publisher-avatar { border: 1px solid #d8dee8; }
+.publisher-avatar { border: 1px solid rgb(var(--v-theme-borderSubtle)); }
 
 .card-top { margin-bottom: 8px; }
 
 .publisher-name {
   max-width: 260px;
-  color: rgb(30 42 68 / 68%);
+  color: rgb(var(--v-theme-brandNavy) / 68%);
   font-size: 13px;
   font-weight: 600;
   line-height: 18px;
@@ -463,7 +463,7 @@ const createLinkCard = (information) => {
   max-width: 100%;
   overflow: hidden;
   margin: 0 0 4px;
-  color: #1e2a44 !important;
+  color: rgb(var(--v-theme-brandNavy)) !important;
   font-size: 18px;
   font-weight: 650 !important;
   line-height: 22px;
@@ -476,7 +476,7 @@ const createLinkCard = (information) => {
 .card-description {
   max-width: 100%;
   margin: 0;
-  color: rgb(30 42 68 / 68%) !important;
+  color: rgb(var(--v-theme-brandNavy) / 68%) !important;
   font-size: 13px;
   line-height: 20px;
 }
@@ -491,17 +491,17 @@ const createLinkCard = (information) => {
   z-index: 2;
   height: 24px;
   padding: 4px 8px !important;
-  color: rgb(30 42 68 / 68%) !important;
-  background: #f7f8fa !important;
-  border: 1px solid #eef1f5;
+  color: rgb(var(--v-theme-brandNavy) / 68%) !important;
+  background: rgb(var(--v-theme-surfaceSecondary)) !important;
+  border: 1px solid rgb(var(--v-theme-surfaceTertiary));
   border-radius: 6px !important;
   font-size: 11px;
   line-height: 16px;
 }
 
 .tag-chip:hover {
-  background: #eef1f5 !important;
-  border-color: #d8dee8;
+  background: rgb(var(--v-theme-surfaceTertiary)) !important;
+  border-color: rgb(var(--v-theme-borderSubtle));
 }
 
 .tag-chip :deep(.v-chip__content) {
@@ -512,7 +512,7 @@ const createLinkCard = (information) => {
   gap: 12px !important;
   min-height: 18px;
   padding-top: 0;
-  color: rgb(30 42 68 / 68%);
+  color: rgb(var(--v-theme-brandNavy) / 68%);
   font-size: 12px;
   line-height: 18px;
 }
@@ -625,7 +625,7 @@ const createLinkCard = (information) => {
     position: relative;
     margin-left: -74px;
     padding: 12px 16px;
-    background: #fcfcfd;
+    background: rgb(var(--v-theme-grey25));
   }
 
   .card-title {
