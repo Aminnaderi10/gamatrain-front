@@ -136,6 +136,13 @@ const categories = ref([
     icon: 'icon-paper',
   },
   {
+    type: 'study-materials',
+    key: 'study-materials',
+    stat: '--',
+    title: 'Study Materials',
+    icon: 'icon-study-materials',
+  },
+  {
     type: 'quizhub',
     key: 'exams',
     stat: '--',
@@ -148,20 +155,6 @@ const categories = ref([
     stat: '--',
     title: 'Tutorial',
     icon: 'icon-tutorial',
-  },
-  {
-    type: 'forum',
-    key: 'questions',
-    stat: '--',
-    title: 'Forum',
-    icon: 'icon-q-a',
-  },
-  {
-    type: 'multimedia',
-    key: 'files',
-    stat: '--',
-    title: 'Multimedia',
-    icon: 'icon-multimedia',
   },
   {
     type: 'school',
@@ -178,6 +171,7 @@ const gradeLoader = ref(false)
 const selectedBoard = ref(null)
 const selectedGrade = ref(null)
 const showBoardHint = ref(false)
+let categoryCountRequestId = 0
 
 const categoryLink = (category) => {
   return category.type === 'school' ? `/school` : `/search?type=${category.type}&section=${selectedBoard.value?.code}&base=${selectedGrade.value}`
@@ -236,33 +230,43 @@ const fetchCategoryCounts = async () => {
       return
     }
 
-    const params = new URLSearchParams()
-    params.append('type', 'test')
-    params.append('perpage', '1')
-    params.append('section', selectedBoard.value.code)
-    params.append('base', selectedGrade.value)
-    const requestUrl = `/api/v1/search?${params.toString()}`
-    const response = await useApiService.get(requestUrl, undefined, { public: true })
-    if (
-      response
-      && response.status === 1
-      && response.data
-      && response.data.types_stats
-    ) {
-      categories.value.find((cat, _i) => cat.key == 'papers').stat
-        = parseInt(response.data.types_stats.papers) || 0
+    const requestId = ++categoryCountRequestId
+    const buildParams = isPaper => ({
+      section: selectedBoard.value.code,
+      base: selectedGrade.value,
+      is_paper: isPaper,
+    })
+    const [paperResult, studyMaterialsResult] = await Promise.allSettled([
+      useApiService.get('/api/v1/search/typesstats', buildParams(1), { public: true }),
+      useApiService.get('/api/v1/search/typesstats', buildParams(0), { public: true }),
+    ])
 
-      categories.value.find((cat, _i) => cat.key == 'files').stat
-        = parseInt(response.data.types_stats.learnfiles) || 0
+    if (requestId !== categoryCountRequestId) return
 
-      categories.value.find((cat, _i) => cat.key == 'exams').stat
-        = parseInt(response.data.types_stats.exams) || 0
+    const getStats = result => result.status === 'fulfilled'
+      ? result.value?.data?.types_stats ?? result.value?.data
+      : null
+    const getCount = (stats, ...keys) => {
+      const value = keys
+        .map(key => stats?.[key])
+        .find(candidate => candidate !== undefined && candidate !== null)
+      const count = Number.parseInt(value, 10)
+      return Number.isFinite(count) ? count : 0
+    }
+    const setCount = (key, value) => {
+      const category = categories.value.find(item => item.key === key)
+      if (category) category.stat = value
+    }
 
-      categories.value.find((cat, _i) => cat.key == 'questions').stat
-        = parseInt(response.data.types_stats.question) || 0
+    const paperStats = getStats(paperResult)
+    const studyMaterialsStats = getStats(studyMaterialsResult)
+    const sharedStats = paperStats || studyMaterialsStats
 
-      categories.value.find((cat, _i) => cat.key == 'tutorial').stat
-        = parseInt(response.data.types_stats.tutorials) || 0
+    if (paperStats) setCount('papers', getCount(paperStats, 'papers'))
+    if (studyMaterialsStats) setCount('study-materials', getCount(studyMaterialsStats, 'papers'))
+    if (sharedStats) {
+      setCount('exams', getCount(sharedStats, 'exams', 'azmoon'))
+      setCount('tutorial', getCount(sharedStats, 'tutorials', 'dars'))
     }
   }
   catch (error) {
@@ -390,17 +394,14 @@ onMounted(() => {
 .stat-icon {
   font-size: 2.3rem;
 }
-.icon-multimedia {
-  color: #02b719;
+.icon-study-materials {
+  color: rgb(var(--v-theme-greenLight700));
 }
 .icon-paper {
   color: #2e90fa;
 }
 .icon-exam {
   color: #7c4dff;
-}
-.icon-q-a {
-  color: #fdb022;
 }
 .icon-tutorial {
   color: #2e90fa;
