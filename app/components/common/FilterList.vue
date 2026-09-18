@@ -29,7 +29,6 @@
     </v-col>
     <v-col
       v-if="hasKeywordSearch"
-      v-show="!headerSearchActive"
       cols="8"
       md="12"
       class="d-none d-md-flex justify-end justify-md-center"
@@ -48,7 +47,7 @@
         density="compact"
         hide-details
         class="custom-search-text-field"
-        :class="{ 'header-keyword-search': headerSearchActive }"
+        :class="{ 'header-keyword-search': keywordSearchInHeader }"
         @update:model-value="changeTextSearch"
       >
         <template #append>
