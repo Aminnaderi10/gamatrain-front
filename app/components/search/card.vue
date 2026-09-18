@@ -104,7 +104,13 @@
               <span class="status-icon status-icon-word icon-word" aria-hidden="true" />
             </span>
             <span v-if="isFeaturedResource" class="indicator indicator-fire" title="Featured resource">
-              <img :src="fireCardIcon" alt="" class="status-icon">
+              <v-icon
+                icon="md:local_fire_department_outlined"
+                class="status-icon status-icon-fire"
+                color="lightError"
+                size="16"
+                aria-hidden="true"
+              />
             </span>
             <QualityIndicator v-if="hasQualityRating" :score="qualityScore" :size="16" />
           </div>
@@ -162,24 +168,13 @@
             {{ information.ext }}
           </span>
           <span v-if="information.test_type_title" class="metadata-item">
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              style="color: #1E2A44"
+            <v-icon
+              icon="md:segment_outlined"
+              class="metadata-test-type-icon"
+              color="brandNavy"
+              size="12"
               aria-hidden="true"
-            >
-              <path
-                d="M7.5 10C7.77614 10 8 9.77614 8 9.5C8 9.22386 7.77614 9 7.5 9C7.22386 9 7 9.22386 7 9.5C7 9.77614 7.22386 10 7.5 10Z"
-                fill="currentColor"
-              />
-              <path
-                d="M13.85 4.64999L10.35 1.14999C10.3062 1.10092 10.2521 1.06206 10.1916 1.03614C10.1312 1.01022 10.0658 0.997883 10 0.999986H5C4.73503 1.00078 4.48113 1.10639 4.29377 1.29375C4.1064 1.48112 4.00079 1.73501 4 1.99999V6.99999H3C2.73478 6.99999 2.48043 7.10534 2.29289 7.29288C2.10536 7.48042 2 7.73477 2 7.99999V11C2 11.2652 2.10536 11.5196 2.29289 11.7071C2.48043 11.8946 2.73478 12 3 12H4V14C4.00079 14.265 4.1064 14.5189 4.29377 14.7062C4.48113 14.8936 4.73503 14.9992 5 15H13C13.265 14.9992 13.5189 14.8936 13.7062 14.7062C13.8936 14.5189 13.9992 14.265 14 14V4.99999C14.0018 4.93427 13.9893 4.86896 13.9634 4.80854C13.9375 4.74812 13.8988 4.69403 13.85 4.64999ZM10 2.19999L12.8 4.99999H10V2.19999ZM3 7.99999H7.7985L9.5 9.49999L7.8035 11H3V7.99999ZM13 14H5V12H7.8045C8.04591 11.9998 8.2791 11.9122 8.461 11.7535L10.153 10.258C10.2615 10.1644 10.3486 10.0486 10.4085 9.91838C10.4684 9.7882 10.4996 9.64667 10.5001 9.50338C10.5006 9.36008 10.4703 9.21835 10.4113 9.08777C10.3522 8.95719 10.2659 8.84081 10.158 8.74649L8.456 7.24199C8.27488 7.08613 8.04394 7.00029 7.805 6.99999H5V1.99999H9V4.99999C9.00079 5.26496 9.1064 5.51885 9.29377 5.70622C9.48113 5.89358 9.73503 5.99919 10 5.99999H13V14Z"
-                fill="currentColor"
-              />
-            </svg>
+            />
             {{ information.test_type_title }}
           </span>
           <span
@@ -216,7 +211,6 @@ import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import DifficultyIndicator from './DifficultyIndicator.vue'
 import QualityIndicator from './QualityIndicator.vue'
-import fireCardIcon from '~/assets/images/search-card/fire.svg'
 
 const route = useRoute()
 const { $stripHtmlTags } = useNuxtApp()
@@ -555,6 +549,11 @@ const createLinkCard = (information) => {
   gap: 4px;
 }
 
+.metadata-test-type-icon {
+  background: transparent;
+  -webkit-text-stroke: 0;
+}
+
 .card-indicators { gap: 8px; }
 
 .indicator {
@@ -582,6 +581,11 @@ const createLinkCard = (information) => {
 }
 
 .status-icon-solved-paper {
+  background: transparent;
+  -webkit-text-stroke: 0;
+}
+
+.status-icon-fire {
   background: transparent;
   -webkit-text-stroke: 0;
 }

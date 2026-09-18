@@ -67,7 +67,9 @@
           :test-type="contentData.test_type"
           :is-paper="contentData.is_paper"
         />
-        <lazy-common-detail-subject-directory-nav :content-data="contentData" />
+        <div class="paper-subject-directory w-100">
+          <lazy-common-detail-subject-directory-nav :content-data="contentData" />
+        </div>
       </v-col>
 
       <lazy-common-box-random-question :lesson="contentData.lesson" />
@@ -338,6 +340,10 @@ if (contentData.value) {
 </script>
 
 <style scoped>
+.paper-subject-directory {
+  margin-top: 16px;
+}
+
 .text-crash-report {
   color: #c62828;
 }
