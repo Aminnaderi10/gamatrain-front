@@ -43,6 +43,8 @@
 </template>
 
 <script setup>
+import { SEARCH_SERVICE_OPTIONS } from '@/constants'
+
 const props = defineProps({
   activeService: {
     type: String,
@@ -71,12 +73,7 @@ const selectService = (serviceId) => {
   emit('change', serviceId)
 }
 
-const services = [
-  { id: 'paper', title: 'Past Papers', shortTitle: 'Papers', icon: 'stat-icon icon-paper' },
-  { id: 'study-materials', title: 'Study Materials', shortTitle: 'Study', icon: 'stat-icon icon-study-materials' },
-  { id: 'quizhub', title: 'Exam Hub', shortTitle: 'Exam', icon: 'stat-icon icon-exam' },
-  { id: 'tutorial', title: 'Tutorial', shortTitle: 'Tutorial', icon: 'stat-icon icon-tutorial' },
-]
+const services = SEARCH_SERVICE_OPTIONS
 
 const formatCount = (serviceId) => {
   const count = props.serviceCounts[serviceId]
