@@ -6,7 +6,8 @@
     <div class="w-100 d-flex align-center align-md-start justify-start ga-2">
       <div
         class="icon-div rounded-circle d-flex align-center justify-center"
-        :style="{ backgroundColor: category.backgroundColor }"
+        :class="category.colorClass"
+        :style="category.colorClass ? undefined : { backgroundColor: category.backgroundColor }"
       >
         <span :class="`icon-span ${category.iconName}`" />
       </div>
@@ -25,7 +26,7 @@
             class="text-subtitle-1 text-sm-h5 pl-3 pr-3"
             color="#F2F4F7"
             :to="`/search?type=${
-              category.typePaper ? category.typePaper : `paper`
+              searchType
             }&section=${information.section}`"
           >
             {{ information?.section_title }}
@@ -36,7 +37,7 @@
             class="text-subtitle-1 text-sm-h5 pl-3 pr-3"
             color="#F2F4F7"
             :to="`/search?type=${
-              category.typePaper ? category.typePaper : `paper`
+              searchType
             }&section=${information.section}&base=${information.base}`"
           >
             {{ information?.base_title }}
@@ -47,7 +48,7 @@
             class="text-subtitle-1 text-sm-h5 pl-5 pr-5"
             color="#F2F4F7"
             :to="`/search?type=${
-              category.typePaper ? category.typePaper : `paper`
+              searchType
             }&section=${information.section}&base=${information.base}&lesson=${
               information.lesson
             }`"
@@ -96,7 +97,7 @@
         class="text-subtitle-1 text-sm-h5 pl-3 pr-3"
         color="#F2F4F7"
         :to="`/search?type=${
-          category.typePaper ? category.typePaper : `paper`
+          searchType
         }&section=${information.section}`"
       >
         {{ information?.section_title }}
@@ -107,7 +108,7 @@
         class="text-subtitle-1 text-sm-h5 pl-3 pr-3"
         color="#F2F4F7"
         :to="`/search?type=${
-          category.typePaper ? category.typePaper : `paper`
+          searchType
         }&section=${information.section}&base=${information.base}`"
       >
         {{ information?.base_title }}
@@ -118,7 +119,7 @@
         class="text-subtitle-1 text-sm-h5 pl-5 pr-5"
         color="#F2F4F7"
         :to="`/search?type=${
-          category.typePaper ? category.typePaper : `paper`
+          searchType
         }&section=${information.section}&base=${information.base}&lesson=${
           information.lesson
         }`"
@@ -165,6 +166,10 @@ const props = defineProps({
     default: () => {},
   },
 })
+
+const searchType = computed(() =>
+  props.category.searchType || props.category.typePaper || 'paper',
+)
 
 const createLink = () => {
   let link = ''
