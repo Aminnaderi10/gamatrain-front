@@ -1,7 +1,6 @@
 <template>
   <span
     class="quality-indicator"
-    :style="sizeStyle"
     :title="`${safeScore} of 5 quality rating`"
     :aria-label="`${safeScore} of 5 quality rating`"
   >
@@ -38,10 +37,6 @@ const props = defineProps({
 
 const safeScore = computed(() => Math.min(5, Math.max(0, Math.round(props.score))))
 const isFilled = segment => segment <= safeScore.value
-const sizeStyle = computed(() => ({
-  width: `${props.size}px`,
-  height: `${props.size}px`,
-}))
 </script>
 
 <style scoped>

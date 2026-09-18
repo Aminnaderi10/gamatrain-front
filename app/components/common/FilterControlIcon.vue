@@ -5,7 +5,6 @@
       :src="resolvedIcon.src"
       :alt="resolvedIcon.alt"
       :class="resolvedIcon.className"
-      :style="resolvedIcon.style"
       contain
       @error="handleImageError"
     />
@@ -13,7 +12,6 @@
       v-else
       :icon="resolvedIcon.icon"
       :class="resolvedIcon.className"
-      :style="resolvedIcon.style"
       :size="resolvedIcon.size || 28"
     />
   </span>
@@ -62,7 +60,6 @@ const resolvedIcon = computed(() => {
       src: selectedIconSrc.value,
       alt: props.selectedItem.title,
       className: '',
-      style: undefined,
       selectedImage: true,
     }
   }
@@ -71,8 +68,7 @@ const resolvedIcon = computed(() => {
     return {
       type: 'icon',
       icon: undefined,
-      className: `${props.selectedItem.contentIcon} search-filter-content-icon`,
-      style: { color: props.selectedItem.color },
+      className: `${props.selectedItem.contentIcon} search-filter-content-icon text-brandNavy`,
       selectedImage: false,
     }
   }
@@ -81,7 +77,6 @@ const resolvedIcon = computed(() => {
     type: 'icon',
     icon: props.controlIcon || props.fallbackIcon,
     className: 'filter-control-material-icon',
-    style: undefined,
     size: props.controlIcon ? 28 : fallbackIconSize.value,
     selectedImage: false,
   }

@@ -1,7 +1,6 @@
 <template>
   <span
     class="difficulty-indicator"
-    :style="sizeStyle"
     :title="`${label} difficulty`"
     :aria-label="`${label} difficulty`"
   >
@@ -42,10 +41,6 @@ const props = defineProps({
 const normalizedLevel = computed(() => String(props.level || '2'))
 const rotation = computed(() => normalizedLevel.value === '1' ? -90 : normalizedLevel.value === '3' ? 90 : 0)
 const label = computed(() => normalizedLevel.value === '1' ? 'Easy' : normalizedLevel.value === '3' ? 'Hard' : 'Medium')
-const sizeStyle = computed(() => ({
-  width: `${props.size}px`,
-  height: `${props.size}px`,
-}))
 </script>
 
 <style scoped>

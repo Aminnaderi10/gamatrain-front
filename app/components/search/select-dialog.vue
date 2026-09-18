@@ -132,7 +132,6 @@
             <span
               v-if="showItemIcon"
               class="select-item-icon mr-2"
-              :style="item.iconPadding ? { padding: `${item.iconPadding}px` } : undefined"
             >
               <v-img
                 v-if="item.icon && !hasIconFailed(getIconSrc(item))"
@@ -143,8 +142,7 @@
               />
               <span
                 v-else-if="item.contentIcon"
-                :class="`${item.contentIcon} select-item-content-icon`"
-                :style="{ color: item.color }"
+                :class="`${item.contentIcon} select-item-content-icon text-brandNavy`"
               />
               <v-icon
                 v-else
@@ -161,8 +159,7 @@
             </v-avatar>
             <span
               v-else-if="item.contentIcon"
-              :class="`${item.contentIcon} size-icon`"
-              :style="{ color: item.color }"
+              :class="`${item.contentIcon} size-icon text-brandNavy`"
             />
           </template>
           <v-list-item-title class="text-h5">

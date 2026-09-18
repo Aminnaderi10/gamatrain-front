@@ -88,7 +88,6 @@ export const useSearchFilters = ({
         iconSrc: item => `/images/boards/${item.icon}.svg`,
         fallbackIcon: 'md:school_outlined',
         fallbackIconPadding: 4,
-        unselectedIconColor: 'rgb(var(--v-theme-brandNavy))',
         queryKey: 'section',
         children: boardChildren,
       }),
@@ -135,8 +134,7 @@ export const useSearchFilters = ({
         queryKey: 'topic',
         selectedVariant: 'dependent-green',
         controlIcon: 'md:sell_outlined',
-        unselectedIconColor: 'rgb(var(--v-theme-brandNavy))',
-        controlIconPadding: 4,
+        controlIconPadded: true,
       }),
       year: () => makeFilter({
         title: 'Year',
@@ -147,8 +145,7 @@ export const useSearchFilters = ({
         queryKey: 'edu_year',
         selectedVariant: 'dependent-green',
         controlIcon: 'md:calendar_today_outlined',
-        unselectedIconColor: 'rgb(var(--v-theme-brandNavy))',
-        controlIconPadding: 4,
+        controlIconPadded: true,
       }),
       session: () => makeFilter({
         title: 'Session',

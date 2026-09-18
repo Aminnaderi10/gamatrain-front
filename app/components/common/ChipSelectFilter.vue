@@ -79,16 +79,8 @@
   >
     <span
       v-if="showItemIcon || controlIcon"
-      class="search-filter-icon mr-2"
-      :class="{ 'search-filter-icon-padded': controlIconPadding }"
-      :style="[
-        controlIconPadding
-          ? { padding: `${controlIconPadding}px` }
-          : selectedItem?.iconPadding
-            ? { padding: `${selectedItem.iconPadding}px` }
-            : undefined,
-        !selectedItem && unselectedIconColor ? { color: unselectedIconColor } : undefined,
-      ]"
+      class="search-filter-icon text-brandNavy mr-2"
+      :class="{ 'search-filter-icon-padded pa-1': controlIconPadded }"
     >
       <CommonFilterControlIcon
         :selected-item="selectedItem"
@@ -245,13 +237,9 @@ const props = defineProps({
     type: String,
     default: '',
   },
-  unselectedIconColor: {
-    type: String,
-    default: '',
-  },
-  controlIconPadding: {
-    type: Number,
-    default: 0,
+  controlIconPadded: {
+    type: Boolean,
+    default: false,
   },
   inlineOptions: {
     type: Boolean,

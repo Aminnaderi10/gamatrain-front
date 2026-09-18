@@ -5,7 +5,6 @@
         <CommonFilterList
           :filter-list="filters"
           :filter-container="ServicesFilterContainer"
-          :style="{ '--search-service-color': activeServiceColor }"
           :count-data-found="totalDataFind"
           :loading="isInitialDataLoading"
           has-keyword-search
@@ -79,11 +78,7 @@
 <script setup>
 import ServicesFilterContainer from '~/components/search/ServicesFilterContainer.vue'
 import { useRoute } from 'vue-router'
-import {
-  DEFAULT_SEARCH_SERVICE,
-  LEGACY_SEARCH_TYPES,
-  SEARCH_SERVICE_OPTIONS,
-} from '@/constants'
+import { LEGACY_SEARCH_TYPES } from '@/constants'
 import {
   getLegacySearchType,
   normalizeSearchService,
@@ -97,10 +92,6 @@ const route = useRoute()
 const router = useRouter()
 
 const activeService = computed(() => normalizeSearchService(route.query.type))
-
-const activeServiceColor = computed(() =>
-  (SEARCH_SERVICE_OPTIONS.find(service => service.id === activeService.value) || DEFAULT_SEARCH_SERVICE).color,
-)
 
 const filters = useSearchFilters({
   activeService,

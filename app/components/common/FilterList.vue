@@ -117,10 +117,7 @@
             >
               <span
                 v-if="hasFilterIcon(entry.filter)"
-                class="mobile-quick-filter__icon"
-                :style="!entry.filter.selectedItem && entry.filter.unselectedIconColor
-                  ? { color: entry.filter.unselectedIconColor }
-                  : undefined"
+                class="mobile-quick-filter__icon text-brandNavy"
                 aria-hidden="true"
               >
                 <CommonFilterControlIcon
@@ -181,21 +178,19 @@
           >
             <component
               :is="filterContainer || 'div'"
-              :style="filterContainer ? undefined : { display: 'contents' }"
+              :class="{ 'filter-list-display-contents': !filterContainer }"
             >
             <div
               class="w-100 d-none d-md-flex justify-center align-center flex-wrap ga-4"
-              :class="{ 'mt-2': !filterContainer }"
-              :style="filterContainer ? { marginTop: '16px' } : undefined"
+              :class="filterContainer ? 'mt-4' : 'mt-2'"
             >
               <div class="d-flex flex-wrap w-100 max-width-container justify-start ga-2">
-                <div
+                <template
                   v-for="(filter, index) in filters"
                   :key="filter.title || index"
-                  :style="{ display: $slots['services-navigation'] && filter.queryKey === 'type' ? 'none' : 'contents' }"
                 >
                   <CommonChipSelectFilter
-                    v-if="!filter.inlineOptions"
+                    v-if="!filter.inlineOptions && !($slots['services-navigation'] && filter.queryKey === 'type')"
                     :ref="(el) => setFilterRef(filter, el)"
                     :title="filter.title"
                     :api="filter.api"
@@ -214,8 +209,7 @@
                     :show-clear="Boolean(filterContainer && filter.closable && !filter.defaultValue)"
                     :selected-variant="filter.selectedVariant"
                     :control-icon="filter.controlIcon"
-                    :unselected-icon-color="filter.unselectedIconColor"
-                    :control-icon-padding="filter.controlIconPadding"
+                    :control-icon-padded="filter.controlIconPadded"
                     :inline-options="filter.inlineOptions"
                     :inline-allow-clear="filter.inlineAllowClear"
                     :item-title="filter.itemTitle"
@@ -224,7 +218,7 @@
                     @update-selected-item="updateSelectedItem($event, index)"
                     @clear="clearFilter(index)"
                   />
-                </div>
+                </template>
               </div>
               <div
                 v-if="!filterContainer"
@@ -395,8 +389,7 @@
                     :show-clear="Boolean(filter.closable && !filter.defaultValue)"
                     :selected-variant="filter.selectedVariant"
                     :control-icon="filter.controlIcon"
-                    :unselected-icon-color="filter.unselectedIconColor"
-                    :control-icon-padding="filter.controlIconPadding"
+                    :control-icon-padded="filter.controlIconPadded"
                     :item-title="filter.itemTitle"
                     :disabled="filter.disabled"
                     :has-search="filter.hasSearch"
@@ -624,6 +617,10 @@ watch(activeFilterService, async (service, previousService) => {
 </script>
 
 <style scoped>
+.filter-list-display-contents {
+  display: contents;
+}
+
 .header-keyword-search {
   width: 100%;
   min-width: 0;
