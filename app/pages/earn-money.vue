@@ -23,15 +23,17 @@
     <v-container
       id="earn-page-banner"
       fluid
-    >
+    />
 
-    </v-container>
-
-    <v-conteiner id="earn-content-monetization">
+    <v-container id="earn-content-monetization">
       <v-row>
         <h2 class="gama-text-h4 monetization-title">
           Want your resources aligned with global curricula?
         </h2>
+        <!--
+          Intentional exception: custom CSS preserves the approved numbered
+          chevron rail, which has no Vuetify equivalent.
+        -->
         <div id="content-monetization-steps">
           <div class="step">
             <div class="step-num">
@@ -95,24 +97,26 @@
                 Cross‑Board Alignment
               </h3>
               <p class="gama-text-body2">
-                Publish on your local board, and we'll align your content with other international boards — so students worldwide can benefit too.
+                Publish on your local board, and we'll align your content with other international boards — so students
+                worldwide can benefit too.
               </p>
             </div>
           </div>
         </div>
       </v-row>
-    </v-conteiner>
+    </v-container>
 
     <v-container id="earn-features">
       <v-row>
-        <v-card flat>
+        <v-card elevation="0">
           <h2 class="gama-text-h4">
             Features & Benefits
           </h2>
-          <div
+          <v-card
             v-for="(item, index) in featureList"
             :key="index"
             class="feature-box"
+            elevation="0"
           >
             <h4 class="gama-text-h6">
               <v-icon>mdi-{{ item.icon }}</v-icon>{{ item.title }}
@@ -120,7 +124,7 @@
             <p class="gama-text-body1">
               {{ item.describe }}
             </p>
-          </div>
+          </v-card>
         </v-card>
       </v-row>
     </v-container>
@@ -135,9 +139,14 @@
             <p class="gama-text-h6">
               Publish Your Materials. Reach Students Worldwide.
             </p>
-            <button class="gama-primary-btn">
+            <v-btn
+              color="primary"
+              rounded="pill"
+              size="large"
+              variant="flat"
+            >
               Start Publishing
-            </button>
+            </v-btn>
           </v-col>
         </v-row>
       </v-container>
@@ -229,68 +238,6 @@ export default {
     background-size: 100% 100%;
     margin-bottom: 3.4rem;
     background-position: center;
-
-    .container {
-        position: relative;
-        height: 100%;
-
-        #doc-img {
-            position: absolute;
-            top: 19.2rem;
-            left: 2.85rem;
-            animation-name: slideAndRotateDocMobileAnimation;
-            animation-duration: 2s;
-            /* Adjust the animation duration as needed */
-            animation-timing-function: ease;
-            /* Adjust the timing function as needed */
-            animation-fill-mode: forwards;
-            /* Keeps the final state of the animation */
-        }
-
-        #zip-img {
-            position: absolute;
-            top: 14.5rem;
-            left: 6.7rem;
-            animation-name: slideAndRotateZipMobileAnimation;
-            animation-duration: 4s;
-            /* Adjust the animation duration as needed */
-            animation-timing-function: ease;
-            /* Adjust the timing function as needed */
-            animation-fill-mode: forwards;
-            /* Keeps the final state of the animation */
-        }
-
-        #pdf-img {
-            position: absolute;
-            top: 13.1rem;
-            right: 6.29rem;
-            animation-name: slideAndRotatePdfMobileAnimation;
-            animation-duration: 2s;
-            /* Adjust the animation duration as needed */
-            animation-timing-function: ease;
-            /* Adjust the timing function as needed */
-            animation-fill-mode: forwards;
-            /* Keeps the final state of the animation */
-            z-index: 1;
-
-        }
-
-        #mp3-img {
-            position: absolute;
-            top: 17.5rem;
-            right: 1.88rem;
-            animation-name: slideAndRotateMp3MobileAnimation;
-            animation-duration: 2s;
-            /* Adjust the animation duration as needed */
-            animation-timing-function: ease;
-            /* Adjust the timing function as needed */
-            animation-fill-mode: forwards;
-            /* Keeps the final state of the animation */
-            z-index: 0;
-        }
-
-    }
-
 }
 
 #earn-content-monetization {
@@ -439,65 +386,6 @@ export default {
         background-repeat: no-repeat;
         background-size: 100% 100%;
         background-position: center;
-
-        .container {
-            position: relative;
-            height: 100%;
-
-            #doc-img {
-                position: absolute;
-                top: 24.9rem;
-                left: -10rem;
-                animation-name: slideAndRotateDocTabletAnimation;
-                animation-duration: 2s;
-                /* Adjust the animation duration as needed */
-                animation-timing-function: ease;
-                /* Adjust the timing function as needed */
-                animation-fill-mode: forwards;
-                /* Keeps the final state of the animation */
-            }
-
-            #zip-img {
-                position: absolute;
-                bottom: -10rem;
-                left: -40rem;
-                animation-name: slideAndRotateZipTabletAnimation;
-                animation-duration: 2s;
-                /* Adjust the animation duration as needed */
-                animation-timing-function: ease;
-                /* Adjust the timing function as needed */
-                animation-fill-mode: forwards;
-                /* Keeps the final state of the animation */
-            }
-
-            #pdf-img {
-                position: absolute;
-                top: 12rem;
-                right: -60rem;
-                animation-name: slideAndRotatePdfTabletAnimation;
-                animation-duration: 2s;
-                /* Adjust the animation duration as needed */
-                animation-timing-function: ease;
-                /* Adjust the timing function as needed */
-                animation-fill-mode: forwards;
-                /* Keeps the final state of the animation */
-            }
-
-            #mp3-img {
-                position: absolute;
-                top: 20.81rem;
-                right: 15.46rem;
-                animation-name: slideAndRotateMp3TabletAnimation;
-                animation-duration: 2s;
-                /* Adjust the animation duration as needed */
-                animation-timing-function: ease;
-                /* Adjust the timing function as needed */
-                animation-fill-mode: forwards;
-                /* Keeps the final state of the animation */
-            }
-
-        }
-
     }
 
     #earn-content-monetization {
@@ -635,65 +523,6 @@ export default {
         background-position: center;
         background-size: 100% 100%;
         width: 100%;
-
-        .container {
-            position: relative;
-            height: 100%;
-
-            #doc-img {
-                position: absolute;
-                top: 24.9rem;
-                left: -10rem;
-                animation-name: slideAndRotateDocDesktopAnimation;
-                animation-duration: 2s;
-                /* Adjust the animation duration as needed */
-                animation-timing-function: ease;
-                /* Adjust the timing function as needed */
-                animation-fill-mode: forwards;
-                /* Keeps the final state of the animation */
-            }
-
-            #zip-img {
-                position: absolute;
-                bottom: -10rem;
-                left: -40rem;
-                animation-name: slideAndRotateZipDesktopAnimation;
-                animation-duration: 2s;
-                /* Adjust the animation duration as needed */
-                animation-timing-function: ease;
-                /* Adjust the timing function as needed */
-                animation-fill-mode: forwards;
-                /* Keeps the final state of the animation */
-            }
-
-            #pdf-img {
-                position: absolute;
-                top: 12rem;
-                right: -60rem;
-                animation-name: slideAndRotatePdfDesktopAnimation;
-                animation-duration: 2s;
-                /* Adjust the animation duration as needed */
-                animation-timing-function: ease;
-                /* Adjust the timing function as needed */
-                animation-fill-mode: forwards;
-                /* Keeps the final state of the animation */
-            }
-
-            #mp3-img {
-                position: absolute;
-                top: 20.81rem;
-                right: 15.46rem;
-                animation-name: slideAndRotateMp3DesktopAnimation;
-                animation-duration: 2s;
-                /* Adjust the animation duration as needed */
-                animation-timing-function: ease;
-                /* Adjust the timing function as needed */
-                animation-fill-mode: forwards;
-                /* Keeps the final state of the animation */
-            }
-
-        }
-
     }
 
     #earn-content-monetization {
@@ -789,201 +618,4 @@ export default {
     }
 }
 
-/* Animate for mobile*/
-@keyframes slideAndRotateDocMobileAnimation {
-    0% {
-        left: -10rem;
-        transform: translateY(-50%) rotate(0deg);
-    }
-
-    100% {
-        left: 0rem;
-        top: 24.2rem;
-        transform: translateY(-50%) rotate(-45deg);
-        /* Rotate to 45 degrees */
-    }
-}
-
-@keyframes slideAndRotateZipMobileAnimation {
-    0% {
-        top: 0;
-        left: 12rem;
-        opacity: 0;
-        transform: translateY(-50%) rotate(0deg);
-    }
-
-    100% {
-        top: 20.2rem;
-        left: 5.4rem;
-        opacity: 1;
-        transform: translateY(-50%) rotate(-28.7deg);
-        /* Rotate to 45 degrees */
-    }
-}
-
-@keyframes slideAndRotatePdfMobileAnimation {
-    0% {
-        top: 40rem;
-        right: -10rem;
-        opacity: 0;
-        transform: translateY(-50%) rotate(180deg);
-    }
-
-    100% {
-        top: 18.1rem;
-        right: 4.29rem;
-        opacity: 1;
-        transform: translateY(-50%) rotate(-11deg);
-        /* Rotate to 45 degrees */
-    }
-}
-
-@keyframes slideAndRotateMp3MobileAnimation {
-    0% {
-        top: 20.81rem;
-        right: -40rem;
-        transform: translateY(-50%) rotate(0);
-    }
-
-    100% {
-        top: 22.5rem;
-        right: 0rem;
-        transform: translateY(-50%) rotate(42.5deg);
-        /* Rotate to 45 degrees */
-    }
-}
-
-/* End animate for mobile*/
-
-/* Animate for tablet*/
-@keyframes slideAndRotateDocTabletAnimation {
-    0% {
-        left: -10rem;
-        transform: translateY(-50%) rotate(0deg);
-    }
-
-    100% {
-        top: 18rem;
-        left: 10.75rem;
-        transform: translateY(-50%) rotate(-45deg);
-
-        /* Rotate to 45 degrees */
-    }
-}
-
-@keyframes slideAndRotateZipTabletAnimation {
-    0% {
-        bottom: -10rem;
-        left: 12rem;
-        opacity: 0;
-        transform: translateY(-50%) rotate(0deg);
-    }
-
-    100% {
-        top: 16.6rem;
-        left: 17.5rem;
-        opacity: 1;
-        transform: translateY(-50%) rotate(-28.7deg);
-        /* Rotate to 45 degrees */
-    }
-}
-
-@keyframes slideAndRotatePdfTabletAnimation {
-    0% {
-        top: 40rem;
-        right: -10rem;
-        opacity: 0;
-        transform: translateY(-50%) rotate(180deg);
-    }
-
-    100% {
-        right: 16rem;
-        top: 12rem;
-        opacity: 1;
-        transform: translateY(-50%) rotate(-11deg);
-        /* Rotate to 45 degrees */
-    }
-}
-
-@keyframes slideAndRotateMp3TabletAnimation {
-    0% {
-        top: 20.81rem;
-        right: -40rem;
-        transform: translateY(-50%) rotate(0);
-    }
-
-    100% {
-        top: 18.81rem;
-        right: 10.46rem;
-        transform: translateY(-50%) rotate(42.5deg);
-        /* Rotate to 45 degrees */
-    }
-}
-
-/* End animate for tablet*/
-
-/* Animate for desktop*/
-@keyframes slideAndRotateDocDesktopAnimation {
-    0% {
-        left: -10rem;
-        transform: translateY(-50%) rotate(0deg);
-    }
-
-    100% {
-        left: 12.75rem;
-        transform: translateY(-50%) rotate(-45deg);
-        /* Rotate to 45 degrees */
-    }
-}
-
-@keyframes slideAndRotateZipDesktopAnimation {
-    0% {
-        bottom: -10rem;
-        left: 12rem;
-        opacity: 0;
-        transform: translateY(-50%) rotate(0deg);
-    }
-
-    100% {
-        bottom: 19.6rem;
-        left: 23.65rem;
-        opacity: 1;
-        transform: translateY(-50%) rotate(-28.7deg);
-        /* Rotate to 45 degrees */
-    }
-}
-
-@keyframes slideAndRotatePdfDesktopAnimation {
-    0% {
-        top: 40rem;
-        right: -10rem;
-        opacity: 0;
-        transform: translateY(-50%) rotate(180deg);
-    }
-
-    100% {
-        right: 27rem;
-        top: 12rem;
-        opacity: 1;
-        transform: translateY(-50%) rotate(-11deg);
-        /* Rotate to 45 degrees */
-    }
-}
-
-@keyframes slideAndRotateMp3DesktopAnimation {
-    0% {
-        top: 20.81rem;
-        right: -40rem;
-        transform: translateY(-50%) rotate(0);
-    }
-
-    100% {
-        top: 20.81rem;
-        right: 15.46rem;
-        transform: translateY(-50%) rotate(42.5deg);
-        /* Rotate to 45 degrees */
-    }
-}
-
-/* End animate for desktop*/
 </style>
