@@ -459,8 +459,6 @@
 <script setup>
 import { useDisplay } from 'vuetify'
 
-const router = useRouter()
-const route = useRoute()
 const { mdAndUp } = useDisplay()
 const searchHeaderReady = ref(false)
 
@@ -506,25 +504,26 @@ const props = defineProps({
 const headerSearchActive = computed(() => props.keywordSearchInHeader && searchHeaderReady.value && mdAndUp.value)
 const emits = defineEmits(['changeFilter'])
 const slots = useSlots()
+const hasServicesNavigation = computed(() => Boolean(slots['services-navigation']))
+const {
+  changeTextSearch,
+  clearAllFilter,
+  clearFilter,
+  countFilterSelect,
+  filters,
+  getFilterIdentity,
+  selectService,
+  setFilterRef,
+  syncFiltersFromQuery,
+  textSearch,
+  updateSelectedItem,
+} = useFilterController({
+  filterList: toRef(props, 'filterList'),
+  hasKeywordSearch: toRef(props, 'hasKeywordSearch'),
+  hasServicesNavigation,
+  onChangeFilter: (...args) => emits('changeFilter', ...args),
+})
 
-const getActiveFilterCount = query => filters.value.filter(filter =>
-  filter.queryKey
-  && query[filter.queryKey] !== undefined
-  && query[filter.queryKey] !== null
-  && query[filter.queryKey] !== ''
-  && !(slots['services-navigation'] && filter.queryKey === 'type'),
-).length
-
-const createFilterState = filterList =>
-  filterList.map(filter => ({
-    ...filter,
-    initialDisabled: filter.disabled,
-  }))
-
-const filters = ref(createFilterState(props.filterList))
-const setFilterRef = (filter, element) => {
-  filter.refElement = element
-}
 const mobileQuickFilters = ref(null)
 const mobileFilterSectionElements = new Map()
 const resolveInlineItemsPerRow = filter =>
@@ -532,15 +531,6 @@ const resolveInlineItemsPerRow = filter =>
     ? filter.inlineItemsPerRow(filters.value)
     : filter.inlineItemsPerRow
 const dialogFilterMobileModel = ref(false)
-const countFilterSelect = ref(getActiveFilterCount(route.query))
-const textSearch = ref(route.query.title ? route.query.title : '')
-const timer = ref(null)
-const hasExclusiveDisabledState = ref(false)
-let pendingServiceChange = false
-let filterListSyncVersion = 0
-
-const isCurrentFilterSync = syncVersion =>
-  syncVersion === undefined || syncVersion === filterListSyncVersion
 
 watch(mdAndUp, (isDesktop) => {
   if (isDesktop) dialogFilterMobileModel.value = false
@@ -550,371 +540,6 @@ onMounted(async () => {
   searchHeaderReady.value = true
   await syncFiltersFromQuery()
 })
-
-const updateSelectedItem = async (itemSelected, index) => {
-  filters.value[index].selectedItem = itemSelected
-
-  const isExclusiveSelected = isExclusiveFilterSelected(index)
-  if (hasExclusiveDisabledState.value && !isExclusiveSelected) {
-    restoreDisabledState()
-    hasExclusiveDisabledState.value = false
-  }
-
-  resetDescendants(index)
-
-  if (isExclusiveSelected) {
-    disableOtherFilters(index)
-    updateQueryFromFilters()
-  }
-  else {
-    await enableReadyChildren(index)
-
-    updateQueryFromFilters()
-  }
-}
-
-const selectService = (serviceId) => {
-  const index = filters.value.findIndex(filter => filter.queryKey === 'type')
-  const filter = filters.value[index]
-  const service = filter?.staticList?.find(item => item.id === serviceId)
-  if (!service || filter.selectedItem?.id === serviceId) return
-
-  pendingServiceChange = true
-  filter.selectedItem = service
-  resetDescendants(index)
-
-  try {
-    return updateQueryFromFilters()
-  }
-  finally {
-    pendingServiceChange = false
-  }
-}
-
-const isExclusiveFilterSelected = (index) => {
-  const filter = filters.value[index]
-
-  return filter?.disableOtherFiltersOnSelectedIds?.includes(
-    filter.selectedItem?.id,
-  )
-}
-
-const restoreDisabledState = () => {
-  filters.value.forEach((filter) => {
-    filter.disabled = filter.initialDisabled
-  })
-}
-
-const disableOtherFilters = (sourceIndex) => {
-  hasExclusiveDisabledState.value = true
-
-  filters.value.forEach((filter, index) => {
-    if (index === sourceIndex) return
-
-    filter.selectedItem = null
-    filter.disabled = true
-  })
-}
-
-const resetDescendants = (indexFilter) => {
-  const filterParent = filters.value[indexFilter]
-
-  if (filterParent.childrenForGetStaticData) {
-    for (const childIndex of filterParent.childrenForGetStaticData) {
-      const child = filters.value[childIndex]
-      const readyForGetStatic
-        = child.dependenciesForGetStaticData?.includes(indexFilter)
-
-      if (readyForGetStatic) {
-        if (child.getStaticList) {
-          const staticList = child.getStaticList('reset')
-          child.refElement.setStaticItem(staticList)
-          child.selectedItem = null
-        }
-      }
-    }
-  }
-
-  if (!filterParent.children || filterParent.children.length == 0) return
-
-  for (const childIndex of filterParent.children) {
-    const child = filters.value[childIndex]
-
-    child.selectedItem = null
-    child.disabled = true
-    resetDescendants(childIndex)
-  }
-}
-
-const filterDataLoads = new WeakMap()
-
-const getFilterDataLoadKey = (filter, parentId = '') => JSON.stringify({
-  api: filter.api,
-  parentId: filter.idInParams ? parentId : '',
-  params: filter.extraApiParams || {},
-})
-
-const loadFilterItems = async (filter, parentId = '') => {
-  if (!filter.api || filter.staticList?.length || !filter.refElement) return
-
-  const loadKey = getFilterDataLoadKey(filter, parentId)
-  const existingLoad = filterDataLoads.get(filter)
-  if (existingLoad?.key === loadKey) {
-    await existingLoad.promise
-    return
-  }
-
-  const loadPromise = filter.refElement.getItems(filter.idInParams ? parentId : '')
-  filterDataLoads.set(filter, { key: loadKey, promise: loadPromise })
-
-  try {
-    await loadPromise
-  }
-  catch (error) {
-    if (filterDataLoads.get(filter)?.promise === loadPromise)
-      filterDataLoads.delete(filter)
-    throw error
-  }
-}
-
-const enableReadyChildren = async (indexFilter, syncVersion) => {
-  const filterParent = filters.value[indexFilter]
-
-  if (filterParent.childrenForGetStaticData) {
-    for (const childIndex of filterParent.childrenForGetStaticData) {
-      const child = filters.value[childIndex]
-      const readyForGetStatic
-        = child.dependenciesForGetStaticData?.includes(indexFilter)
-
-      if (readyForGetStatic) {
-        if (
-          child.getStaticList
-          && filterParent.selectedItem
-          && filterParent.selectedItem.id
-        ) {
-          const staticList = child.getStaticList(filterParent.selectedItem.id)
-          child.refElement.setStaticItem(staticList)
-        }
-      }
-    }
-  }
-
-  if (!filterParent.children || filterParent.children.length == 0) return
-
-  for (const childIndex of filterParent.children) {
-    const child = filters.value[childIndex]
-
-    const ready = child.dependencies.every(
-      dep => !!filters.value[dep.parent].selectedItem,
-    )
-
-    if (ready) {
-      const disableValue = child.dependencies.some(dep =>
-        dep.disableIds?.includes(filters.value[dep.parent].selectedItem.id),
-      )
-
-      if (disableValue) {
-        child.disabled = true
-        continue
-      }
-
-      if (
-        child.queryMap
-        && child.parentIndexChangeQueryKey
-        && filters.value[child.parentIndexChangeQueryKey].selectedItem
-      ) {
-        const id
-          = filters.value[child.parentIndexChangeQueryKey].selectedItem.id
-        child.queryKey = child.queryMap[id] ?? child.queryKey
-      }
-
-      child.disabled = false
-      if (child.api && !child.staticList?.length) {
-        if (!child.idInParams) {
-          child.dependencies.forEach((dep) => {
-            const parentNode = filters.value[dep.parent]
-            child.extraApiParams[dep.targetKey]
-              = parentNode.selectedItem?.[dep.sourceKey] ?? null
-          })
-        }
-        await loadFilterItems(child, filterParent.selectedItem.id)
-        if (!isCurrentFilterSync(syncVersion)) return
-      }
-
-      await enableReadyChildren(childIndex, syncVersion)
-      if (!isCurrentFilterSync(syncVersion)) return
-    }
-  }
-}
-
-const clearFilter = (index) => {
-  filters.value[index].selectedItem = null
-
-  if (hasExclusiveDisabledState.value) {
-    restoreDisabledState()
-    hasExclusiveDisabledState.value = false
-  }
-
-  resetDescendants(index)
-
-  updateQueryFromFilters()
-}
-
-const updateQueryFromFilters = async () => {
-  const query = { ...route.query }
-  const filterQuery = {}
-  const titles = {}
-
-  filters.value.forEach((f) => {
-    if (f.queryKey) delete query[f.queryKey]
-
-    // Due to the update to version 2 of the backend for the board, this f.title != 'Board' has been placed.
-    // if (f.queryKey && f.selectedItem?.code && f.title != 'Board') {
-    if (f.queryKey && f.selectedItem?.code) {
-      filterQuery[f.queryKey] = f.selectedItem.code
-      titles[f.queryKey] = f.selectedItem.title
-    }
-    else if (f.queryKey && f.selectedItem?.id) {
-      filterQuery[f.queryKey] = f.selectedItem.id
-      titles[f.queryKey] = f.selectedItem.title
-    }
-  })
-
-  delete query.page
-  Object.assign(query, filterQuery)
-
-  countFilterSelect.value = getActiveFilterCount(filterQuery)
-  router.replace({ query })
-  emits('changeFilter', query, titles, { serviceChange: pendingServiceChange })
-}
-
-const fetchDataRequireFilter = async (syncVersion) => {
-  for (let i = 0; i < filters.value.length; i++) {
-    if (!isCurrentFilterSync(syncVersion)) return
-
-    const filter = filters.value[i]
-    if (!filter.dependencies?.length) {
-      if (filter.api && !filter.staticList?.length) {
-        await loadFilterItems(filter)
-        if (!isCurrentFilterSync(syncVersion)) return
-      }
-    }
-    if (filter.getStaticList) {
-      const staticList = filter.getStaticList()
-      filter.refElement.setStaticItem(staticList)
-    }
-  }
-}
-
-const fetchFilterAvailableInQuery = async (syncVersion) => {
-  for (let index = 0; index < filters.value.length; index++) {
-    if (!isCurrentFilterSync(syncVersion)) return
-
-    const filter = filters.value[index]
-    const qVal = route.query[filter.queryKey]
-    // Due to the update to version 2 of the backend for the board, change filter key to id.
-    // old code
-    const filterKey = filter.queryKey == 'section' ? 'code' : 'id'
-    // const filterKey = 'id'
-
-    if (!qVal) {
-      if (filter.defaultValue) {
-        filters.value[index].selectedItem = filter.defaultValue
-        await enableReadyChildren(index, syncVersion)
-        if (!isCurrentFilterSync(syncVersion)) return
-
-        const query = { ...route.query }
-        query[filter.queryKey] = filter.defaultValue.id
-        router.replace({ query })
-      }
-      else {
-        filters.value[index].selectedItem = null
-      }
-      continue
-    }
-
-    const ready = filter.dependencies?.every(
-      dep => filters.value[dep.parent].selectedItem,
-    )
-
-    if (!ready && filter.dependencies?.length) {
-      filters.value[index].selectedItem = null
-      continue
-    }
-
-    if (filter.staticList?.length) {
-      const selected = filter.staticList.find(
-        x => String(x[filterKey]) === String(qVal),
-      )
-      filters.value[index].selectedItem = selected || null
-      if (!selected) continue
-      if (isExclusiveFilterSelected(index)) {
-        disableOtherFilters(index)
-        continue
-      }
-      await enableReadyChildren(index, syncVersion)
-      if (!isCurrentFilterSync(syncVersion)) return
-    }
-    else {
-      const selected = await filter.refElement?.getItemById(qVal, filterKey)
-      filters.value[index].selectedItem = selected || null
-      if (!selected) continue
-      if (isExclusiveFilterSelected(index)) {
-        disableOtherFilters(index)
-        continue
-      }
-      await enableReadyChildren(index, syncVersion)
-      if (!isCurrentFilterSync(syncVersion)) return
-    }
-  }
-}
-
-const syncFiltersFromQuery = async () => {
-  const syncVersion = ++filterListSyncVersion
-
-  await nextTick()
-  if (!isCurrentFilterSync(syncVersion)) return
-
-  await fetchDataRequireFilter(syncVersion)
-  if (!isCurrentFilterSync(syncVersion)) return
-
-  await fetchFilterAvailableInQuery(syncVersion)
-}
-
-const getFilterIdentity = filter => `${filter.queryKey ?? ''}:${filter.title ?? ''}`
-
-const reconcileFilterConfiguration = (filterList) => {
-  const existingFilters = new Map(
-    filters.value.map(filter => [getFilterIdentity(filter), filter]),
-  )
-
-  return filterList.map((filterConfig) => {
-    const existingFilter = existingFilters.get(getFilterIdentity(filterConfig))
-    if (!existingFilter) return createFilterState([filterConfig])[0]
-
-    const runtimeState = {
-      selectedItem: existingFilter.selectedItem,
-      disabled: existingFilter.disabled,
-      refElement: existingFilter.refElement,
-    }
-
-    Object.assign(existingFilter, filterConfig, runtimeState, {
-      initialDisabled: filterConfig.disabled,
-    })
-
-    return existingFilter
-  })
-}
-
-watch(
-  () => props.filterList,
-  async (filterList) => {
-    filters.value = reconcileFilterConfiguration(filterList)
-    hasExclusiveDisabledState.value = false
-    await syncFiltersFromQuery()
-  },
-  { flush: 'post' },
-)
 
 const openFilterSelectModal = (filter) => {
   if (filter.disabled) return
@@ -975,11 +600,6 @@ const getMobileFilterItemsSignature = filter => JSON.stringify(
   getMobileFilterItems(filter).map(item => [item.id, item.title]),
 )
 
-watch(
-  () => route.query,
-  () => syncFiltersFromQuery(),
-  { deep: true },
-)
 const inlineFilterEntries = computed(() =>
   filters.value
     .map((filter, index) => ({ filter, index }))
@@ -1001,44 +621,6 @@ watch(activeFilterService, async (service, previousService) => {
   await nextTick()
   if (mobileQuickFilters.value) mobileQuickFilters.value.scrollLeft = 0
 })
-
-const changeTextSearch = () => {
-  if (props.hasKeywordSearch) {
-    const query = { ...route.query }
-    if (textSearch.value.length == 0) {
-      delete query.title
-    }
-    else {
-      query.title = textSearch.value
-    }
-    router.replace({ query })
-    debouncedSearchText()
-  }
-}
-
-const debouncedSearchText = () => {
-  if (timer.value) {
-    clearTimeout(timer.value)
-    timer.value = null
-  }
-  timer.value = setTimeout(() => {
-    emits('changeFilter', route.query)
-  }, 800)
-}
-
-const clearAllFilter = async () => {
-  for (let i = 0; i < filters.value.length; i++) {
-    const filter = filters.value[i]
-    if (
-      filter.selectedItem
-      && !filter.defaultValue
-    ) {
-      filter.selectedItem = null
-      resetDescendants(i)
-    }
-  }
-  updateQueryFromFilters()
-}
 </script>
 
 <style scoped>
