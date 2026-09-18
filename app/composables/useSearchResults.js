@@ -1,8 +1,11 @@
+import {
+  buildSearchParams,
+  getLegacySearchType,
+  normalizeSearchService,
+} from '@/utils/search-services'
+
 export const useSearchResults = async ({
   activeService,
-  buildSearchParams,
-  getEquivalentNewType,
-  getEquivalentOldType,
   beforeReplaceResults,
 }) => {
   const route = useRoute()
@@ -10,7 +13,7 @@ export const useSearchResults = async ({
 
   const querySearch = ref({
     ...route.query,
-    type: getEquivalentNewType(route.query.type),
+    type: normalizeSearchService(route.query.type),
     page: Number(route.query.page) || 1,
   })
   const isInitialDataLoading = ref(false)
@@ -31,7 +34,7 @@ export const useSearchResults = async ({
     if (isAllDataLoaded.value) return
 
     try {
-      const typeRoute = getEquivalentOldType(querySearch.value.type)
+      const typeRoute = getLegacySearchType(querySearch.value.type)
       let response = {}
 
       if (typeRoute == 'teacher') {
@@ -156,7 +159,7 @@ export const useSearchResults = async ({
   }
 
   const reloadResultsForFilters = async (query) => {
-    lastRequestedService.value = getEquivalentNewType(query.type)
+    lastRequestedService.value = normalizeSearchService(query.type)
     isAllDataLoaded.value = false
     isInitialDataLoading.value = true
     firstLoadedPageNumber.value = 1
@@ -173,7 +176,7 @@ export const useSearchResults = async ({
     'dataSearchSSR',
     () => {
       const pageNumber = Number(route.query.page) || 1
-      if (getEquivalentOldType(route.query.type) == 'teacher') {
+      if (getLegacySearchType(route.query.type) == 'teacher') {
         const query = {
           'PagingDto.PageFilter.Size': perPageServerSide,
           'PagingDto.PageFilter.Skip': (pageNumber - 1) * perPageServerSide,
@@ -215,7 +218,7 @@ export const useSearchResults = async ({
 
   if (initialData.value) {
     data.value = initialData.value.data.list
-    if (getEquivalentOldType(route.query.type) == 'teacher') {
+    if (getLegacySearchType(route.query.type) == 'teacher') {
       totalDataFind.value = initialData.value.data.totalRecordsCount || 0
     }
     else {

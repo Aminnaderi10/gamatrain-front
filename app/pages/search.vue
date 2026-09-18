@@ -79,6 +79,15 @@
 <script setup>
 import ServicesFilterContainer from '~/components/search/ServicesFilterContainer.vue'
 import { useRoute } from 'vue-router'
+import {
+  DEFAULT_SEARCH_SERVICE,
+  LEGACY_SEARCH_TYPES,
+  SEARCH_SERVICE_OPTIONS,
+} from '@/constants'
+import {
+  getLegacySearchType,
+  normalizeSearchService,
+} from '@/utils/search-services'
 
 definePageMeta({
   searchExperience: true,
@@ -87,133 +96,14 @@ definePageMeta({
 const route = useRoute()
 const router = useRouter()
 
-const getEquivalentNewType = (type) => {
-  switch (type) {
-    case 'test':
-      return 'paper'
-    case 'learnfiles':
-      return 'multimedia'
-    case 'azmoon':
-      return 'quizhub'
-    case 'question':
-      return 'forum'
-    case 'dars':
-      return 'tutorial'
-    case 'paper':
-      return 'paper'
-    case 'study-materials':
-      return 'study-materials'
-    case 'multimedia':
-      return 'multimedia'
-    case 'quizhub':
-      return 'quizhub'
-    case 'forum':
-      return 'forum'
-    case 'tutorial':
-      return 'tutorial'
-    case 'teacher':
-      return 'teacher'
-    default:
-      return 'paper'
-  }
-}
-const getEquivalentOldType = (type) => {
-  switch (type) {
-    case 'paper':
-      return 'test'
-    case 'study-materials':
-      return 'test'
-    case 'multimedia':
-      return 'learnfiles'
-    case 'quizhub':
-      return 'azmoon'
-    case 'forum':
-      return 'question'
-    case 'tutorial':
-      return 'dars'
-    case 'test':
-      return 'test'
-    case 'learnfiles':
-      return 'learnfiles'
-    case 'azmoon':
-      return 'azmoon'
-    case 'question':
-      return 'question'
-    case 'dars':
-      return 'dars'
-    case 'teacher':
-      return 'teacher'
-    default:
-      return 'test'
-  }
-}
+const activeService = computed(() => normalizeSearchService(route.query.type))
 
-const activeService = computed(() => getEquivalentNewType(route.query.type))
-
-const buildSearchParams = (query, page, perpage) => {
-  const frontendType = getEquivalentNewType(query.type)
-  const params = {
-    page,
-    perpage,
-    noTypesStats: 1,
-    title: query.title,
-    section: query.section,
-    base: query.base,
-    lesson: query.lesson,
-    type: getEquivalentOldType(frontendType),
-  }
-
-  if (frontendType === 'paper') {
-    params.is_paper = true
-    params.test_type = query.test_type
-    params.variant = query.variant
-    params.edu_year = query.edu_year
-    params.edu_month = query.edu_month
-  }
-  else if (frontendType === 'study-materials') {
-    params.is_paper = false
-    params.test_type = query.test_type
-    params.topic = query.topic
-  }
-  else if (frontendType === 'quizhub') {
-    params.exam_type = query.exam_type
-    params.topic = query.topic
-    params.edu_year = query.edu_year
-    params.edu_month = query.edu_month
-  }
-  else if (frontendType === 'tutorial') {
-    params.topic = query.topic
-  }
-  else if (frontendType === 'multimedia') {
-    params.content_type = query.content_type
-  }
-  else {
-    params.topic = query.topic
-    params.test_type = query.test_type
-    params.content_type = query.content_type
-    params.edu_year = query.edu_year
-    params.edu_month = query.edu_month
-  }
-
-  return params
-}
-
-const serviceOptions = [
-  { title: 'Past Papers', id: 'paper', contentIcon: 'stat-icon icon-paper', color: 'rgb(var(--v-theme-brandNavy))' },
-  { title: 'Study Materials', id: 'study-materials', icon: '/images/study-materials.svg', iconPadding: 3, color: 'rgb(var(--v-theme-brandNavy))' },
-  { title: 'Exam Hub', id: 'quizhub', contentIcon: 'stat-icon icon-exam', color: 'rgb(var(--v-theme-brandNavy))' },
-  { title: 'Tutorial', id: 'tutorial', contentIcon: 'stat-icon icon-tutorial', color: 'rgb(var(--v-theme-brandNavy))' },
-]
-
-const defaultService = serviceOptions[0]
 const activeServiceColor = computed(() =>
-  (serviceOptions.find(service => service.id === activeService.value) || defaultService).color,
+  (SEARCH_SERVICE_OPTIONS.find(service => service.id === activeService.value) || DEFAULT_SEARCH_SERVICE).color,
 )
 
 const filters = useSearchFilters({
   activeService,
-  defaultService,
-  serviceOptions,
 })
 
 const scrollToPageTop = async () => {
@@ -242,16 +132,12 @@ const {
   totalDataFind,
 } = await useSearchResults({
   activeService,
-  buildSearchParams,
-  getEquivalentNewType,
-  getEquivalentOldType,
   beforeReplaceResults: scrollToPageTop,
 })
 
 const { metadata, setAppliedFilterTitles } = useSearchMetadata({
   activeService,
   data,
-  getEquivalentOldType,
 })
 
 const changeFilter = async (query, titles) => {
@@ -269,7 +155,7 @@ const createLinkAddConent = () => {
 
     router.push({ query: { auth_form: 'login' } })
   else {
-    const type = getEquivalentOldType(route.query.type)
+    const type = getLegacySearchType(route.query.type)
     let link = ''
     switch (type) {
       case 'test':
@@ -297,9 +183,8 @@ const createLinkAddConent = () => {
 }
 
 onMounted(() => {
-  const oldType = ['test', 'learnfiles', 'azmoon', 'question', 'dars']
-  const normalizedType = getEquivalentNewType(route.query.type)
-  if (!route.query.type || oldType.includes(route.query.type)) {
+  const normalizedType = normalizeSearchService(route.query.type)
+  if (!route.query.type || LEGACY_SEARCH_TYPES.includes(route.query.type)) {
     router.replace({
       query: {
         ...route.query,

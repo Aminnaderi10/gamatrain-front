@@ -1,10 +1,10 @@
 import dayjs from 'dayjs'
 import { SEARCH_MONTHS_BY_LEVEL } from '@/constants'
+import { getLegacySearchType } from '@/utils/search-services'
 
 export const useSearchMetadata = ({
   activeService,
   data,
-  getEquivalentOldType,
 }) => {
   const route = useRoute()
   const appliedFilterTitles = ref({
@@ -64,7 +64,7 @@ export const useSearchMetadata = ({
     }
 
     if (
-      (getEquivalentOldType(route.query.type) == 'test' || getEquivalentOldType(route.query.type) == 'azmoon')
+      (getLegacySearchType(route.query.type) == 'test' || getLegacySearchType(route.query.type) == 'azmoon')
       && test_type
     ) {
       titles.classificationTitle = getAppliedFilterTitle('test_type')
@@ -113,7 +113,7 @@ export const useSearchMetadata = ({
       },
     }
 
-    const template = titleTemplates[getEquivalentOldType(route.query.type)] || titleTemplates.default
+    const template = titleTemplates[getLegacySearchType(route.query.type)] || titleTemplates.default
     const title = titles.boardTitle ? template.dynamic : template.fallback
 
     let descAppendText = ''
@@ -161,10 +161,10 @@ export const useSearchMetadata = ({
     }
 
     const descTemplate
-      = descriptionTemplates[getEquivalentOldType(route.query.type)] || descriptionTemplates.default
+      = descriptionTemplates[getLegacySearchType(route.query.type)] || descriptionTemplates.default
     const description = titles.boardTitle
       ? descTemplate.dynamic
-      : pageDescriptions[getEquivalentOldType(route.query.type)] || pageDescriptions.test
+      : pageDescriptions[getLegacySearchType(route.query.type)] || pageDescriptions.test
 
     return { title, description }
   })

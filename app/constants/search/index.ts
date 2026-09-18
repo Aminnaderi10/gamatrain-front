@@ -1,5 +1,48 @@
 export const EDEXCEL_BOARD_CODE = 6657
 
+export const SEARCH_SERVICE_OPTIONS = [
+  {
+    id: 'paper',
+    legacyApiType: 'test',
+    title: 'Past Papers',
+    shortTitle: 'Papers',
+    icon: 'stat-icon icon-paper',
+    color: 'rgb(var(--v-theme-brandNavy))',
+    isPaper: true,
+  },
+  {
+    id: 'study-materials',
+    legacyApiType: 'test',
+    title: 'Study Materials',
+    shortTitle: 'Study',
+    icon: 'stat-icon icon-study-materials',
+    color: 'rgb(var(--v-theme-brandNavy))',
+    isPaper: false,
+  },
+  {
+    id: 'quizhub',
+    legacyApiType: 'azmoon',
+    title: 'Exam Hub',
+    shortTitle: 'Exam',
+    icon: 'stat-icon icon-exam',
+    color: 'rgb(var(--v-theme-brandNavy))',
+    isPaper: null,
+  },
+  {
+    id: 'tutorial',
+    legacyApiType: 'dars',
+    title: 'Tutorial',
+    shortTitle: 'Tutorial',
+    icon: 'stat-icon icon-tutorial',
+    color: 'rgb(var(--v-theme-brandNavy))',
+    isPaper: null,
+  },
+]
+
+export const DEFAULT_SEARCH_SERVICE = SEARCH_SERVICE_OPTIONS[0]
+
+export const LEGACY_SEARCH_TYPES = ['test', 'learnfiles', 'azmoon', 'question', 'dars']
+
 export const ALL_SEARCH_MONTHS = [
   { id: 1, title: 'January' },
   { id: 2, title: 'February' },

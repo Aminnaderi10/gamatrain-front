@@ -1,14 +1,14 @@
 import {
   ALL_SEARCH_MONTHS,
+  DEFAULT_SEARCH_SERVICE,
   EDEXCEL_BOARD_CODE,
   SEARCH_BOARD_ICON_BY_TITLE,
   SEARCH_MONTHS_BY_LEVEL,
+  SEARCH_SERVICE_OPTIONS,
 } from '@/constants'
 
 export const useSearchFilters = ({
   activeService,
-  defaultService,
-  serviceOptions,
 }) => {
   const route = useRoute()
 
@@ -114,11 +114,11 @@ export const useSearchFilters = ({
       makeFilter({
         title: 'Services',
         hasSearch: false,
-        staticList: serviceOptions,
+        staticList: SEARCH_SERVICE_OPTIONS,
         queryKey: 'type',
         children: serviceChildren,
         closable: false,
-        defaultValue: defaultService,
+        defaultValue: DEFAULT_SEARCH_SERVICE,
         showItemIcon: true,
         iconSrc: item => item.icon,
         fallbackIcon: 'md:category',
