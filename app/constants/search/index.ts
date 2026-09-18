@@ -46,7 +46,7 @@ export const SEARCH_SERVICE_TITLE_SUFFIXES = {
 
 export const LEGACY_SEARCH_TYPES = ['test', 'learnfiles', 'azmoon', 'question', 'dars']
 
-export const MOBILE_GENERAL_SEARCH_CATEGORIES = [
+export const GENERAL_SEARCH_CATEGORIES = [
   {
     title: 'Past Papers',
     value: 'Past Papers',
@@ -75,8 +75,8 @@ export const MOBILE_GENERAL_SEARCH_CATEGORIES = [
     activeColorClass: 'bg-generalSearchStudyMaterialsActive',
   },
   {
-    title: 'QuizHub',
-    value: 'QuizHub',
+    title: 'Exam Hub',
+    value: 'Exam Hub',
     api: '/api/v1/search',
     apiParams: { type: 'azmoon' },
     type: 'paper',
@@ -123,6 +123,9 @@ export const MOBILE_GENERAL_SEARCH_CATEGORIES = [
     activeColorClass: 'bg-generalSearchBlogActive',
   },
 ]
+
+export const MOBILE_GENERAL_SEARCH_CATEGORIES = GENERAL_SEARCH_CATEGORIES
+export const DESKTOP_GENERAL_SEARCH_CATEGORIES = GENERAL_SEARCH_CATEGORIES
 
 export const ALL_SEARCH_MONTHS = [
   { id: 1, title: 'January' },

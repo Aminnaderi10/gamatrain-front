@@ -146,7 +146,7 @@ const categories = ref([
     type: 'quizhub',
     key: 'exams',
     stat: '--',
-    title: 'QuizHub',
+    title: 'Exam Hub',
     icon: 'icon-exam',
   },
   {

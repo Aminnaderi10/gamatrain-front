@@ -8,7 +8,9 @@
         class="subject-directory-card__icon"
         aria-hidden="true"
       >
-        <span class="subject-directory-card__icon-glyph icon-subject-directory" />
+        <span
+          class="subject-directory-card__icon-glyph icon-subject-directory d-inline-flex align-center justify-center"
+        />
       </span>
 
       <div class="subject-directory-card__copy">
@@ -97,8 +99,11 @@ defineProps({
 }
 
 .subject-directory-card__icon-glyph {
+  width: 22px;
+  height: 22px;
   font-size: 22px;
   line-height: 1;
+  transform: translateX(4px);
 }
 
 .subject-directory-card__copy {
@@ -174,6 +179,8 @@ defineProps({
   }
 
   .subject-directory-card__icon-glyph {
+    width: 18px;
+    height: 18px;
     font-size: 18px;
   }
 

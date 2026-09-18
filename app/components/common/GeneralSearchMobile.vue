@@ -38,7 +38,10 @@
                 class="category-div d-flex align-center justify-center rounded-circle"
                 :class="item.colorClass"
               >
-                <span :class="`icon-category ${item.iconName}`" />
+                <span
+                  class="icon-category d-inline-flex align-center justify-center"
+                  :class="item.iconName"
+                />
               </div>
             </div>
             <div class="primary-gray-600">
@@ -339,8 +342,15 @@ watch(
   height: 50px;
 }
 .icon-category {
+  width: 30px;
+  height: 30px;
   font-size: 30px;
+  line-height: 1;
   color: rgb(var(--v-theme-white));
+}
+
+.icon-category:not(.icon-paper):not(.icon-study-materials) {
+  transform: translateX(4px);
 }
 
 .active-category {
