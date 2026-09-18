@@ -5,8 +5,9 @@
     :fullscreen="!mdAndUp"
     @click="clickOnOverlay"
   >
-    <div
+    <v-card
       class="select-dialog-panel w-100 d-flex flex-column bg-white pa-0 mobile-style"
+      variant="flat"
       @click="clickOnModal"
     >
       <v-row class="select-dialog-header">
@@ -31,18 +32,18 @@
             <span class="text-h5 text-grey400">result</span>
             <span class="text-h4 text-green font-weight-bold">{{ filteredItems.length }}</span>
           </template>
-          <v-icon
+          <v-btn
+            icon
+            variant="text"
+            width="32"
+            height="32"
+            :ripple="false"
             class="select-dialog-close ml-4"
-            size="20"
-            role="button"
-            tabindex="0"
             aria-label="Close dialog"
-            @click="closeModal"
-            @keydown.enter.stop.prevent="closeModal"
-            @keydown.space.stop.prevent="closeModal"
+            @click.stop="closeModal"
           >
-            md:cancel
-          </v-icon>
+            <v-icon size="20">md:cancel</v-icon>
+          </v-btn>
         </v-col>
       </v-row>
       <v-row
@@ -205,7 +206,7 @@
       >
         No {{ titleModal }} found.
       </v-alert>
-    </div>
+    </v-card>
   </v-dialog>
 </template>
 
@@ -404,12 +405,11 @@ const clickOnModal = (event) => {
 
 .select-dialog-close {
   box-sizing: border-box;
-  display: inline-flex;
-  width: 32px;
-  height: 32px;
+  width: 32px !important;
+  min-width: 32px !important;
+  height: 32px !important;
   flex: 0 0 32px;
-  align-items: center;
-  justify-content: center;
+  padding: 0 !important;
   margin-left: 8px !important;
   color: rgb(var(--v-theme-grey500));
   background: transparent;
@@ -421,6 +421,10 @@ const clickOnModal = (event) => {
     background-color 160ms ease,
     border-color 160ms ease,
     transform 160ms ease;
+}
+
+.select-dialog-close :deep(.v-btn__overlay) {
+  opacity: 0;
 }
 
 .select-dialog-close:hover {
