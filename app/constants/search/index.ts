@@ -37,6 +37,13 @@ export const SEARCH_SERVICE_OPTIONS = [
 
 export const DEFAULT_SEARCH_SERVICE = SEARCH_SERVICE_OPTIONS[0]
 
+export const SEARCH_SERVICE_TITLE_SUFFIXES = {
+  paper: 'Past Papers',
+  'study-materials': 'Study Materials',
+  quizhub: 'Exams',
+  tutorial: 'Revision notes',
+}
+
 export const LEGACY_SEARCH_TYPES = ['test', 'learnfiles', 'azmoon', 'question', 'dars']
 
 export const MOBILE_GENERAL_SEARCH_CATEGORIES = [

@@ -64,19 +64,6 @@
               />
             </span>
             <span
-              v-if="information.is_paper && information.q_file"
-              class="indicator indicator-solved-paper"
-              title="Solved paper availability"
-            >
-              <v-icon
-                icon="md:lightbulb_2_outlined"
-                class="status-icon status-icon-solved-paper"
-                color="academicGold"
-                size="16"
-                aria-hidden="true"
-              />
-            </span>
-            <span
               v-if="hasPdfAvailable"
               class="indicator indicator-pdf"
               title="PDF availability"
@@ -105,8 +92,8 @@
             </span>
             <span v-if="isFeaturedResource" class="indicator indicator-fire" title="Featured resource">
               <v-icon
-                icon="md:local_fire_department_outlined"
-                class="status-icon status-icon-fire"
+                icon="md:local_fire_department"
+                class="status-icon"
                 color="lightError"
                 size="16"
                 aria-hidden="true"
@@ -550,16 +537,6 @@ const createLinkCard = (information) => {
 }
 
 .status-icon-mark-scheme {
-  background: transparent;
-  -webkit-text-stroke: 0;
-}
-
-.status-icon-solved-paper {
-  background: transparent;
-  -webkit-text-stroke: 0;
-}
-
-.status-icon-fire {
   background: transparent;
   -webkit-text-stroke: 0;
 }

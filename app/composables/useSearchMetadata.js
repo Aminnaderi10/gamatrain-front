@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { SEARCH_MONTHS_BY_LEVEL } from '@/constants'
+import { SEARCH_MONTHS_BY_LEVEL, SEARCH_SERVICE_TITLE_SUFFIXES } from '@/constants'
 import { getLegacySearchType } from '@/utils/search-services'
 
 export const useSearchMetadata = ({
@@ -73,6 +73,7 @@ export const useSearchMetadata = ({
     }
 
     const joinTextTitles = `${titles.boardTitle} ${titles.gradeTitle} ${titles.subjectTitle} ${titles.classificationTitle} ${titles.monthTitle} ${titles.yearTitle}`
+    const serviceTitleSuffix = SEARCH_SERVICE_TITLE_SUFFIXES[activeService.value] || 'Past Papers'
 
     let appendText = ''
     if (titles.is_paper) {
@@ -86,7 +87,7 @@ export const useSearchMetadata = ({
           'Multimedia Interactive Educational Content; PowerPoint, Video, Class Voice, GamaTrain',
       },
       test: {
-        dynamic: `${joinTextTitles} ${appendText}`,
+        dynamic: `${joinTextTitles} ${serviceTitleSuffix}`,
         fallback: 'Educational Resources | K12 Education Papers and Materials',
       },
       question: {
@@ -95,11 +96,11 @@ export const useSearchMetadata = ({
           'Seek Clarification, Expand Your Understanding: GamaTrain\'s Q&A Forum',
       },
       azmoon: {
-        dynamic: `${joinTextTitles} Online test`,
+        dynamic: `${joinTextTitles} ${serviceTitleSuffix}`,
         fallback: 'Online Exams, Free Exams for Improving Education',
       },
       dars: {
-        dynamic: `${joinTextTitles} Textbook`,
+        dynamic: `${joinTextTitles} ${serviceTitleSuffix}`,
         fallback:
           'Master Concepts, Enhance Learning: GamaTrain\'s Online Tutorials',
       },
@@ -108,7 +109,7 @@ export const useSearchMetadata = ({
         fallback: 'Teacher directory',
       },
       default: {
-        dynamic: `${joinTextTitles} Past Papers`,
+        dynamic: `${joinTextTitles} ${serviceTitleSuffix}`,
         fallback: 'Educational Resources | K12 Education Papers and Materials',
       },
     }
