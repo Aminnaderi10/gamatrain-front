@@ -7,7 +7,7 @@ import { createVuetify } from 'vuetify'
 import { aliases as mdiAliases, mdi } from 'vuetify/iconsets/mdi'
 import { mdSymbols } from '../utils/iconsets/mdSymbols'
 import { defineNuxtPlugin } from 'nuxt/app'
-import { DIRECTORY_COLORS } from '~/constants/pastpaper/directory'
+import { DIRECTORY_COLORS, DIRECTORY_FILTER_COLORS } from '~/constants/pastpaper/directory'
 
 export default defineNuxtPlugin(
   (app: { vueApp: { use: (plugin: unknown) => void } }) => {
@@ -78,6 +78,7 @@ export default defineNuxtPlugin(
               generalSearchBlogActive: '#FFDFB3',
               white: '#FFFFFF',
               ...DIRECTORY_COLORS,
+              ...DIRECTORY_FILTER_COLORS,
             },
           },
           dark: {
@@ -137,6 +138,7 @@ export default defineNuxtPlugin(
               generalSearchBlogActive: '#FFDFB3',
               white: '#FFFFFF',
               ...DIRECTORY_COLORS,
+              ...DIRECTORY_FILTER_COLORS,
             },
           },
         },
