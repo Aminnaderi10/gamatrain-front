@@ -80,16 +80,8 @@
       </div>
       <div
         class="d-flex align-center ga-3 action-button"
-        :class="{
-          'search-header-actions': isSearchExperience,
-          'search-header-actions-signed-out': isSearchExperience && !isAuthenticated,
-        }"
+        :class="{ 'search-header-actions': isSearchExperience }"
       >
-        <div
-          id="search-header-keyword"
-          class="search-header-keyword d-none d-md-flex"
-          :class="{ 'search-header-keyword-hidden': !isSearchExperience }"
-        />
         <v-icon
           :color="menuSetting.linkColor"
           role="button"
@@ -331,21 +323,6 @@ onBeforeUnmount(() => {
   flex: 1 1 auto;
   min-width: 0;
   justify-content: flex-end;
-}
-.search-header-keyword {
-  box-sizing: border-box;
-  flex: 1 1 430px;
-  max-width: 430px;
-  min-width: 0;
-  padding-left: 100px;
-}
-.search-header-keyword-hidden {
-  display: none !important;
-}
-@media (min-width: 960px) {
-  .search-header-actions-signed-out {
-    column-gap: 60px !important;
-  }
 }
 .main-header{
   height : 64px;

@@ -1,4 +1,25 @@
 import type { ExperienceDTO } from '@/types'
+import type { SearchParameters } from '@/composables/useApiService'
+
+export interface ProfileListParams extends SearchParameters {
+  'PagingDto.PageFilter.Size': number
+  'PagingDto.PageFilter.Skip': number
+  'PagingDto.PageFilter.ReturnTotalRecordsCount': boolean
+}
+
+export interface ProfileListItemDTO {
+  handle: string
+  fullName?: string | null
+  avatar?: string | null
+  skills?: string[] | null
+  userRateLevel?: string | null
+  onlineStatus?: OnlineStatus | null
+}
+
+export interface ProfileListResponseDTO {
+  list: ProfileListItemDTO[]
+  totalRecordsCount: number
+}
 
 export type OnlineStatus = 'Online' | 'ActiveRecently' | 'OnlineToday' | 'ActiveThisWeek' | 'ActiveThisMonth' | 'ActiveLongTimeAgo' | 'NewUser'
 

@@ -1,3 +1,5 @@
+import { useProfileListApi } from '@/composables/api/profile/useProfileList.api'
+import { useSearchApi } from '@/composables/api/search/useSearch.api'
 import {
   buildSearchParams,
   getLegacySearchType,
@@ -10,6 +12,8 @@ export const useSearchResults = async ({
 }) => {
   const route = useRoute()
   const router = useRouter()
+  const { getResults, getTypesStats } = useSearchApi()
+  const { getProfiles } = useProfileListApi()
 
   const querySearch = ref({
     ...route.query,
@@ -43,12 +47,12 @@ export const useSearchResults = async ({
           'PagingDto.PageFilter.Skip': (querySearch.value.page - 1) * perPage,
           'PagingDto.PageFilter.ReturnTotalRecordsCount': true,
         }
-        response = await useApiService.get('/api/v2/identities/profiles/list', query)
+        response = await getProfiles(query)
         totalDataFind.value = response.data.totalRecordsCount || 0
       }
       else {
         const params = buildSearchParams(querySearch.value, querySearch.value.page, perPage)
-        response = await useApiService.get('/api/v1/search', params)
+        response = await getResults(params)
         totalDataFind.value = response.data.num || 0
       }
 
@@ -124,16 +128,8 @@ export const useSearchResults = async ({
   const refreshServiceResultCounts = async (query) => {
     const requestId = ++serviceCountRequestId
     const [paperResult, studyMaterialsResult] = await Promise.allSettled([
-      useApiService.get(
-        '/api/v1/search/typesstats',
-        buildTypeStatsParams(query, 1),
-        { public: true },
-      ),
-      useApiService.get(
-        '/api/v1/search/typesstats',
-        buildTypeStatsParams(query, 0),
-        { public: true },
-      ),
+      getTypesStats(buildTypeStatsParams(query, 1)),
+      getTypesStats(buildTypeStatsParams(query, 0)),
     ])
 
     if (requestId !== serviceCountRequestId) return
@@ -182,11 +178,11 @@ export const useSearchResults = async ({
           'PagingDto.PageFilter.Skip': (pageNumber - 1) * perPageServerSide,
           'PagingDto.PageFilter.ReturnTotalRecordsCount': true,
         }
-        return useApiService.get('/api/v2/identities/profiles/list', query)
+        return getProfiles(query)
       }
 
       const params = buildSearchParams(route.query, pageNumber, perPageServerSide)
-      return useApiService.get('/api/v1/search', params, { public: true })
+      return getResults(params, { public: true })
     },
   )
   const initialData = initialDataRequest.data

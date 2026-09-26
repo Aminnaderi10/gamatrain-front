@@ -477,7 +477,7 @@ const props = defineProps({
   },
   keywordSearchTarget: {
     type: String,
-    default: '#search-header-keyword',
+    default: '',
   },
   loading: {
     type: Boolean,
@@ -493,7 +493,7 @@ const props = defineProps({
   },
 })
 
-const headerSearchActive = computed(() => props.keywordSearchInHeader && searchHeaderReady.value && mdAndUp.value)
+const headerSearchActive = computed(() => props.keywordSearchInHeader && Boolean(props.keywordSearchTarget) && searchHeaderReady.value && mdAndUp.value)
 const emits = defineEmits(['changeFilter'])
 const slots = useSlots()
 const hasServicesNavigation = computed(() => Boolean(slots['services-navigation']))

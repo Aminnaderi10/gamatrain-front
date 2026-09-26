@@ -81,6 +81,7 @@ export const GENERAL_SEARCH_CATEGORIES = [
     apiParams: { type: 'azmoon' },
     type: 'paper',
     typePaper: 'exam',
+    searchType: 'quizhub',
     isOldApi: true,
     keywordSearch: 'title',
     iconName: 'icon-exam',

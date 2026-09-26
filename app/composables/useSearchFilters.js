@@ -1,3 +1,4 @@
+import { useBoardApi } from '@/composables/api/board/useBoard.api'
 import {
   ALL_SEARCH_MONTHS,
   DEFAULT_SEARCH_SERVICE,
@@ -11,6 +12,7 @@ export const useSearchFilters = ({
   activeService,
 }) => {
   const route = useRoute()
+  const { getBoards } = useBoardApi()
 
   const makeFilter = overrides => ({
     selectedItem: null,
@@ -29,7 +31,7 @@ export const useSearchFilters = ({
 
   const enrichBoardsWithIcons = async (boards) => {
     try {
-      const response = await useApiService.get('/api/v2/boards', undefined, { public: true })
+      const response = await getBoards()
       const boardByCode = new Map(
         (response.data || []).map(board => [String(board.code), board]),
       )

@@ -342,7 +342,7 @@ const getItems = async (extraIdParam = '') => {
 }
 
 const getItemById = (id, filterKey) => {
-  if (!id) return null
+  if (id === undefined || id === null || id === '') return null
 
   const searchField = filterKey === 'code' ? 'code' : 'id'
 

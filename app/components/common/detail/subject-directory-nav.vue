@@ -162,7 +162,7 @@ defineProps({
     align-items: center;
     flex-wrap: nowrap;
     gap: 8px;
-    padding: 8px 16px;
+    padding: 2px 16px;
   }
 
   .subject-directory-card__main {
@@ -221,13 +221,13 @@ defineProps({
     position: static;
     display: inline-flex;
     box-sizing: border-box;
-    height: 16px;
-    min-height: 16px;
+    height: 22px;
+    min-height: 22px;
     gap: 3px;
-    padding: 0 4px;
+    padding: 2px 6px;
     margin-left: auto;
-    font-size: 7px;
-    line-height: 14px;
+    font-size: 11px;
+    line-height: 16px;
     white-space: nowrap;
   }
 }

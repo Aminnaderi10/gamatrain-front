@@ -7,11 +7,11 @@ export const useFilterController = ({
   const route = useRoute()
   const router = useRouter()
 
+  const hasFilterValue = value => value !== undefined && value !== null && value !== ''
+
   const getActiveFilterCount = query => filters.value.filter(filter =>
     filter.queryKey
-    && query[filter.queryKey] !== undefined
-    && query[filter.queryKey] !== null
-    && query[filter.queryKey] !== ''
+    && hasFilterValue(query[filter.queryKey])
     && !(hasServicesNavigation.value && filter.queryKey === 'type'),
   ).length
 
@@ -132,7 +132,7 @@ export const useFilterController = ({
           readyForGetStatic
           && child.getStaticList
           && filterParent.selectedItem
-          && filterParent.selectedItem.id
+          && hasFilterValue(filterParent.selectedItem.id)
         ) {
           const staticList = child.getStaticList(filterParent.selectedItem.id)
           child.refElement.setStaticItem(staticList)
@@ -196,11 +196,11 @@ export const useFilterController = ({
     filters.value.forEach((filter) => {
       if (filter.queryKey) delete query[filter.queryKey]
 
-      if (filter.queryKey && filter.selectedItem?.code) {
+      if (filter.queryKey && hasFilterValue(filter.selectedItem?.code)) {
         filterQuery[filter.queryKey] = filter.selectedItem.code
         titles[filter.queryKey] = filter.selectedItem.title
       }
-      else if (filter.queryKey && filter.selectedItem?.id) {
+      else if (filter.queryKey && hasFilterValue(filter.selectedItem?.id)) {
         filterQuery[filter.queryKey] = filter.selectedItem.id
         titles[filter.queryKey] = filter.selectedItem.title
       }
@@ -291,7 +291,7 @@ export const useFilterController = ({
       const queryValue = route.query[filter.queryKey]
       const filterKey = filter.queryKey == 'section' ? 'code' : 'id'
 
-      if (!queryValue) {
+      if (!hasFilterValue(queryValue)) {
         if (filter.defaultValue) {
           filters.value[index].selectedItem = filter.defaultValue
           await enableReadyChildren(index, syncVersion)
