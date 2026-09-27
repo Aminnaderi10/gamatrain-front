@@ -40,7 +40,7 @@
           </div>
 
           <div
-            class="card-indicators d-flex align-center flex-shrink-0"
+            class="card-indicators d-flex align-center flex-shrink-0 ga-3 ga-md-6"
             aria-label="Resource information"
           >
             <DifficultyIndicator v-if="hasDifficulty" :level="information.level" :size="16" />
@@ -445,8 +445,6 @@ const createLinkCard = (information) => {
   -webkit-text-stroke: 0;
 }
 
-.card-indicators { gap: 8px; }
-
 .indicator {
   display: inline-flex;
   width: 16px;
@@ -501,10 +499,6 @@ const createLinkCard = (information) => {
 }
 
 .indicator-muted { opacity: 0.32; }
-
-@media (min-width: 960px) {
-  .card-indicators { gap: 24px; }
-}
 
 @media (min-width: 1280px) {
   .metadata {
