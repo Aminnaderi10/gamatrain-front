@@ -36,13 +36,14 @@
       >
         <!-- Generating: the server is building the file (before any byte arrives). -->
         <template v-if="getPhase(format.fileType) === 'cooking'">
-          <v-progress-circular
-            indeterminate
-            :color="format.color"
+          <span :class="`${format.textClass} text-h5 font-weight-bold mt-1 ml-2`">Cooking</span>
+          <v-icon
+            class="heart-blink ml-1"
+            color="#e53935"
             size="20"
-            width="2"
-          />
-          <span :class="`${format.textClass} text-h5 font-weight-bold mt-1 mx-2`">Cooking for you…</span>
+          >
+            md:favorite
+          </v-icon>
         </template>
 
         <!-- Streaming the finished file, with real progress. -->
@@ -287,6 +288,20 @@ onMounted(() => {
 }
 .text-powerpoint {
   color: #c43e1c;
+}
+/* "Cooking" phase: a blinking (pulsing) heart while the server generates the file. */
+.heart-blink {
+  animation: heart-blink 1s ease-in-out infinite;
+}
+@keyframes heart-blink {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.25;
+    transform: scale(0.8);
+  }
 }
 .button-mobile-download {
   height: 46px;
