@@ -1,16 +1,10 @@
 <template>
-  <div
-    class="card-search w-100 rounded-xl position-relative"
+  <NuxtLink
+    :to="createLinkCard(information)"
+    :prefetch="false"
+    class="card-search card-primary-link d-block w-100 rounded-xl position-relative"
+    :aria-label="information?.title"
   >
-    <NuxtLink
-      :to="createLinkCard(information)"
-      :prefetch="false"
-      class="card-primary-link"
-      :aria-label="information?.title"
-    >
-      <span class="card-primary-link__label">{{ information?.title }}</span>
-    </NuxtLink>
-
     <div class="card-content d-flex align-stretch">
       <div class="cover-wrap d-flex align-center justify-center flex-shrink-0">
         <v-img
@@ -52,8 +46,9 @@
             <DifficultyIndicator v-if="hasDifficulty" :level="information.level" :size="16" />
             <span
               v-if="hasAnswersAtEndOfFiles"
+              v-tooltip:top="'Answers included'"
               class="indicator indicator-library"
-              title="Resource available"
+              aria-label="Answers included"
             >
               <v-icon
                 icon="md:library_add_check"
@@ -65,15 +60,17 @@
             </span>
             <span
               v-if="hasPdfAvailable"
+              v-tooltip:top="'PDF file'"
               class="indicator indicator-pdf"
-              title="PDF availability"
+              aria-label="PDF file"
             >
               <span class="status-icon status-icon-pdf icon-pdf" aria-hidden="true" />
             </span>
             <span
               v-if="information.is_paper && information.a_file"
+              v-tooltip:top="'Mark scheme'"
               class="indicator indicator-mark-scheme"
-              title="Mark scheme availability"
+              aria-label="Mark scheme"
             >
               <v-icon
                 icon="md:check_box_outlined"
@@ -85,12 +82,18 @@
             </span>
             <span
               v-if="!information.is_paper && information.q_file_word"
+              v-tooltip:top="'Word file'"
               class="indicator indicator-word"
-              title="Word file availability"
+              aria-label="Word file"
             >
               <span class="status-icon status-icon-word icon-word" aria-hidden="true" />
             </span>
-            <span v-if="isFeaturedResource" class="indicator indicator-fire" title="Featured resource">
+            <span
+              v-if="isFeaturedResource"
+              v-tooltip:top="'Featured resource'"
+              class="indicator indicator-fire"
+              aria-label="Featured resource"
+            >
               <v-icon
                 icon="md:local_fire_department"
                 class="status-icon"
@@ -183,15 +186,15 @@
         </div>
       </div>
     </div>
-  </div>
+  </NuxtLink>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import DifficultyIndicator from './DifficultyIndicator.vue'
-import QualityIndicator from './QualityIndicator.vue'
-import { getLegacySearchType } from '@/utils/search-services'
+import DifficultyIndicator from './difficultyIndicator.vue'
+import QualityIndicator from './qualityIndicator.vue'
+import { getLegacySearchType } from '@/utils/searchServices'
 import { hasEmbeddedAnswers } from '@/utils/searchCardAvailability'
 
 const route = useRoute()
@@ -310,17 +313,13 @@ const createLinkCard = (information) => {
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
-.card-search:has(.card-primary-link:hover) {
+.card-search:hover {
   border-color: rgb(var(--v-theme-borderSubtle));
   box-shadow: 0 6px 18px rgb(var(--v-theme-brandNavy) / 12%);
   transform: translateY(-2px);
 }
 
 .card-primary-link {
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  border-radius: inherit;
   color: inherit;
   text-decoration: none;
 }
@@ -328,18 +327,6 @@ const createLinkCard = (information) => {
 .card-primary-link:focus-visible {
   outline: 3px solid rgb(var(--v-theme-academicGold) / 34%);
   outline-offset: -3px;
-}
-
-.card-primary-link__label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
 }
 
 .card-content {

@@ -125,7 +125,10 @@
 </template>
 
 <script setup>
+import { useSearchServiceCounts } from '@/composables/useSearchServiceCounts'
+
 const { data: boardList, getData: getBoards } = useBoard()
+const { fetchServiceCounts } = useSearchServiceCounts()
 
 const categories = ref([
   {
@@ -231,43 +234,17 @@ const fetchCategoryCounts = async () => {
     }
 
     const requestId = ++categoryCountRequestId
-    const buildParams = isPaper => ({
+    const counts = await fetchServiceCounts({
       section: selectedBoard.value.code,
       base: selectedGrade.value,
-      is_paper: isPaper,
     })
-    const [paperResult, studyMaterialsResult] = await Promise.allSettled([
-      useApiService.get('/api/v1/search/typesstats', buildParams(1), { public: true }),
-      useApiService.get('/api/v1/search/typesstats', buildParams(0), { public: true }),
-    ])
 
     if (requestId !== categoryCountRequestId) return
 
-    const getStats = result => result.status === 'fulfilled'
-      ? result.value?.data?.types_stats ?? result.value?.data
-      : null
-    const getCount = (stats, ...keys) => {
-      const value = keys
-        .map(key => stats?.[key])
-        .find(candidate => candidate !== undefined && candidate !== null)
-      const count = Number.parseInt(value, 10)
-      return Number.isFinite(count) ? count : 0
-    }
-    const setCount = (key, value) => {
-      const category = categories.value.find(item => item.key === key)
-      if (category) category.stat = value
-    }
-
-    const paperStats = getStats(paperResult)
-    const studyMaterialsStats = getStats(studyMaterialsResult)
-    const sharedStats = paperStats || studyMaterialsStats
-
-    if (paperStats) setCount('papers', getCount(paperStats, 'papers'))
-    if (studyMaterialsStats) setCount('study-materials', getCount(studyMaterialsStats, 'papers'))
-    if (sharedStats) {
-      setCount('exams', getCount(sharedStats, 'exams', 'azmoon'))
-      setCount('tutorial', getCount(sharedStats, 'tutorials', 'dars'))
-    }
+    categories.value.forEach((category) => {
+      const count = counts[category.type]
+      if (count !== undefined) category.stat = count
+    })
   }
   catch (error) {
     console.error('Error fetching category counts:', error)

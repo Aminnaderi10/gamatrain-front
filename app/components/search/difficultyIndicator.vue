@@ -1,7 +1,7 @@
 <template>
   <span
+    v-tooltip:top="`${label} difficulty`"
     class="difficulty-indicator"
-    :title="`${label} difficulty`"
     :aria-label="`${label} difficulty`"
   >
     <svg

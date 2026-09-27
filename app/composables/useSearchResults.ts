@@ -1,21 +1,25 @@
+import type { ApiResult, ProfileListResponseDTO } from '@/types'
+import type { SearchListDTO, SearchQuery, SearchResultItem, SearchResultsOptions, SearchServiceCounts } from '@/types/search'
 import { useProfileListApi } from '@/composables/api/profile/useProfileList.api'
 import { useSearchApi } from '@/composables/api/search/useSearch.api'
+import { useSearchServiceCounts } from '@/composables/useSearchServiceCounts'
 import {
   buildSearchParams,
   getLegacySearchType,
   normalizeSearchService,
-} from '@/utils/search-services'
+} from '@/utils/searchServices'
 
 export const useSearchResults = async ({
   activeService,
   beforeReplaceResults,
-}) => {
+}: SearchResultsOptions) => {
   const route = useRoute()
   const router = useRouter()
-  const { getResults, getTypesStats } = useSearchApi()
+  const { getResults } = useSearchApi()
+  const { fetchServiceCounts } = useSearchServiceCounts()
   const { getProfiles } = useProfileListApi()
 
-  const querySearch = ref({
+  const querySearch = ref<SearchQuery & { page: number }>({
     ...route.query,
     type: normalizeSearchService(route.query.type),
     page: Number(route.query.page) || 1,
@@ -23,10 +27,10 @@ export const useSearchResults = async ({
   const isInitialDataLoading = ref(false)
   const isPaginationDataLoading = ref(false)
   const isPreviousLoading = ref(false)
-  const data = ref([])
+  const data = ref<SearchResultItem[]>([])
   const isAllDataLoaded = ref(false)
-  const totalDataFind = ref(0)
-  const serviceResultCounts = ref({})
+  const totalDataFind = ref<number | string>(0)
+  const serviceResultCounts = ref<SearchServiceCounts>({})
   const perPage = 10
   const perPageServerSide = 5
   const firstLoadedPageNumber = ref(Number(route.query.page) || 1)
@@ -34,12 +38,12 @@ export const useSearchResults = async ({
   const lastRequestedService = ref(activeService.value)
   let serviceCountRequestId = 0
 
-  const getDataList = async () => {
-    if (isAllDataLoaded.value) return
+  const getDataList = async (): Promise<SearchResultItem[]> => {
+    if (isAllDataLoaded.value) return []
 
     try {
       const typeRoute = getLegacySearchType(querySearch.value.type)
-      let response = {}
+      let list: SearchResultItem[]
 
       if (typeRoute == 'teacher') {
         const query = {
@@ -47,20 +51,24 @@ export const useSearchResults = async ({
           'PagingDto.PageFilter.Skip': (querySearch.value.page - 1) * perPage,
           'PagingDto.PageFilter.ReturnTotalRecordsCount': true,
         }
-        response = await getProfiles(query)
+        const response = await getProfiles(query)
+        if (!response.data) throw new Error('Teacher search returned no data')
         totalDataFind.value = response.data.totalRecordsCount || 0
+        list = response.data.list
       }
       else {
         const params = buildSearchParams(querySearch.value, querySearch.value.page, perPage)
-        response = await getResults(params)
+        const response = await getResults(params)
+        if (!response.data) throw new Error('Resource search returned no data')
         totalDataFind.value = response.data.num || 0
+        list = response.data.list
       }
 
-      if (response.data.list && response.data.list.length < perPage) {
+      if (list && list.length < perPage) {
         isAllDataLoaded.value = true
       }
 
-      return response.data.list
+      return list
     }
     catch (err) {
       console.error(err)
@@ -76,7 +84,7 @@ export const useSearchResults = async ({
   const loadNextPageData = async () => {
     latestLoadedPageNumber.value += 1
     querySearch.value.page = latestLoadedPageNumber.value
-    const query = { ...route.query }
+    const query: SearchQuery = { ...route.query }
 
     query.page = querySearch.value.page
     router.replace({ query })
@@ -88,7 +96,7 @@ export const useSearchResults = async ({
   const loadPreviousPageData = async () => {
     firstLoadedPageNumber.value -= 1
     querySearch.value.page = firstLoadedPageNumber.value
-    const query = { ...route.query }
+    const query: SearchQuery = { ...route.query }
 
     query.page = querySearch.value.page
     router.replace({ query })
@@ -97,56 +105,11 @@ export const useSearchResults = async ({
     data.value = [...responseList, ...data.value]
   }
 
-  const buildTypeStatsParams = (query, isPaper) => ({
-    title: query.title,
-    section: query.section,
-    base: query.base,
-    lesson: query.lesson,
-    topic: query.topic,
-    test_type: query.test_type,
-    variant: query.variant,
-    exam_type: query.exam_type,
-    content_type: query.content_type,
-    edu_year: query.edu_year,
-    edu_month: query.edu_month,
-    is_paper: isPaper,
-  })
-
-  const getTypesStatsData = result =>
-    result.status === 'fulfilled'
-      ? result.value?.data?.types_stats ?? result.value?.data
-      : null
-
-  const getStatsCount = (stats, ...keys) => {
-    const value = keys
-      .map(key => stats?.[key])
-      .find(candidate => candidate !== undefined && candidate !== null)
-    const count = Number.parseInt(value, 10)
-    return Number.isFinite(count) ? count : 0
-  }
-
-  const refreshServiceResultCounts = async (query) => {
+  const refreshServiceResultCounts = async (query: SearchQuery) => {
     const requestId = ++serviceCountRequestId
-    const [paperResult, studyMaterialsResult] = await Promise.allSettled([
-      getTypesStats(buildTypeStatsParams(query, 1)),
-      getTypesStats(buildTypeStatsParams(query, 0)),
-    ])
+    const counts = await fetchServiceCounts(query)
 
     if (requestId !== serviceCountRequestId) return
-
-    const paperStats = getTypesStatsData(paperResult)
-    const studyMaterialsStats = getTypesStatsData(studyMaterialsResult)
-    const sharedStats = paperStats || studyMaterialsStats
-    const counts = {}
-
-    if (paperStats)
-      counts.paper = getStatsCount(paperStats, 'papers')
-    if (studyMaterialsStats)
-      counts['study-materials'] = getStatsCount(studyMaterialsStats, 'papers')
-    if (sharedStats) {
-      counts.quizhub = getStatsCount(sharedStats, 'exams', 'azmoon')
-      counts.tutorial = getStatsCount(sharedStats, 'tutorials', 'dars')
-    }
 
     serviceResultCounts.value = {
       ...serviceResultCounts.value,
@@ -154,7 +117,7 @@ export const useSearchResults = async ({
     }
   }
 
-  const reloadResultsForFilters = async (query) => {
+  const reloadResultsForFilters = async (query: SearchQuery) => {
     lastRequestedService.value = normalizeSearchService(query.type)
     isAllDataLoaded.value = false
     isInitialDataLoading.value = true
@@ -168,7 +131,7 @@ export const useSearchResults = async ({
     await countsRequest
   }
 
-  const initialDataRequest = useAsyncData(
+  const initialDataRequest = useAsyncData<ApiResult<SearchListDTO | ProfileListResponseDTO>>(
     'dataSearchSSR',
     () => {
       const pageNumber = Number(route.query.page) || 1
@@ -188,7 +151,7 @@ export const useSearchResults = async ({
   const initialData = initialDataRequest.data
 
   watchEffect(() => {
-    if (initialData.value) {
+    if (initialData.value?.data) {
       data.value = initialData.value.data.list
     }
   })
@@ -212,13 +175,15 @@ export const useSearchResults = async ({
 
   await initialDataRequest
 
-  if (initialData.value) {
+  if (initialData.value?.data) {
     data.value = initialData.value.data.list
     if (getLegacySearchType(route.query.type) == 'teacher') {
-      totalDataFind.value = initialData.value.data.totalRecordsCount || 0
+      totalDataFind.value = 'totalRecordsCount' in initialData.value.data
+        ? initialData.value.data.totalRecordsCount || 0
+        : 0
     }
     else {
-      totalDataFind.value = initialData.value.data.num || 0
+      totalDataFind.value = 'num' in initialData.value.data ? initialData.value.data.num || 0 : 0
     }
     isInitialDataLoading.value = false
     isPaginationDataLoading.value = false

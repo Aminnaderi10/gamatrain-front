@@ -1,8 +1,8 @@
 <template>
   <span
+    v-tooltip:top="`Quality: ${safeScore} of 5`"
     class="quality-indicator"
-    :title="`${safeScore} of 5 quality rating`"
-    :aria-label="`${safeScore} of 5 quality rating`"
+    :aria-label="`Quality: ${safeScore} of 5`"
   >
     <svg
       :width="size"

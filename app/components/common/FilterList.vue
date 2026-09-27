@@ -105,9 +105,11 @@
               'mobile-quick-filter--disabled': entry.filter.disabled,
             }"
           >
-            <button
+            <v-btn
               type="button"
-              class="mobile-quick-filter__control"
+              variant="text"
+              :ripple="false"
+              class="mobile-quick-filter__control text-none"
               :aria-label="getQuickFilterAriaLabel(entry.filter)"
               :aria-pressed="Boolean(entry.filter.selectedItem)"
               :aria-disabled="entry.filter.disabled"
@@ -116,7 +118,7 @@
             >
               <span
                 v-if="hasFilterIcon(entry.filter)"
-                class="mobile-quick-filter__icon text-brandNavy"
+                class="mobile-quick-filter__icon text-brandNavy me-2"
                 aria-hidden="true"
               >
                 <CommonFilterControlIcon
@@ -126,6 +128,7 @@
                   :fallback-icon="entry.filter.fallbackIcon"
                   :fallback-icon-padding="entry.filter.fallbackIconPadding"
                   :control-icon="entry.filter.controlIcon"
+                  :icon-size="20"
                 />
               </span>
 
@@ -136,17 +139,21 @@
                   class="mobile-quick-filter__value"
                 >{{ getQuickFilterValue(entry.filter) }}</span>
               </span>
-            </button>
+            </v-btn>
 
-            <button
+            <v-btn
               v-if="entry.filter.selectedItem && entry.filter.closable"
               type="button"
+              variant="text"
+              :ripple="false"
               class="mobile-quick-filter__clear"
               :aria-label="`Clear ${entry.filter.title} filter`"
               @click.stop="clearFilter(entry.index)"
             >
-              <v-icon size="18">md:cancel</v-icon>
-            </button>
+              <v-icon size="18">
+                md:cancel
+              </v-icon>
+            </v-btn>
           </div>
         </div>
       </div>
@@ -1122,6 +1129,7 @@ watch(activeFilterService, async (service, previousService) => {
 
   .mobile-quick-filter--disabled .mobile-quick-filter__control {
     cursor: default;
+    opacity: 1;
   }
 
   .mobile-quick-filter--disabled .mobile-quick-filter__icon,
@@ -1140,7 +1148,6 @@ watch(activeFilterService, async (service, previousService) => {
     min-height: 44px;
     flex: 1 1 auto;
     align-items: center;
-    gap: 8px;
     padding: 6px 12px;
     overflow: hidden;
     color: inherit;
@@ -1150,6 +1157,27 @@ watch(activeFilterService, async (service, previousService) => {
     border: 0;
     border-radius: inherit;
     cursor: pointer;
+  }
+
+  .mobile-quick-filter__control,
+  .mobile-quick-filter__clear {
+    height: 100%;
+    letter-spacing: normal;
+    text-indent: 0;
+  }
+
+  .mobile-quick-filter__control :deep(.v-btn__content) {
+    min-width: 0;
+    flex: 1 1 auto;
+    justify-content: flex-start;
+  }
+
+  /* Keep the existing hover backgrounds and focus outline without a second overlay. */
+  .mobile-quick-filter__control :deep(.v-btn__overlay),
+  .mobile-quick-filter__clear :deep(.v-btn__overlay),
+  .mobile-quick-filter__control::after,
+  .mobile-quick-filter__clear::after {
+    display: none;
   }
 
   .mobile-quick-filter--selected .mobile-quick-filter__control {
@@ -1182,6 +1210,10 @@ watch(activeFilterService, async (service, previousService) => {
     display: inline-flex;
     width: 20px;
     height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    max-width: 20px;
+    max-height: 20px;
     flex: 0 0 20px;
     align-items: center;
     justify-content: center;

@@ -1,3 +1,4 @@
+import type { FilterConfiguration, FilterItem, SearchConditionalFilter, SearchServiceId, SearchServiceOptions } from '@/types/search'
 import { useBoardApi } from '@/composables/api/board/useBoard.api'
 import {
   ALL_SEARCH_MONTHS,
@@ -10,11 +11,11 @@ import {
 
 export const useSearchFilters = ({
   activeService,
-}) => {
+}: SearchServiceOptions) => {
   const route = useRoute()
   const { getBoards } = useBoardApi()
 
-  const makeFilter = overrides => ({
+  const makeFilter = (overrides: Partial<FilterConfiguration> & Pick<FilterConfiguration, 'title' | 'queryKey'>): FilterConfiguration => ({
     selectedItem: null,
     disabled: false,
     hasSearch: true,
@@ -29,7 +30,7 @@ export const useSearchFilters = ({
     ...overrides,
   })
 
-  const enrichBoardsWithIcons = async (boards) => {
+  const enrichBoardsWithIcons = async (boards: FilterItem[]): Promise<FilterItem[]> => {
     try {
       const response = await getBoards()
       const boardByCode = new Map(
@@ -55,14 +56,15 @@ export const useSearchFilters = ({
 
   return computed(() => {
     const service = activeService.value
-    const conditionalFilters = {
-      paper: ['year', 'session', 'paper', 'variant'],
+    const filtersByService: Partial<Record<SearchServiceId, SearchConditionalFilter[]>> = {
+      'paper': ['year', 'session', 'paper', 'variant'],
       'study-materials': ['material', 'topic'],
-      quizhub: ['topic', 'year', 'session', 'exam-type'],
-      tutorial: ['topic'],
-    }[service] || []
+      'quizhub': ['topic', 'year', 'session', 'exam-type'],
+      'tutorial': ['topic'],
+    }
+    const conditionalFilters = filtersByService[service] || []
 
-    const index = {
+    const index: Record<'board' | 'level' | 'subject' | 'service', number> & Partial<Record<SearchConditionalFilter, number>> = {
       board: 0,
       level: 1,
       subject: 2,
@@ -76,7 +78,7 @@ export const useSearchFilters = ({
     if (index.paper !== undefined) boardChildren.push(index.paper)
     if (index.material !== undefined) boardChildren.push(index.material)
     const subjectChildren = index.topic === undefined ? [] : [index.topic]
-    const serviceChildren = conditionalFilters.map(name => index[name])
+    const serviceChildren = conditionalFilters.map((_, offset) => offset + 4)
 
     const result = [
       makeFilter({
@@ -127,7 +129,7 @@ export const useSearchFilters = ({
     ]
 
     const factories = {
-      topic: () => makeFilter({
+      'topic': () => makeFilter({
         title: 'Topic',
         disabled: true,
         api: '/api/v1/types/list',
@@ -138,7 +140,7 @@ export const useSearchFilters = ({
         controlIcon: 'md:sell_outlined',
         controlIconPadded: true,
       }),
-      year: () => makeFilter({
+      'year': () => makeFilter({
         title: 'Year',
         dependencies: [{ parent: index.service, targetKey: 'type', sourceKey: 'id' }],
         staticList: Array.from({ length: 14 }, (_, index) => 2013 + index)
@@ -149,21 +151,20 @@ export const useSearchFilters = ({
         controlIcon: 'md:calendar_today_outlined',
         controlIconPadded: true,
       }),
-      session: () => makeFilter({
+      'session': () => makeFilter({
         title: 'Session',
         dependencies: [{ parent: index.service, targetKey: 'type', sourceKey: 'id' }],
         staticList: [],
         dependenciesForGetStaticData: [index.level],
         getStaticList: (id = route.query.base) => {
           const levelId = id === 'reset' ? route.query.base : (id || route.query.base)
-          return levelId && SEARCH_MONTHS_BY_LEVEL[levelId]
-            ? SEARCH_MONTHS_BY_LEVEL[levelId]
-            : ALL_SEARCH_MONTHS
+          const months = levelId ? SEARCH_MONTHS_BY_LEVEL[Number(levelId)] : undefined
+          return months || ALL_SEARCH_MONTHS
         },
         queryKey: 'edu_month',
         selectedVariant: 'dependent-green',
       }),
-      paper: () => makeFilter({
+      'paper': () => makeFilter({
         title: 'Paper',
         disabled: true,
         api: '/api/v1/types/list',
@@ -179,10 +180,10 @@ export const useSearchFilters = ({
             : 4,
         itemTitle: (item) => {
           const match = item.title?.match(/^\s*paper\s+(\d+)\s*$/i)
-          return match ? match[1] : item.title
+          return match?.[1] ?? item.title
         },
       }),
-      variant: () => makeFilter({
+      'variant': () => makeFilter({
         title: 'Variant',
         staticList: [
           { id: '7814', title: '1' },
@@ -193,7 +194,7 @@ export const useSearchFilters = ({
         inlineOptions: true,
         inlineAllowClear: true,
       }),
-      material: () => makeFilter({
+      'material': () => makeFilter({
         title: 'Material Type',
         disabled: true,
         api: '/api/v1/types/list',

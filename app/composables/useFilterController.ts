@@ -1,47 +1,60 @@
+import type {
+  FilterConfiguration,
+  FilterControlHandle,
+  FilterControllerOptions,
+  FilterId,
+  FilterItem,
+  FilterState,
+  FilterTitles,
+  SearchQuery,
+} from '@/types/search'
+
 export const useFilterController = ({
   filterList,
   hasKeywordSearch,
   hasServicesNavigation,
   onChangeFilter,
-}) => {
+}: FilterControllerOptions) => {
   const route = useRoute()
   const router = useRouter()
 
-  const hasFilterValue = value => value !== undefined && value !== null && value !== ''
+  const hasFilterValue = <T>(value: T): value is Exclude<T, undefined | null | ''> =>
+    value !== undefined && value !== null && value !== ''
 
-  const getActiveFilterCount = query => filters.value.filter(filter =>
+  const getActiveFilterCount = (query: SearchQuery) => filters.value.filter(filter =>
     filter.queryKey
     && hasFilterValue(query[filter.queryKey])
     && !(hasServicesNavigation.value && filter.queryKey === 'type'),
   ).length
 
-  const createFilterState = filterConfiguration =>
-    filterConfiguration.map(filter => ({
-      ...filter,
-      initialDisabled: filter.disabled,
-    }))
+  const createFilterState = (filter: FilterConfiguration): FilterState => ({
+    ...filter,
+    dependencies: filter.dependencies ?? [],
+    extraApiParams: filter.extraApiParams ?? {},
+    initialDisabled: filter.disabled,
+  })
 
-  const filters = ref(createFilterState(filterList.value))
+  const filters = ref(filterList.value.map(createFilterState))
   const countFilterSelect = ref(getActiveFilterCount(route.query))
   const textSearch = ref(route.query.title ? route.query.title : '')
   const hasExclusiveDisabledState = ref(false)
-  const filterDataLoads = new WeakMap()
-  const timer = ref(null)
+  const filterDataLoads = new WeakMap<FilterState, { key: string, promise: Promise<void> }>()
+  const timer = ref<ReturnType<typeof setTimeout> | null>(null)
   let pendingServiceChange = false
   let filterListSyncVersion = 0
 
-  const setFilterRef = (filter, element) => {
+  const setFilterRef = (filter: FilterState, element: FilterControlHandle | null) => {
     filter.refElement = element
   }
 
-  const isCurrentFilterSync = syncVersion =>
+  const isCurrentFilterSync = (syncVersion?: number) =>
     syncVersion === undefined || syncVersion === filterListSyncVersion
 
-  const isExclusiveFilterSelected = (index) => {
+  const isExclusiveFilterSelected = (index: number) => {
     const filter = filters.value[index]
 
-    return filter?.disableOtherFiltersOnSelectedIds?.includes(
-      filter.selectedItem?.id,
+    return filter?.selectedItem && filter.disableOtherFiltersOnSelectedIds?.includes(
+      filter.selectedItem.id,
     )
   }
 
@@ -51,7 +64,7 @@ export const useFilterController = ({
     })
   }
 
-  const disableOtherFilters = (sourceIndex) => {
+  const disableOtherFilters = (sourceIndex: number) => {
     hasExclusiveDisabledState.value = true
 
     filters.value.forEach((filter, index) => {
@@ -62,18 +75,20 @@ export const useFilterController = ({
     })
   }
 
-  const resetDescendants = (indexFilter) => {
+  const resetDescendants = (indexFilter: number) => {
     const filterParent = filters.value[indexFilter]
+    if (!filterParent) return
 
     if (filterParent.childrenForGetStaticData) {
       for (const childIndex of filterParent.childrenForGetStaticData) {
         const child = filters.value[childIndex]
+        if (!child) continue
         const readyForGetStatic
           = child.dependenciesForGetStaticData?.includes(indexFilter)
 
         if (readyForGetStatic && child.getStaticList) {
           const staticList = child.getStaticList('reset')
-          child.refElement.setStaticItem(staticList)
+          child.refElement?.setStaticItem(staticList)
           child.selectedItem = null
         }
       }
@@ -83,6 +98,7 @@ export const useFilterController = ({
 
     for (const childIndex of filterParent.children) {
       const child = filters.value[childIndex]
+      if (!child) continue
 
       child.selectedItem = null
       child.disabled = true
@@ -90,13 +106,13 @@ export const useFilterController = ({
     }
   }
 
-  const getFilterDataLoadKey = (filter, parentId = '') => JSON.stringify({
+  const getFilterDataLoadKey = (filter: FilterState, parentId: FilterId = '') => JSON.stringify({
     api: filter.api,
     parentId: filter.idInParams ? parentId : '',
     params: filter.extraApiParams || {},
   })
 
-  const loadFilterItems = async (filter, parentId = '') => {
+  const loadFilterItems = async (filter: FilterState, parentId: FilterId = '') => {
     if (!filter.api || filter.staticList?.length || !filter.refElement) return
 
     const loadKey = getFilterDataLoadKey(filter, parentId)
@@ -119,12 +135,14 @@ export const useFilterController = ({
     }
   }
 
-  const enableReadyChildren = async (indexFilter, syncVersion) => {
+  const enableReadyChildren = async (indexFilter: number, syncVersion?: number) => {
     const filterParent = filters.value[indexFilter]
+    if (!filterParent) return
 
     if (filterParent.childrenForGetStaticData) {
       for (const childIndex of filterParent.childrenForGetStaticData) {
         const child = filters.value[childIndex]
+        if (!child) continue
         const readyForGetStatic
           = child.dependenciesForGetStaticData?.includes(indexFilter)
 
@@ -135,7 +153,7 @@ export const useFilterController = ({
           && hasFilterValue(filterParent.selectedItem.id)
         ) {
           const staticList = child.getStaticList(filterParent.selectedItem.id)
-          child.refElement.setStaticItem(staticList)
+          child.refElement?.setStaticItem(staticList)
         }
       }
     }
@@ -144,28 +162,32 @@ export const useFilterController = ({
 
     for (const childIndex of filterParent.children) {
       const child = filters.value[childIndex]
+      if (!child) continue
 
       const ready = child.dependencies.every(
-        dep => !!filters.value[dep.parent].selectedItem,
+        dep => !!filters.value[dep.parent]?.selectedItem,
       )
 
       if (ready) {
-        const disableValue = child.dependencies.some(dep =>
-          dep.disableIds?.includes(filters.value[dep.parent].selectedItem.id),
-        )
+        const disableValue = child.dependencies.some((dep) => {
+          const selectedItem = filters.value[dep.parent]?.selectedItem
+          return selectedItem && dep.disableIds?.includes(selectedItem.id)
+        })
 
         if (disableValue) {
           child.disabled = true
           continue
         }
 
+        const queryKeyParent = child.parentIndexChangeQueryKey
+          ? filters.value[child.parentIndexChangeQueryKey]?.selectedItem
+          : null
         if (
           child.queryMap
           && child.parentIndexChangeQueryKey
-          && filters.value[child.parentIndexChangeQueryKey].selectedItem
+          && queryKeyParent
         ) {
-          const id
-            = filters.value[child.parentIndexChangeQueryKey].selectedItem.id
+          const id = queryKeyParent.id
           child.queryKey = child.queryMap[id] ?? child.queryKey
         }
 
@@ -175,10 +197,10 @@ export const useFilterController = ({
             child.dependencies.forEach((dep) => {
               const parentNode = filters.value[dep.parent]
               child.extraApiParams[dep.targetKey]
-                = parentNode.selectedItem?.[dep.sourceKey] ?? null
+                = parentNode?.selectedItem?.[dep.sourceKey] ?? null
             })
           }
-          await loadFilterItems(child, filterParent.selectedItem.id)
+          await loadFilterItems(child, filterParent.selectedItem?.id)
           if (!isCurrentFilterSync(syncVersion)) return
         }
 
@@ -189,20 +211,23 @@ export const useFilterController = ({
   }
 
   const updateQueryFromFilters = async () => {
-    const query = { ...route.query }
-    const filterQuery = {}
-    const titles = {}
+    const query: SearchQuery = { ...route.query }
+    const filterQuery: SearchQuery = {}
+    const titles: FilterTitles = {}
 
     filters.value.forEach((filter) => {
-      if (filter.queryKey) delete query[filter.queryKey]
+      if (filter.queryKey) Reflect.deleteProperty(query, filter.queryKey)
 
-      if (filter.queryKey && hasFilterValue(filter.selectedItem?.code)) {
-        filterQuery[filter.queryKey] = filter.selectedItem.code
-        titles[filter.queryKey] = filter.selectedItem.title
+      const selectedItem = filter.selectedItem
+      if (!selectedItem || !filter.queryKey) return
+
+      if (hasFilterValue(selectedItem.code)) {
+        filterQuery[filter.queryKey] = selectedItem.code
+        titles[filter.queryKey] = selectedItem.title
       }
-      else if (filter.queryKey && hasFilterValue(filter.selectedItem?.id)) {
-        filterQuery[filter.queryKey] = filter.selectedItem.id
-        titles[filter.queryKey] = filter.selectedItem.title
+      else if (hasFilterValue(selectedItem.id)) {
+        filterQuery[filter.queryKey] = selectedItem.id
+        titles[filter.queryKey] = selectedItem.title
       }
     })
 
@@ -214,8 +239,10 @@ export const useFilterController = ({
     onChangeFilter(query, titles, { serviceChange: pendingServiceChange })
   }
 
-  const updateSelectedItem = async (itemSelected, index) => {
-    filters.value[index].selectedItem = itemSelected
+  const updateSelectedItem = async (itemSelected: FilterItem | null, index: number) => {
+    const filter = filters.value[index]
+    if (!filter) return
+    filter.selectedItem = itemSelected
 
     const isExclusiveSelected = isExclusiveFilterSelected(index)
     if (hasExclusiveDisabledState.value && !isExclusiveSelected) {
@@ -235,11 +262,11 @@ export const useFilterController = ({
     }
   }
 
-  const selectService = (serviceId) => {
+  const selectService = (serviceId: FilterId) => {
     const index = filters.value.findIndex(filter => filter.queryKey === 'type')
     const filter = filters.value[index]
     const service = filter?.staticList?.find(item => item.id === serviceId)
-    if (!service || filter.selectedItem?.id === serviceId) return
+    if (!filter || !service || filter.selectedItem?.id === serviceId) return
 
     pendingServiceChange = true
     filter.selectedItem = service
@@ -253,8 +280,10 @@ export const useFilterController = ({
     }
   }
 
-  const clearFilter = (index) => {
-    filters.value[index].selectedItem = null
+  const clearFilter = (index: number) => {
+    const filter = filters.value[index]
+    if (!filter) return
+    filter.selectedItem = null
 
     if (hasExclusiveDisabledState.value) {
       restoreDisabledState()
@@ -265,11 +294,10 @@ export const useFilterController = ({
     updateQueryFromFilters()
   }
 
-  const fetchDataRequireFilter = async (syncVersion) => {
-    for (let index = 0; index < filters.value.length; index++) {
+  const fetchDataRequireFilter = async (syncVersion?: number) => {
+    for (const filter of filters.value) {
       if (!isCurrentFilterSync(syncVersion)) return
 
-      const filter = filters.value[index]
       if (!filter.dependencies?.length) {
         if (filter.api && !filter.staticList?.length) {
           await loadFilterItems(filter)
@@ -278,41 +306,40 @@ export const useFilterController = ({
       }
       if (filter.getStaticList) {
         const staticList = filter.getStaticList()
-        filter.refElement.setStaticItem(staticList)
+        filter.refElement?.setStaticItem(staticList)
       }
     }
   }
 
-  const fetchFilterAvailableInQuery = async (syncVersion) => {
-    for (let index = 0; index < filters.value.length; index++) {
+  const fetchFilterAvailableInQuery = async (syncVersion?: number) => {
+    for (const [index, filter] of filters.value.entries()) {
       if (!isCurrentFilterSync(syncVersion)) return
 
-      const filter = filters.value[index]
       const queryValue = route.query[filter.queryKey]
       const filterKey = filter.queryKey == 'section' ? 'code' : 'id'
 
       if (!hasFilterValue(queryValue)) {
         if (filter.defaultValue) {
-          filters.value[index].selectedItem = filter.defaultValue
+          filter.selectedItem = filter.defaultValue
           await enableReadyChildren(index, syncVersion)
           if (!isCurrentFilterSync(syncVersion)) return
 
-          const query = { ...route.query }
+          const query: SearchQuery = { ...route.query }
           query[filter.queryKey] = filter.defaultValue.id
           router.replace({ query })
         }
         else {
-          filters.value[index].selectedItem = null
+          filter.selectedItem = null
         }
         continue
       }
 
       const ready = filter.dependencies?.every(
-        dependency => filters.value[dependency.parent].selectedItem,
+        dependency => filters.value[dependency.parent]?.selectedItem,
       )
 
       if (!ready && filter.dependencies?.length) {
-        filters.value[index].selectedItem = null
+        filter.selectedItem = null
         continue
       }
 
@@ -320,7 +347,7 @@ export const useFilterController = ({
         const selected = filter.staticList.find(
           item => String(item[filterKey]) === String(queryValue),
         )
-        filters.value[index].selectedItem = selected || null
+        filter.selectedItem = selected || null
         if (!selected) continue
         if (isExclusiveFilterSelected(index)) {
           disableOtherFilters(index)
@@ -331,7 +358,7 @@ export const useFilterController = ({
       }
       else {
         const selected = await filter.refElement?.getItemById(queryValue, filterKey)
-        filters.value[index].selectedItem = selected || null
+        filter.selectedItem = selected || null
         if (!selected) continue
         if (isExclusiveFilterSelected(index)) {
           disableOtherFilters(index)
@@ -355,16 +382,16 @@ export const useFilterController = ({
     await fetchFilterAvailableInQuery(syncVersion)
   }
 
-  const getFilterIdentity = filter => `${filter.queryKey ?? ''}:${filter.title ?? ''}`
+  const getFilterIdentity = (filter: FilterConfiguration) => `${filter.queryKey ?? ''}:${filter.title ?? ''}`
 
-  const reconcileFilterConfiguration = (filterConfiguration) => {
+  const reconcileFilterConfiguration = (filterConfiguration: FilterConfiguration[]) => {
     const existingFilters = new Map(
       filters.value.map(filter => [getFilterIdentity(filter), filter]),
     )
 
     return filterConfiguration.map((filterConfig) => {
       const existingFilter = existingFilters.get(getFilterIdentity(filterConfig))
-      if (!existingFilter) return createFilterState([filterConfig])[0]
+      if (!existingFilter) return createFilterState(filterConfig)
 
       const runtimeState = {
         selectedItem: existingFilter.selectedItem,
@@ -373,6 +400,8 @@ export const useFilterController = ({
       }
 
       Object.assign(existingFilter, filterConfig, runtimeState, {
+        dependencies: filterConfig.dependencies ?? [],
+        extraApiParams: filterConfig.extraApiParams ?? {},
         initialDisabled: filterConfig.disabled,
       })
 
@@ -405,8 +434,7 @@ export const useFilterController = ({
   }
 
   const clearAllFilter = async () => {
-    for (let index = 0; index < filters.value.length; index++) {
-      const filter = filters.value[index]
+    for (const [index, filter] of filters.value.entries()) {
       if (filter.selectedItem && !filter.defaultValue) {
         filter.selectedItem = null
         resetDescendants(index)

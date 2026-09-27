@@ -12,7 +12,7 @@
       v-else
       :icon="resolvedIcon.icon"
       :class="resolvedIcon.className"
-      :size="resolvedIcon.size || 28"
+      :size="iconSize ?? resolvedIcon.size ?? 28"
     />
   </span>
 </template>
@@ -42,6 +42,10 @@ const props = defineProps({
   controlIcon: {
     type: String,
     default: '',
+  },
+  iconSize: {
+    type: Number,
+    default: null,
   },
 })
 

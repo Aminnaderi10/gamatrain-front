@@ -1,18 +1,19 @@
+import type { FilterTitles, SearchMetadataOptions, SearchQuery } from '@/types/search'
 import dayjs from 'dayjs'
 import { SEARCH_MONTHS_BY_LEVEL, SEARCH_SERVICE_TITLE_SUFFIXES } from '@/constants'
-import { getLegacySearchType } from '@/utils/search-services'
+import { getLegacySearchType } from '@/utils/searchServices'
 
 export const useSearchMetadata = ({
   activeService,
   data,
-}) => {
+}: SearchMetadataOptions) => {
   const route = useRoute()
-  const appliedFilterTitles = ref({
+  const appliedFilterTitles = ref<{ query: SearchQuery, titles: FilterTitles }>({
     query: {},
     titles: {},
   })
 
-  const setAppliedFilterTitles = (query, titles) => {
+  const setAppliedFilterTitles = (query: SearchQuery, titles: FilterTitles) => {
     appliedFilterTitles.value = {
       query: { ...query },
       titles: { ...titles },
@@ -22,7 +23,7 @@ export const useSearchMetadata = ({
   const metadata = computed(() => {
     const { section, base, lesson, test_type, edu_year, edu_month } = route.query
     const firstElement = data.value[0]
-    const getAppliedFilterTitle = (queryKey) => {
+    const getAppliedFilterTitle = (queryKey: string) => {
       const appliedQueryValue = appliedFilterTitles.value.query[queryKey]
       const currentQueryValue = route.query[queryKey]
 
@@ -33,15 +34,15 @@ export const useSearchMetadata = ({
 
     let monthTitle = edu_month
       ? dayjs()
-          .month(edu_month - 1)
+          .month(Number(edu_month) - 1)
           .format('MMMM')
       : ''
     if (base && edu_month) {
-      const monthList = SEARCH_MONTHS_BY_LEVEL[base]
+      const monthList = SEARCH_MONTHS_BY_LEVEL[Number(base)]
       if (monthList && monthList.length > 0) {
-        const month = monthList.filter(item => item.id == edu_month)
-        if (month.length > 0) {
-          monthTitle = month[0].title
+        const month = monthList.find(item => item.id === Number(edu_month))
+        if (month) {
+          monthTitle = month.title
         }
       }
     }
@@ -57,7 +58,7 @@ export const useSearchMetadata = ({
         section && base && lesson
           ? getAppliedFilterTitle('lesson') || firstElement?.lesson_title || ''
           : '',
-      classificationTitle: '',
+      classificationTitle: '' as string | null | undefined,
       yearTitle: edu_year ? edu_year : '',
       monthTitle,
       is_paper: firstElement?.is_paper ?? activeService.value === 'paper',
@@ -117,13 +118,9 @@ export const useSearchMetadata = ({
     const template = titleTemplates[getLegacySearchType(route.query.type)] || titleTemplates.default
     const title = titles.boardTitle ? template.dynamic : template.fallback
 
-    let descAppendText = ''
-    if (titles.is_paper) {
-      descAppendText = 'Includes mark scheme for exam preparation.'
-    }
-    else {
-      descAppendText = 'Useful for study, practice, and exam preparation.'
-    }
+    const descAppendText = titles.is_paper
+      ? 'Includes mark scheme for exam preparation.'
+      : 'Useful for study, practice, and exam preparation.'
 
     const pageDescriptions = {
       learnfiles:

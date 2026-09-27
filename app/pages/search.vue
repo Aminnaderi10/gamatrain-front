@@ -76,13 +76,13 @@
 </template>
 
 <script setup>
-import ServicesFilterContainer from '~/components/search/ServicesFilterContainer.vue'
+import ServicesFilterContainer from '~/components/search/servicesFilterContainer.vue'
 import { useRoute } from 'vue-router'
 import { LEGACY_SEARCH_TYPES } from '@/constants'
 import {
   getLegacySearchType,
   normalizeSearchService,
-} from '@/utils/search-services'
+} from '@/utils/searchServices'
 
 definePageMeta({
   searchExperience: true,

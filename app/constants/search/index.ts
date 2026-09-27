@@ -1,3 +1,5 @@
+import type { GeneralSearchCategory, SearchServiceId, SearchServiceOption } from '@/types/search'
+
 export const EDEXCEL_BOARD_CODE = 6657
 
 export const SEARCH_SERVICE_OPTIONS = [
@@ -33,15 +35,15 @@ export const SEARCH_SERVICE_OPTIONS = [
     icon: 'stat-icon icon-tutorial',
     isPaper: null,
   },
-]
+] satisfies SearchServiceOption[]
 
 export const DEFAULT_SEARCH_SERVICE = SEARCH_SERVICE_OPTIONS[0]
 
-export const SEARCH_SERVICE_TITLE_SUFFIXES = {
-  paper: 'Past Papers',
+export const SEARCH_SERVICE_TITLE_SUFFIXES: Partial<Record<SearchServiceId, string>> = {
+  'paper': 'Past Papers',
   'study-materials': 'Study Materials',
-  quizhub: 'Exams',
-  tutorial: 'Revision notes',
+  'quizhub': 'Exams',
+  'tutorial': 'Revision notes',
 }
 
 export const LEGACY_SEARCH_TYPES = ['test', 'learnfiles', 'azmoon', 'question', 'dars']
@@ -123,7 +125,7 @@ export const GENERAL_SEARCH_CATEGORIES = [
     colorClass: 'bg-generalSearchBlog',
     activeColorClass: 'bg-generalSearchBlogActive',
   },
-]
+] satisfies GeneralSearchCategory[]
 
 export const MOBILE_GENERAL_SEARCH_CATEGORIES = GENERAL_SEARCH_CATEGORIES
 export const DESKTOP_GENERAL_SEARCH_CATEGORIES = GENERAL_SEARCH_CATEGORIES

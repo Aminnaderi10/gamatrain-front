@@ -2,15 +2,18 @@
   <v-dialog
     v-model="dialogModel"
     :max-width="maxWidth"
-    :fullscreen="variant === 'publish' ? width <= 767 : !mdAndUp"
+    :fullscreen="!mdAndUp"
     @click="clickOnOverlay"
   >
     <div
-      class="w-100 d-flex flex-column bg-white rounded-xl overflow-y-auto mobile-style py-6 px-3 px-sm-6"
-      :class="{ 'modal-panel--publish': variant === 'publish' }"
+      class="w-100 d-flex flex-column bg-white rounded-xl overflow-y-auto mobile-style"
+      :class="variant === 'publish' ? 'modal-panel--publish py-6 px-4 pa-sm-6 pa-md-8' : 'py-6 px-3 px-sm-6'"
       @click="clickOnModal"
     >
-      <div class="modal-header w-100 d-flex align-center justify-space-between">
+      <div
+        class="modal-header w-100 d-flex align-center justify-space-between"
+        :class="{ 'ga-4 ga-sm-6 pb-2': variant === 'publish' }"
+      >
         <div class="d-flex flex-column align-start justify-start ga-1">
           <span class="modal-title text-h5 text-sm-h3 font-weight-bold text-grey700">{{ title }}</span>
           <span
@@ -19,8 +22,7 @@
           >{{ subtitle }}</span>
         </div>
         <v-icon
-          class="ml-4"
-          :class="{ 'modal-close--publish': variant === 'publish' }"
+          :class="variant === 'publish' ? 'modal-close--publish ml-2 ml-sm-4' : 'ml-4'"
           size="x-large"
           :color="variant === 'publish' ? undefined : 'grey300'"
           aria-label="Close dialog"
@@ -55,7 +57,7 @@ const props = withDefaults(defineProps<IModalBase>(), {
   variant: 'default',
 })
 
-const { mdAndUp, width } = useDisplay()
+const { mdAndUp } = useDisplay()
 
 const emit = defineEmits(['update:showDialog'])
 
@@ -79,7 +81,10 @@ const clickOnModal = (event: MouseEvent) => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use 'sass:map';
+@use 'vuetify/settings' as vuetify;
+
 .mobile-style{
   max-height: 90%;
 }
@@ -89,19 +94,12 @@ const clickOnModal = (event: MouseEvent) => {
 }
 
 .modal-panel--publish {
-  width: 100%;
   max-height: min(90vh, 860px);
-  padding: 32px !important;
   color: rgb(var(--v-theme-brandNavy));
   background: rgb(var(--v-theme-grey25)) !important;
   border: 1px solid rgb(var(--v-theme-borderSubtle));
   border-radius: 20px !important;
   box-shadow: 0 24px 64px rgb(var(--v-theme-brandNavy) / 18%);
-}
-
-.modal-panel--publish .modal-header {
-  gap: 24px;
-  padding-bottom: 8px;
 }
 
 .modal-panel--publish .modal-title {
@@ -122,7 +120,6 @@ const clickOnModal = (event: MouseEvent) => {
   flex: 0 0 40px;
   width: 40px;
   height: 40px;
-  margin-left: 16px !important;
   color: rgb(var(--v-theme-brandNavy)) !important;
   background: rgb(var(--v-theme-surfaceSecondary));
   border: 1px solid rgb(var(--v-theme-borderSubtle));
@@ -145,34 +142,25 @@ const clickOnModal = (event: MouseEvent) => {
   outline-offset: 2px;
 }
 
-@media only screen and (min-width: 768px) and (max-width: 1023px) {
+@media #{map.get(vuetify.$display-breakpoints, 'sm')} {
   .modal-panel--publish {
-    position: static;
-    width: 90%;
     max-width: 680px;
-    margin: auto;
-    padding: 24px !important;
-    border-radius: 20px !important;
+    margin-inline: auto;
+    left: 0;
+    right: 0;
   }
 }
 
-@media only screen and (max-width: 767px) {
+@media #{map.get(vuetify.$display-breakpoints, 'xs')} {
   .modal-panel--publish {
-    width: 100%;
     max-height: 92vh;
-    padding: 24px 16px max(20px, env(safe-area-inset-bottom)) !important;
-    border-radius: 20px 20px 0 0 !important;
-  }
-
-  .modal-panel--publish .modal-header {
-    gap: 16px;
+    padding-bottom: max(20px, env(safe-area-inset-bottom)) !important;
   }
 
   .modal-panel--publish .modal-close--publish {
     flex-basis: 48px;
     width: 48px;
     height: 48px;
-    margin-left: 8px !important;
   }
 }
 
@@ -181,7 +169,7 @@ const clickOnModal = (event: MouseEvent) => {
     transition: none;
   }
 }
-@media only screen and (max-width: 960px) {
+@media #{map.get(vuetify.$display-breakpoints, 'sm-and-down')} {
   .mobile-style {
     position: absolute;
     bottom: 0;
