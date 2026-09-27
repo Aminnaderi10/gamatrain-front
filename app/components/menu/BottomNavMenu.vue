@@ -1,106 +1,102 @@
 <template>
-  <div class="w-100 d-flex d-md-none align-start justify-space-between position-sticky bottom-0 mt-2 px-3 pt-3 bottom-nav-menu bg-white">
+  <div class="w-100 d-flex d-md-none align-start justify-space-between position-sticky bottom-0 mt-2 px-3 pt-3 bottom-nav-menu bg-grey700 rounded-t-xl">
     <nuxt-link
       v-slot="{ isActive }"
-      class="each-menu d-flex align-center justify-start flex-column"
+      class="d-flex align-center justify-start flex-column"
       to="/"
     >
       <v-icon
-        size="24"
-        color="grey600"
-        :class="`rounded-circle pa-4 ${isActive ? `bg-primary50`:``}`"
+        :size="ICON_SIZE"
+        :color="isActive ? `primary`:`white`"
+        class="rounded-circle pa-2"
       >
-        {{ isActive ? `md:home`:`md:home_outlined` }}
+        md:home_outlined
       </v-icon>
       <span
-        v-if="isActive"
-        class="text-grey500 text-subtitle-1"
+        :class="`text-subtitle-1 ${isActive ? `text-primary`:`text-grey400`}`"
       >Home</span>
     </nuxt-link>
 
-    <div class="each-menu d-flex align-center justify-start flex-column">
+    <div
+      class="d-flex align-center justify-start flex-column"
+    >
       <v-icon
-        size="24"
-        color="grey600"
-        :class="`rounded-circle pa-4 ${isSearchOptionOpen ? `bg-primary50`:``}`"
+        :size="ICON_SIZE"
+        :color="isSearchOptionOpen ? `primary`:`white`"
+        class="rounded-circle pa-2"
         @click="changeModalSearchOption"
       >
-        {{ isSearchOptionOpen ? `md:grid_view` :`md:grid_view_outlined` }}
+        md:grid_view_outlined
       </v-icon>
       <span
-        v-if="isSearchOptionOpen"
-        class="text-grey500 text-subtitle-1"
-      >Category</span>
+        :class="`text-subtitle-1 ${isSearchOptionOpen ? `text-primary`:`text-grey400`}`"
+      >Explore</span>
     </div>
 
-    <div class="each-menu d-flex align-center justify-start flex-column">
+    <div class="d-flex align-center justify-center ml-2 mt-n5 container-add rounded-circle bg-primary">
       <v-icon
-        size="24"
-        color="grey600"
-        :class="`rounded-circle pa-4 ${isAddOptionOpen ? `bg-primary50`:``}`"
+        size="28"
+        color="grey700"
         @click="changeModalAddOption"
       >
         md:add
       </v-icon>
-      <span
-        v-if="isAddOptionOpen"
-        class="text-grey500 text-subtitle-1"
-      >Add</span>
     </div>
 
     <nuxt-link
       v-slot="{ isActive }"
-      class="each-menu d-flex align-center justify-start flex-column"
+      class="d-flex align-center justify-start flex-column"
       to="/post"
     >
       <v-icon
-        size="24"
-        color="grey600"
-        :class="`rounded-circle pa-4 ${isActive ? `bg-primary50`:``}`"
+        :size="ICON_SIZE"
+        :color="isActive ? `primary`:`white`"
+        class="rounded-circle pa-2"
       >
         md:explore_outlined
       </v-icon>
       <span
-        v-if="isActive"
-        class="text-grey500 text-subtitle-1"
-      >posts</span>
+        :class="`text-subtitle-1 ${isActive ? `text-primary`:`text-grey400`}`"
+      >Discover</span>
     </nuxt-link>
 
-    <div class="each-menu d-flex align-start flex-column">
-      <nuxt-link
-        v-if="isAuthenticated"
-        to="/user"
-        class="pa-1"
+    <nuxt-link
+      v-if="isAuthenticated"
+      v-slot="{ isActive }"
+      to="/user"
+      class="d-flex align-center justify-start flex-column"
+    >
+      <img
+        v-if="user.user.value?.avatarUri"
+        :width="ICON_SIZE"
+        :height="ICON_SIZE"
+        :class="`rounded-circle ${isActive ? `active-border`:`deactive-border`}`"
+        :src="user.user.value?.avatarUri"
+        alt="User Profile"
       >
-        <img
-          v-if="user.user.value?.avatarUri"
-          width="24"
-          height="24"
-          class="rounded-circle"
-          :src="user.user.value?.avatarUri"
-          alt="User Profile"
-        >
-        <v-icon
-          v-else
-          size="24"
-          color="grey600"
-        >
-          md:account_circle
-        </v-icon>
-      </nuxt-link>
-      <template
+      <v-icon
         v-else
+        :size="ICON_SIZE"
+        :color="isActive ? `primary`:`white`"
       >
-        <v-icon
-          size="24"
-          color="grey600"
-          class="pa-4"
-          @click="openLoginModal"
-        >
-          md:account_circle
-        </v-icon>
-      </template>
-    </div>
+        md:account_circle
+      </v-icon>
+      <span
+        :class="`text-subtitle-1 ${isActive ? `text-primary`:`text-grey400`}`"
+      >Profile</span>
+    </nuxt-link>
+    <template
+      v-else
+    >
+      <v-icon
+        :size="ICON_SIZE"
+        color="white"
+        class="pa-4"
+        @click="openLoginModal"
+      >
+        md:account_circle
+      </v-icon>
+    </template>
   </div>
   <menu-search-option-bottom-menu
     v-if="isSearchOptionOpen"
@@ -124,6 +120,8 @@ const router = useRouter()
 const route = useRoute()
 const { isAuthenticated } = useAuth()
 const user = useUser()
+
+const ICON_SIZE = 26
 
 const openLoginModal = () => {
   router.push({ query: { auth_form: 'login' } })
@@ -160,8 +158,50 @@ const changeModalAddOption = () => {
 <style scoped>
 .bottom-nav-menu{
   height: 62px;
-  z-index: 10;
-  box-shadow: -9px -7px 20px 0px #1018282b;;
+  z-index: 999;
+  overflow: visible;
+}
 
+.bottom-nav-menu::before {
+  content: "";
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  width: 96px;
+  height: 24px;
+  transform: translateX(-50%);
+  background: inherit;
+  clip-path: path("M0 24 C7 24 12 22 16 19 C20 16 23 12 27 9 C31 5 37 3 43 2 C45 2 47 2 48 2 C49 2 51 2 53 2 C59 3 65 5 69 9 C73 12 76 16 80 19 C84 22 89 24 96 24 Z");
+  pointer-events: none;
+}
+.active-border {
+  border : 2px solid rgb(var(--v-theme-primary))
+}
+.deactive-border {
+    border : 2px solid rgb(var(--v-theme-grey400))
+}
+.container-add{
+  width: 52px;
+  height: 52px;
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+  box-shadow:
+    0 0 18px rgba(var(--v-theme-primary), 0.55),
+    0 8px 22px rgba(var(--v-theme-primary), 0.35);
+}
+
+.container-add::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  background: rgba(var(--v-theme-primary), 0.28);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.container-add::before {
+  filter: blur(200px);
 }
 </style>
