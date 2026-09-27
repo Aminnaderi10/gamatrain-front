@@ -197,11 +197,8 @@ const changeModalAddOption = () => {
   inset: -7px;
   border-radius: 50%;
   background: rgba(var(--v-theme-primary), 0.28);
+  filter: blur(200px);
   pointer-events: none;
   z-index: -1;
-}
-
-.container-add::before {
-  filter: blur(200px);
 }
 </style>
