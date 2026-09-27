@@ -36,7 +36,7 @@
       >
         <!-- Generating: the server is building the file (before any byte arrives). -->
         <template v-if="getPhase(format.fileType) === 'cooking'">
-          <span :class="`${format.textClass} text-h5 font-weight-bold mt-1 ml-2`">Cooking</span>
+          <span :class="`${format.textClass} text-h5 font-weight-bold mt-1 ml-2`">Cooking for you</span>
           <v-icon
             class="heart-blink ml-1"
             color="#e53935"
