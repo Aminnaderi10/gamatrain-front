@@ -175,7 +175,7 @@ onMounted(async () => {
 .custom-overlay{
   height: calc(100% - 62px);
   background-color: rgba(0, 0, 0, 0.32);
-  z-index: 10000;
+  z-index: 998;
 }
 .search-container{
   height: 90%;
