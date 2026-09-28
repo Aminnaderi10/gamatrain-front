@@ -48,7 +48,9 @@ withDefaults(
 </script>
 
 <style scoped>
-.inner-wrap {
+.inner-wrap,
+.circle-wrap,
+.line-wrap {
     inset: 0;
 }
 
