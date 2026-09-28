@@ -33,6 +33,7 @@ import type {
 } from '@/types'
 
 definePageMeta({
+  layout: 'dashboard-layout',
   middleware: ['auth'],
 })
 

@@ -94,6 +94,7 @@
 import type { DataTableHeader, ExamResultDTO } from '@/types'
 
 definePageMeta({
+  layout: 'dashboard-layout',
   middleware: ['auth'],
 })
 
