@@ -1,5 +1,5 @@
 <template>
-  <div class="w-100 h-100 d-flex flex-column align-start justify-start px-2 pa-md-0">
+  <v-container class="d-flex flex-column align-start justify-start">
     <template v-if="loadingGetItemById">
       <user-exam-result-header-skeleton />
       <user-exam-result-overview-skeleton />
@@ -24,7 +24,7 @@
         :questions="contentData?.result"
       />
     </template>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

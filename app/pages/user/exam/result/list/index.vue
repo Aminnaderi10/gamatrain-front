@@ -1,5 +1,5 @@
 <template>
-  <div class="w-100 h-100 d-flex flex-column align-start justify-start px-2 pa-md-0">
+  <v-container class="d-flex flex-column align-start justify-start">
     <div class="w-100 d-flex align-center justify-space-between ga-2 mt-4">
       <h1 class="text-h4 text-grey700 font-weight-regular">
         Exam Results
@@ -87,7 +87,7 @@
       @update:page="changePageNumber"
       @update:page-size="changePageSize"
     />
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">
