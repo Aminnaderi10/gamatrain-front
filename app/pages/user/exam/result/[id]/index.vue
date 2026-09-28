@@ -1,5 +1,5 @@
 <template>
-  <v-container class="d-flex flex-column align-start justify-start">
+  <v-container class="mt-16 d-flex flex-column align-start justify-start">
     <template v-if="loadingGetItemById">
       <user-exam-result-header-skeleton />
       <user-exam-result-overview-skeleton />
