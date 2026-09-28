@@ -1,5 +1,8 @@
 <template>
-  <footer class="w-1000 d-flex align-center justify-center bg-grey100 pt-4">
+  <footer
+    id="footer-container"
+    class="w-100 d-flex align-center justify-center bg-grey100 pt-4"
+  >
     <v-container>
       <v-row>
         <v-col

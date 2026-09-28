@@ -1,5 +1,8 @@
 <template>
-  <div class="w-100 d-flex d-md-none align-start justify-space-between position-sticky bottom-0 px-3 pt-3 bottom-nav-menu bg-grey700 rounded-t-xl">
+  <div
+    class="w-100 d-flex d-md-none align-start justify-space-between position-sticky bottom-0 px-3 pt-3 bottom-nav-menu bg-grey700 rounded-t-xl"
+    :class="{ 'bottom-nav-menu--raised': isSearchOptionOpen }"
+  >
     <nuxt-link
       v-slot="{ isActive }"
       class="d-flex align-center justify-start flex-column"
@@ -160,6 +163,10 @@ const changeModalAddOption = () => {
   height: 62px;
   z-index: 999;
   overflow: visible;
+}
+/* Sit above the Explore overlay (1007) and the fixed header while it is open. */
+.bottom-nav-menu--raised {
+  z-index: 1008;
 }
 
 .bottom-nav-menu::before {
