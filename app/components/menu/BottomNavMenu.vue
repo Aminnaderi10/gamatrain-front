@@ -1,73 +1,73 @@
 <template>
-  <div
-    class="w-100 d-flex d-md-none align-start justify-space-between position-sticky bottom-0 px-3 pt-3 bottom-nav-menu bg-grey700 rounded-t-xl"
+  <nav
+    class="w-100 d-flex d-md-none align-center position-sticky bottom-0 px-1 bottom-nav-menu bg-grey700 rounded-t-xl"
     :class="{ 'bottom-nav-menu--raised': isSearchOptionOpen }"
+    aria-label="Main navigation"
   >
     <nuxt-link
       v-slot="{ isActive }"
-      class="d-flex align-center justify-start flex-column"
+      class="nav-item flex-1-1-0 h-100 d-flex align-center justify-center flex-column"
       to="/"
     >
       <v-icon
         :size="ICON_SIZE"
         :color="isActive ? `primary`:`white`"
-        class="rounded-circle pa-2"
       >
         md:home_outlined
       </v-icon>
-      <span
-        :class="`text-subtitle-1 ${isActive ? `text-primary`:`text-grey400`}`"
-      >Home</span>
+      <span :class="`text-subtitle-1 ${isActive ? `text-primary`:`text-grey400`}`">Home</span>
     </nuxt-link>
 
     <div
-      class="d-flex align-center justify-start flex-column"
+      class="nav-item flex-1-1-0 h-100 d-flex align-center justify-center flex-column cursor-pointer"
+      role="button"
+      :aria-expanded="isSearchOptionOpen"
+      @click="changeModalSearchOption"
     >
       <v-icon
         :size="ICON_SIZE"
         :color="isSearchOptionOpen ? `primary`:`white`"
-        class="rounded-circle pa-2"
-        @click="changeModalSearchOption"
       >
         md:grid_view_outlined
       </v-icon>
-      <span
-        :class="`text-subtitle-1 ${isSearchOptionOpen ? `text-primary`:`text-grey400`}`"
-      >Explore</span>
+      <span :class="`text-subtitle-1 ${isSearchOptionOpen ? `text-primary`:`text-grey400`}`">Explore</span>
     </div>
 
-    <div class="d-flex align-center justify-center ml-2 mt-n5 container-add rounded-circle bg-primary">
-      <v-icon
-        size="28"
-        color="grey700"
+    <div class="flex-1-1-0 h-100 d-flex justify-center">
+      <div
+        class="d-flex align-center justify-center mt-n2 container-add rounded-circle bg-primary"
+        role="button"
+        aria-label="Add"
         @click="changeModalAddOption"
       >
-        md:add
-      </v-icon>
+        <v-icon
+          size="28"
+          color="grey700"
+        >
+          md:add
+        </v-icon>
+      </div>
     </div>
 
     <nuxt-link
       v-slot="{ isActive }"
-      class="d-flex align-center justify-start flex-column"
+      class="nav-item flex-1-1-0 h-100 d-flex align-center justify-center flex-column"
       to="/post"
     >
       <v-icon
         :size="ICON_SIZE"
         :color="isActive ? `primary`:`white`"
-        class="rounded-circle pa-2"
       >
         md:explore_outlined
       </v-icon>
-      <span
-        :class="`text-subtitle-1 ${isActive ? `text-primary`:`text-grey400`}`"
-      >Discover</span>
+      <span :class="`text-subtitle-1 ${isActive ? `text-primary`:`text-grey400`}`">Discover</span>
     </nuxt-link>
 
     <nuxt-link
       v-if="isAuthenticated"
       v-slot="{ isActive }"
       to="/user"
-      class="d-flex align-center justify-start flex-column"
+      class="nav-item flex-1-1-0 h-100 d-flex align-center justify-center flex-column"
     >
       <img
         v-if="user.user.value?.avatarUri"
@@ -84,23 +84,23 @@
       >
         md:account_circle
       </v-icon>
-      <span
-        :class="`text-subtitle-1 ${isActive ? `text-primary`:`text-grey400`}`"
-      >Profile</span>
+      <span :class="`text-subtitle-1 ${isActive ? `text-primary`:`text-grey400`}`">Profile</span>
     </nuxt-link>
-    <template
+    <div
       v-else
+      class="nav-item flex-1-1-0 h-100 d-flex align-center justify-center flex-column cursor-pointer"
+      role="button"
+      @click="openLoginModal"
     >
       <v-icon
         :size="ICON_SIZE"
         color="white"
-        class="pa-4"
-        @click="openLoginModal"
       >
         md:account_circle
       </v-icon>
-    </template>
-  </div>
+      <span class="text-subtitle-1 text-grey400">Profile</span>
+    </div>
+  </nav>
   <menu-search-option-bottom-menu
     v-if="isSearchOptionOpen"
     @close="isSearchOptionOpen = false"
@@ -160,7 +160,9 @@ const changeModalAddOption = () => {
 
 <style scoped>
 .bottom-nav-menu{
-  height: 62px;
+  /* Room for the iPhone home indicator when the page extends under it (viewport-fit=cover). */
+  height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   z-index: 999;
   overflow: visible;
 }
@@ -180,6 +182,11 @@ const changeModalAddOption = () => {
   background: inherit;
   clip-path: path("M0 24 C7 24 12 22 16 19 C20 16 23 12 27 9 C31 5 37 3 43 2 C45 2 47 2 48 2 C49 2 51 2 53 2 C59 3 65 5 69 9 C73 12 76 16 80 19 C84 22 89 24 96 24 Z");
   pointer-events: none;
+}
+.nav-item {
+  gap: 2px;
+  min-width: 48px;
+  -webkit-tap-highlight-color: transparent;
 }
 .active-border {
   border : 2px solid rgb(var(--v-theme-primary))

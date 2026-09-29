@@ -173,7 +173,7 @@ onMounted(async () => {
 
 <style scoped>
 .custom-overlay{
-  height: calc(100% - 62px);
+  height: calc(100% - var(--bottom-nav-height) - env(safe-area-inset-bottom, 0px));
   background-color: rgba(0, 0, 0, 0.32);
   z-index: 1007;
 }
