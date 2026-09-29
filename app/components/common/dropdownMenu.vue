@@ -36,7 +36,7 @@
       </div>
       <div
         v-bind="props"
-        class="d-flex d-lg-none"
+        class="d-none d-md-flex d-lg-none"
       >
         <v-avatar
           v-if="user?.avatarUri"
