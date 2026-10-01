@@ -23,7 +23,7 @@
     </div>
     <div class="w-100 d-flex align-center mt-4">
       <div
-        v-if="!reviewMode && contentData.answer_full.length > 0"
+        v-if="!reviewMode && hasFullAnswer"
         class="w-100 d-flex align-center justify-end"
       >
         <v-btn
@@ -132,7 +132,7 @@
     </div>
 
     <div
-      v-if="!reviewMode && contentData.answer_full.length > 0 && isFullAnswerVisible"
+      v-if="!reviewMode && hasFullAnswer && isFullAnswerVisible"
       ref="fullAnswerRef"
       class="w-100 mt-4 d-flex flex-column align-start justify-start px-2 px-sm-8"
     >
@@ -142,9 +142,16 @@
         Solution:
       </div>
       <div
+        v-if="contentData.answer_full"
         :class="['test-text text-grey800 mt-4', { 'test-text-sm': smAndUp }]"
         v-html="contentData.answer_full"
       />
+      <img
+        v-if="fullAnswerFile"
+        class="answer-img mt-4 ma-auto ms-sm-0"
+        :src="fullAnswerFile"
+        alt="Solution Image"
+      >
     </div>
 
     <div
@@ -235,6 +242,11 @@ const questionReward = ref(0)
 
 const fullAnswerRef = ref<HTMLElement>()
 const isFullAnswerVisible = ref(false)
+const fullAnswerFile = computed(() => {
+  const file = props.contentData.answer_full_file
+  return file && file !== '0' ? file : null
+})
+const hasFullAnswer = computed(() => !!props.contentData.answer_full || !!fullAnswerFile.value)
 
 const nextTestId = ref()
 const nextTestLoading = ref(false)
