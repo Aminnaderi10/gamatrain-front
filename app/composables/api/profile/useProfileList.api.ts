@@ -5,6 +5,7 @@ export const useProfileListApi = () => {
     useApiService.get<ApiResult<ProfileListResponseDTO>>(
       '/api/v2/identities/profiles/list',
       params,
+      { public: true },
     )
 
   return { getProfiles }

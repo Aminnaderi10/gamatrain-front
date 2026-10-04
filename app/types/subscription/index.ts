@@ -192,6 +192,29 @@ export interface UserSubscriptionDTO {
   lastPaymentFailedDate: string
 }
 
+export interface GetUserSubscriptionHistoryParams {
+  page: number
+  pageSize: number
+}
+
+export interface UserSubscriptionHistoryDTO {
+  id: number
+  subscriptionPlanId: number
+  planTitle: string
+  status: UserSubscriptionStatus
+  creationDate: string
+  startDate: string
+  expirationDate: string
+  pricePaid: number
+  currency: SubscriptionCurrency
+  billingInterval: BillingInterval
+  autoRenews: boolean
+  // Set when the gateway reported a failed renewal charge before this subscription ended - lets us
+  // tell "ended because a payment failed" apart from a user-requested cancellation or a plan that
+  // simply ran its course, and offer a one-click resubscribe to the same plan/interval for that case.
+  lastPaymentFailedDate: string | null
+}
+
 export interface FeatureGroupUserSubscriptionDTO {
   features: AdminSubscriptionPlanFeatureDTO[]
   limit: number | null
@@ -222,6 +245,22 @@ export interface AdminUserSubscriptionListDTO {
   gateway: PaymentGateway
 }
 
+export interface AdminUserSubscriptionQuotaFeatureDTO {
+  featureId: number
+  featureCode: string
+  featureName: string
+}
+
+export interface AdminUserSubscriptionQuotaStatusDTO {
+  features: AdminUserSubscriptionQuotaFeatureDTO[]
+  // null means unlimited.
+  limit: number | null
+  used: number
+  // limit minus used, floored at 0; null when limit is null (unlimited).
+  remaining: number | null
+  description: string | null
+}
+
 export interface AdminUserSubscriptionDetailDTO {
   id: number
   userId: number
@@ -239,9 +278,13 @@ export interface AdminUserSubscriptionDetailDTO {
   cancelAtPeriodEnd: boolean
   pendingSwitchPlanId: number | null
   pendingSwitchPlanTitle: string | null
+  pendingSwitchBillingInterval: BillingInterval | null
   lastPaymentFailedDate: string | null
   externalSubscriptionId: string | null
   gateway: PaymentGateway
+  // Live quota status (Used/Limit per feature group) - only present on the single-subscription
+  // detail response, never on the paged list.
+  featureGroups: AdminUserSubscriptionQuotaStatusDTO[] | null
 }
 
 export interface SearchFilterAdminUserSubscription {

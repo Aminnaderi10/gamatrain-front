@@ -10,6 +10,12 @@
         <v-icon color="primary-gray-700">
           md:visibility
         </v-icon>
+        <v-tooltip
+          activator="parent"
+          location="top"
+        >
+          Views
+        </v-tooltip>
         {{ views }}
       </div>
       <div
@@ -19,6 +25,12 @@
         <v-icon color="primary-gray-700">
           md:star
         </v-icon>
+        <v-tooltip
+          activator="parent"
+          location="top"
+        >
+          Rating
+        </v-tooltip>
         {{ score }}
       </div>
       <div
@@ -26,10 +38,21 @@
         class="d-flex flex-column align-center justify-center ga-1 primary-gray-700 cursor-pointer text-no-wrap"
       >
         <v-icon color="primary-gray-700">
-          md:book_ribbon
+          {{ isSlideType ? 'md:slideshow' : 'md:book_ribbon' }}
         </v-icon>
+        <v-tooltip
+          activator="parent"
+          location="top"
+        >
+          {{ isSlideType ? 'Number of slides' : 'Number of pages' }}
+        </v-tooltip>
         {{ pageCount }}
       </div>
+      <common-bookmark-button
+        v-if="hasSave"
+        :id="id"
+        type="multimedia"
+      />
       <div
         v-if="hasShare"
         class="d-flex flex-column align-center justify-center ga-1 primary-gray-700 cursor-pointer text-no-wrap"
@@ -38,7 +61,12 @@
         <v-icon color="primary-gray-700">
           md:share
         </v-icon>
-        Share
+        <v-tooltip
+          activator="parent"
+          location="top"
+        >
+          Share
+        </v-tooltip>
       </div>
     </div>
 
@@ -60,26 +88,26 @@
           hide-delimiters
           show-arrows
         >
-          <template #prev="{ props }">
+          <template #prev="{ props: navProps }">
             <v-btn
               color="grey700"
               variant="outlined"
               size="24"
               flat
               icon
-              @click="props.onClick"
+              @click="navProps.onClick"
             >
               <v-icon>md:chevron_left</v-icon>
             </v-btn>
           </template>
-          <template #next="{ props }">
+          <template #next="{ props: navProps }">
             <v-btn
               color="grey700"
               variant="outlined"
               size="24"
               flat
               icon
-              @click="props.onClick"
+              @click="navProps.onClick"
             >
               <v-icon>md:chevron_right</v-icon>
             </v-btn>
@@ -134,13 +162,19 @@ interface IPreviewCard {
   score?: string | number
   pageCount?: string | number
   hasShare?: boolean
+  hasSave?: boolean
   previewData: MultimediaPreviewDataDTO
 }
 
-withDefaults(defineProps<IPreviewCard>(), {
+const props = withDefaults(defineProps<IPreviewCard>(), {
   hasShare: true,
+  hasSave: true,
 })
 const emit = defineEmits(['share'])
+
+// A presentation's pageCount is really its slide count - label/icon it accordingly rather than
+// implying it's a paginated document like a PDF.
+const isSlideType = computed(() => props.previewData?.type === 'slide')
 
 const shareContent = () => {
   emit('share')

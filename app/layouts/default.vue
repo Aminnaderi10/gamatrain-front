@@ -24,9 +24,9 @@
         <div>
           <slot />
         </div>
-        <!-- Blog container -->
-        <lazy-home-blog-container v-if="showBlogSlider" />
-      <!-- End blog container -->
+        <!-- Post container -->
+        <lazy-home-post-container v-if="showPostSlider" />
+      <!-- End post container -->
       </main>
       <lazy-common-footer v-if="!isSearchExperience" />
       <menu-bottom-nav-menu v-if="showBottomNavSlider" />
@@ -48,10 +48,10 @@ const route = useRoute()
 const isSearchExperience = computed(() => route.meta.searchExperience === true)
 const { isOnline } = useNetwork()
 
-const excludedPaths = ['/', '/school']
-const excludedNames = ['exam-start-id', 'school-add', 'subject-directory', 'governance', 'donate', 'payments-id-verify', 'teacher-id']
+const excludedPaths = ['/', '/school', 'unsubscribe']
+const excludedNames = ['exam-start-id', 'school-add', 'subject-directory', 'governance', 'donate', 'payments-id-verify', 'teacher-id', 'unsubscribe']
 
-const showBlogSlider = computed(() => {
+const showPostSlider = computed(() => {
   return !isSearchExperience.value
     && !excludedPaths.includes(route.path)
     && !excludedNames.includes(route.name)

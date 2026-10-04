@@ -10,6 +10,12 @@
         <v-icon color="primary-gray-700">
           md:visibility
         </v-icon>
+        <v-tooltip
+          activator="parent"
+          location="top"
+        >
+          Views
+        </v-tooltip>
         {{ views }}
       </div>
       <div
@@ -19,6 +25,12 @@
         <v-icon color="primary-gray-700">
           md:question_mark
         </v-icon>
+        <v-tooltip
+          activator="parent"
+          location="top"
+        >
+          Number of questions
+        </v-tooltip>
         {{ questionNumber }}
       </div>
       <div
@@ -28,8 +40,19 @@
         <v-icon color="primary-gray-700">
           md:device_thermostat
         </v-icon>
+        <v-tooltip
+          activator="parent"
+          location="top"
+        >
+          Difficulty level
+        </v-tooltip>
         {{ level }}
       </div>
+      <common-bookmark-button
+        v-if="hasSave"
+        :id="id"
+        type="exams"
+      />
       <div
         v-if="hasShare"
         class="d-flex flex-column align-center justify-center ga-1 primary-gray-700 cursor-pointer text-no-wrap"
@@ -38,7 +61,12 @@
         <v-icon color="primary-gray-700">
           md:share
         </v-icon>
-        Share
+        <v-tooltip
+          activator="parent"
+          location="top"
+        >
+          Share
+        </v-tooltip>
       </div>
     </div>
 
@@ -73,6 +101,7 @@ interface IPreviewCard {
   title: string
   views?: number | string
   hasShare?: boolean
+  hasSave?: boolean
   questionNumber?: number | string
   level?: number | string
   thumbPic: string
@@ -80,6 +109,7 @@ interface IPreviewCard {
 
 withDefaults(defineProps<IPreviewCard>(), {
   hasShare: true,
+  hasSave: true,
 })
 const emit = defineEmits(['share'])
 

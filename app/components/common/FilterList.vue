@@ -306,7 +306,7 @@
               :count="countDataFound"
               :loading="loading"
             >
-              <span class="text-h5 text-grey400">Result</span>
+              <span class="text-h5 text-grey400">Results</span>
               <v-skeleton-loader
                 v-if="loading"
                 width="100"

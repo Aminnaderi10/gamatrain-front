@@ -115,51 +115,12 @@
 
       <!-- Start Desktop -->
       <div class="w-100 mt-2 d-none d-sm-flex">
-        <v-data-table
+        <common-data-table
           :headers="headers"
           :items="featureGroups"
-          :items-per-page="featureGroups.length || 1"
-          class="elevation-1 set-height-table"
-          fixed-header
-          hide-default-footer
+          :page-size="featureGroups.length || 1"
+          :show-pagination="false"
         >
-          <template #headers="{ columns }">
-            <tr>
-              <th
-                v-for="(column, index) in columns"
-                :key="index"
-                :class="`bg-grey100 text-grey700 text-h5 font-weight-medium pa-2 text-center
-                 ${index == 0 ? `text-start` : `th-min-width`}`"
-              >
-                {{ column.title }}
-              </th>
-            </tr>
-          </template>
-
-          <template #[`item.description`]="{ item }">
-            <div class="text-grey700 text-h6 d-flex justify-start align-center font-weight-medium description-width">
-              {{ item.description || featureNames(item) }}
-            </div>
-          </template>
-
-          <template #[`item.limit`]="{ item }">
-            <div class="text-grey700 text-h6 d-flex justify-center align-center font-weight-bold">
-              {{ formatLimit(item.limit) }}
-            </div>
-          </template>
-
-          <template #[`item.used`]="{ item }">
-            <div class="text-grey700 text-h6 d-flex justify-center align-center font-weight-bold">
-              {{ $numberFormat(item.used) }}
-            </div>
-          </template>
-
-          <template #[`item.remaining`]="{ item }">
-            <div class="text-grey700 text-h6 d-flex justify-center align-center font-weight-bold">
-              {{ formatRemaining(item) }}
-            </div>
-          </template>
-
           <template #[`item.usage`]="{ item }">
             <div class="usage-cell d-flex flex-column ga-1 py-2">
               <div class="w-100 d-flex justify-space-between text-subtitle-1 text-grey500">
@@ -173,7 +134,7 @@
               />
             </div>
           </template>
-        </v-data-table>
+        </common-data-table>
       </div>
       <!-- End Desktop -->
 
@@ -212,6 +173,27 @@
       v-else
       class="w-100 d-flex flex-column align-center justify-start ga-2 choose-plan-section"
     >
+      <div
+        v-if="lapsedPaymentFailureEntry"
+        class="w-100 bg-grey100 border border-warning rounded-lg pa-4 mb-2 d-flex flex-column flex-sm-row align-center justify-space-between ga-3"
+      >
+        <div class="d-flex flex-column align-center align-sm-start">
+          <span class="text-h6 font-weight-bold text-grey700">Your {{ lapsedPaymentFailureEntry.planTitle }} subscription ended</span>
+          <span class="text-h6 text-grey500 text-center text-sm-start">We couldn't process your last payment. Resume to pick up right where you left off.</span>
+        </div>
+        <v-btn
+          rounded="pill"
+          color="primary"
+          height="40"
+          flat
+          class="text-h5 font-weight-bold text-white flex-shrink-0"
+          :loading="loadingStartPaymentSubscription"
+          @click="resumeLapsedSubscription"
+        >
+          Resume subscription
+        </v-btn>
+      </div>
+
       <span class="text-h5 text-grey700 font-weight-bold text-center">Choose a plan to get started</span>
       <span class="text-h6 text-grey500 text-center">
         You don't have an active subscription yet - pick a plan below to unlock premium downloads.
@@ -224,6 +206,13 @@
         :show-limited-access-link="false"
       />
     </div>
+
+    <!-- Independent of whether the user currently has an active subscription -
+         a lapsed/cancelled subscriber can still have real history to see. -->
+    <user-subscription-history-table
+      v-if="!loadingGetUserSubscription"
+      class="mt-6"
+    />
 
     <common-modal-base
       v-model:show-dialog="showCancelModal"
@@ -274,12 +263,12 @@
 </template>
 
 <script setup lang="ts">
-import type { FeatureGroupUserSubscriptionDTO } from '@/types'
+import type { DataTableHeader, FeatureGroupUserSubscriptionDTO, PaymentGateway } from '@/types'
 import { BILLING_INTERVAL_PERIOD_LABEL } from '@/constants'
 
 definePageMeta({
   layout: 'dashboard-layout',
-  middleware: ['auth'],
+  middleware: ['auth', 'user-type'],
 })
 
 useHead({
@@ -291,6 +280,8 @@ useHead({
 
 const { $numberFormat } = useNuxtApp()
 const { formatLocal } = useDateTime()
+const route = useRoute()
+const { savePathRedirect } = usePayment()
 const {
   userSubscription,
   loadingGetUserSubscription,
@@ -299,6 +290,10 @@ const {
   getUserSubscription,
   cancelSubscription,
   resumeSubscription,
+  userSubscriptionHistory,
+  getUserSubscriptionHistory,
+  startPaymentSubscription,
+  loadingStartPaymentSubscription,
   data: plansData,
   loadingGetData: loadingGetPlansData,
   getData: getPlans,
@@ -308,11 +303,29 @@ const showCancelModal = ref(false)
 const showResumeModal = ref(false)
 const showChangePlanModal = ref(false)
 
-const headers = [
-  { title: 'Feature Group', key: 'description', sortable: false, width: '24vw' },
-  { title: 'Limit', key: 'limit', sortable: false, width: '16vw' },
-  { title: 'Used', key: 'used', sortable: false, width: '16vw' },
-  { title: 'Remaining', key: 'remaining', sortable: false, width: '16vw' },
+const headers: DataTableHeader<FeatureGroupUserSubscriptionDTO>[] = [
+  {
+    title: 'Feature Group',
+    key: 'description',
+    sortable: false,
+    width: '24vw',
+    getText: (item: FeatureGroupUserSubscriptionDTO) => item.description || featureNames(item),
+  },
+  {
+    title: 'Limit',
+    key: 'limit',
+    sortable: false,
+    width: '16vw',
+    getText: (item: FeatureGroupUserSubscriptionDTO) => formatLimit(item.limit),
+  },
+  { title: 'Used', key: 'used', sortable: false, width: '16vw', type: 'number' },
+  {
+    title: 'Remaining',
+    key: 'remaining',
+    sortable: false,
+    width: '16vw',
+    getText: (item: FeatureGroupUserSubscriptionDTO) => formatRemaining(item),
+  },
   { title: 'Usage', key: 'usage', sortable: false, width: '28vw' },
 ]
 
@@ -327,7 +340,18 @@ const showCancelButton = computed(() => {
 })
 
 const showResumeButton = computed(() => {
-  return userSubscription.value?.autoRenews === true && userSubscription.value.cancelAtPeriodEnd === true
+  return userSubscription.value?.cancelAtPeriodEnd === true
+})
+
+// Only the most recent history row counts (history is sorted newest-first) - an old payment
+// failure several subscriptions ago shouldn't keep offering a stale "resume" for it. A truly
+// cancelled/expired subscription can't be resumed in place (that's only possible for the
+// cancelAtPeriodEnd-pending case above, via the real me/resume endpoint), so this is a one-click
+// fresh purchase of the same plan/interval instead - see docs/business/subscriptions.md,
+// "Self-service subscription history" (gamatrain-back#675).
+const lapsedPaymentFailureEntry = computed(() => {
+  const latest = userSubscriptionHistory.value[0]
+  return latest?.lastPaymentFailedDate ? latest : null
 })
 
 const renewalBadge = computed(() => {
@@ -515,6 +539,20 @@ const openChangePlanModal = async () => {
   await getPlans()
 }
 
+const resumeLapsedSubscription = async () => {
+  const entry = lapsedPaymentFailureEntry.value
+  if (!entry) return
+
+  const response = await startPaymentSubscription(
+    { gateway: 'Stripe' as PaymentGateway, billingInterval: entry.billingInterval, confirm: true },
+    entry.subscriptionPlanId,
+  )
+  if (response.succeeded && response.data?.url) {
+    savePathRedirect(route.fullPath)
+    window.location.href = response.data.url
+  }
+}
+
 const switchSuccessfully = async () => {
   showChangePlanModal.value = false
   await getUserSubscription()
@@ -524,7 +562,7 @@ onMounted(async () => {
   await getUserSubscription()
 
   if (!userSubscription.value) {
-    await getPlans()
+    await Promise.all([getPlans(), getUserSubscriptionHistory({ page: 1, pageSize: 1 })])
   }
 })
 </script>
@@ -532,15 +570,6 @@ onMounted(async () => {
 <style scoped>
 .summary-card {
   min-height: 116px;
-}
-.set-height-table {
-  max-height: 70vh;
-}
-.th-min-width {
-  min-width: 130px;
-}
-.description-width {
-  min-width: 200px;
 }
 .usage-cell {
   min-width: 160px;

@@ -24,7 +24,9 @@ export interface PastPaperDTO {
   description: string
   views: number
   ref_score: number
+  q_file_pages?: string
   edu_year: string
+  edu_month: string
   section: string
   base: string
   lesson: string
@@ -45,6 +47,10 @@ export interface PastPaperDTO {
   answer_type: string
   up_date: string
   edu_month_title: string
+  variant: string | null
+  variant_title: string | null
+  owner: boolean
+  user_: string
 }
 
 export interface ContentItemDTO {
@@ -135,6 +141,28 @@ export interface PastPaperCreateDTO {
   school: string
 }
 
+export interface PastPaperEditDTO {
+  board?: string | number
+  grade?: string | number
+  subject?: string | number
+  classification?: string | number
+  topics?: number[] | string[]
+  answer_type?: string | number
+  level?: string | number
+  holding_level?: string | number
+  title?: string
+  description?: string
+  file_pdf?: string
+  file_word?: string
+  file_answer?: string
+  edu_year?: string | number
+  edu_month?: string | number
+  file_extra?: PastPaperExtraFileCreateDTO[]
+  state?: string
+  area?: string
+  school?: string
+}
+
 export interface PastPaperCreatePayloadDTO {
   section: string | number
   base: string | number
@@ -209,6 +237,7 @@ export interface PastPaperDetailDTO {
   avatar: string
   bookmark: boolean
   ownerIdentity: string
+  owner: boolean
   section_title: string
   base_title: string
   lesson_title: string

@@ -1,37 +1,40 @@
 <template>
   <div class="publish-options w-100 d-flex align-center justify-center flex-column">
     <div class="container-card w-100">
-      <v-btn
+      <template
         v-for="item in addOptions"
         :key="item.title"
-        :to="item.path"
-        :disabled="item.disabled"
-        :aria-label="`${item.title} — ${item.typeFile}`"
-        variant="plain"
-        class="card-add-option"
       >
-        <div class="publish-option-content w-100 d-flex flex-column align-start justify-start">
-          <div class="icon-div d-flex align-center justify-center">
-            <span
-              v-if="item.icon"
-              class="icon-add text-grey700"
-              :class="item.icon"
-            />
-            <v-icon
-              v-if="item.iconMd"
-              color="brandNavy"
-              size="20"
-            >
-              {{ item.iconMd }}
-            </v-icon>
-          </div>
-          <span class="card-option-title w-100">{{ item.title }}</span>
+        <v-btn
+          v-if="!item.disabled"
+          :to="item.path"
+          :aria-label="`${item.title} — ${item.typeFile}`"
+          variant="plain"
+          class="card-add-option"
+        >
+          <div class="publish-option-content w-100 d-flex flex-column align-start justify-start">
+            <div class="icon-div d-flex align-center justify-center">
+              <span
+                v-if="item.icon"
+                class="icon-add text-grey700"
+                :class="item.icon"
+              />
+              <v-icon
+                v-if="item.iconMd"
+                color="brandNavy"
+                size="20"
+              >
+                {{ item.iconMd }}
+              </v-icon>
+            </div>
+            <span class="card-option-title w-100">{{ item.title }}</span>
 
-          <span class="chip-type-file">
-            {{ item.typeFile }}
-          </span>
-        </div>
-      </v-btn>
+            <span class="chip-type-file">
+              {{ item.typeFile }}
+            </span>
+          </div>
+        </v-btn>
+      </template>
     </div>
 
     <div class="info-card w-100 d-flex align-center justify-start">
@@ -45,14 +48,13 @@
       </div>
       <div class="info-card__copy d-flex flex-column align-start justify-start">
         <span class="info-card__title">Turn your expertise into reputation and income</span>
-        <span class="info-card__description">Publish educational content to boost your score and earn from sales.</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { DEFAULT_BOARD_ID, MULTIMEDIA_CONTENT_TYPE_IDS, PAPER_CLASSIFICATION_IDS } from '@/constants'
+import { DEFAULT_BOARD_ID, PAPER_CLASSIFICATION_IDS } from '@/constants'
 
 const route = useRoute()
 const emit = defineEmits(['close'])
@@ -68,7 +70,7 @@ interface AddOption {
 
 const { user } = useUser()
 const userBoardId = computed(() => user.value?.board ?? DEFAULT_BOARD_ID)
-const canAddEducationalContent = computed(() => user.value?.group === 5)
+const { canAddEducationalContent } = useUserPermissions()
 
 const addOptions = computed<AddOption[]>(() => [
   {
@@ -100,20 +102,6 @@ const addOptions = computed<AddOption[]>(() => [
     disabled: !canAddEducationalContent.value,
   },
   {
-    path: `/user/multimedia/create?contentType=${MULTIMEDIA_CONTENT_TYPE_IDS.VIDEO}`,
-    title: 'Video',
-    iconMd: 'md:videocam',
-    typeFile: 'MP4',
-    disabled: !canAddEducationalContent.value,
-  },
-  {
-    path: `/user/multimedia/create?contentType=${MULTIMEDIA_CONTENT_TYPE_IDS.PRESENTATION}`,
-    title: 'Presentation',
-    iconMd: 'md:slideshow',
-    typeFile: 'PPTX',
-    disabled: !canAddEducationalContent.value,
-  },
-  {
     path: '/school/add',
     title: 'School',
     icon: 'icon-school',
@@ -121,15 +109,8 @@ const addOptions = computed<AddOption[]>(() => [
     disabled: false,
   },
   {
-    path: '/user/question/create',
-    title: 'Q&A',
-    icon: 'icon-q-a',
-    typeFile: 'TEXT',
-    disabled: false,
-  },
-  {
-    path: '/user/blogs/create',
-    title: 'Blogs',
+    path: '/user/posts/create',
+    title: 'Posts',
     iconMd: 'md:art_track',
     typeFile: 'HTML',
     disabled: false,

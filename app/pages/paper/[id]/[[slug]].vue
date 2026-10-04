@@ -23,6 +23,25 @@
         <v-icon color="primary">
           md:chevron_forward
         </v-icon>
+
+        <v-btn
+          v-if="
+            isAuthenticated
+              && user
+              && contentData.user_
+              && Number(contentData.user_) === user?.coreId
+          "
+          color="info"
+          class="rounded-circle"
+          size="24"
+          flat
+          variant="tonal"
+          @click="openEditModal = true"
+        >
+          <v-icon size="16">
+            md:edit
+          </v-icon>
+        </v-btn>
       </v-col>
       <v-col
         cols="12"
@@ -34,8 +53,10 @@
           :thumb-pic="contentData.thumb_pic"
           :title="contentData.title"
           :alt="pageTitle"
+          :files="contentData.files"
           :views="contentData.views"
           :score="contentData.ref_score"
+          :q-file-pages="contentData.q_file_pages"
           @share="openShare = true"
         />
       </v-col>
@@ -87,11 +108,11 @@
         class="mt-6"
       >
         <span
-          class="d-flex align-center ga-1 text-h5 cursor-pointer text-crash-report"
+          class="d-flex align-center ga-1 text-h5 cursor-pointer text-lightError"
           @click="openCrashReport = true"
         >
           <v-icon
-            color="#C62828"
+            color="lightError"
             class="mb-1"
           >md:warning_outlined</v-icon>
           Crash report
@@ -128,6 +149,20 @@
     >
       <lazy-common-modal-share :title="contentData.title" />
     </lazy-common-modal-base>
+
+    <lazy-common-modal-base
+      v-if="openEditModal"
+      v-model:show-dialog="openEditModal"
+      title="Edit"
+    >
+      <lazy-paper-modal-edit
+        :id="contentData.id"
+        :title="contentData.title"
+        :description="contentData.description"
+        @close="openEditModal = false"
+        @success="editSuccessfully"
+      />
+    </lazy-common-modal-base>
   </v-container>
 </template>
 
@@ -142,6 +177,9 @@ interface BreadCrumb {
 
 const route = useRoute()
 const router = useRouter()
+const { user } = useUser()
+const { isAuthenticated } = useAuth()
+const { buildCambridgeMeta } = useCambridgeSeo()
 
 const { buildSchema } = useSeoSchema()
 
@@ -151,6 +189,7 @@ const pageTitle = ref('')
 const breads = ref<BreadCrumb[]>([])
 const openCrashReport = ref(false)
 const openShare = ref(false)
+const openEditModal = ref(false)
 const isAdsLoad = ref(false)
 
 const { data: contentData } = await useAsyncData(
@@ -218,7 +257,12 @@ const setMetaData = () => {
   if (!contentData.value) return
 
   const dto: PastPaperDTO = contentData.value
-  const { section_title, base_title, title, is_paper } = dto
+  const {
+    section_title,
+    base_title,
+    title,
+    is_paper,
+  } = dto
 
   // Build title parts safely from DTO
   const titleParts = [
@@ -232,6 +276,13 @@ const setMetaData = () => {
   if (is_paper) {
     pageTitle.value = `${baseTitle} past paper`
     pageDescribe.value = `Download ${baseTitle} past paper with mark scheme (MS). Access a full collection of past papers for study, revision, and exam practice.`
+
+    const cambridgeMeta = buildCambridgeMeta(dto)
+
+    if (cambridgeMeta) {
+      pageTitle.value = `${pageTitle.value} ${cambridgeMeta.titleSuffix}`
+      pageDescribe.value = cambridgeMeta.description
+    }
   }
   else {
     pageTitle.value = baseTitle
@@ -337,14 +388,24 @@ if (contentData.value) {
   initBreadCrumb()
   setMetaData()
 }
+
+const editSuccessfully = (data: {
+  title: string
+  description: string
+}) => {
+  if (contentData.value) {
+    contentData.value = {
+      ...contentData.value,
+      title: data.title,
+      description: data.description,
+    }
+    setMetaData()
+  }
+}
 </script>
 
 <style scoped>
 .paper-subject-directory {
   margin-top: 16px;
-}
-
-.text-crash-report {
-  color: #c62828;
 }
 </style>

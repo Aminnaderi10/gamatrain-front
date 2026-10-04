@@ -32,6 +32,7 @@ export const useSearchResults = async ({
   const totalDataFind = ref<number | string>(0)
   const serviceResultCounts = ref<SearchServiceCounts>({})
   const perPage = 10
+  const perPageProfiles = 5
   const perPageServerSide = 5
   const firstLoadedPageNumber = ref(Number(route.query.page) || 1)
   const latestLoadedPageNumber = ref(Number(route.query.page) || 1)
@@ -43,28 +44,30 @@ export const useSearchResults = async ({
 
     try {
       const typeRoute = getLegacySearchType(querySearch.value.type)
+      const pageSize = typeRoute == 'teacher' ? perPageProfiles : perPage
       let list: SearchResultItem[]
 
       if (typeRoute == 'teacher') {
         const query = {
-          'PagingDto.PageFilter.Size': perPage,
-          'PagingDto.PageFilter.Skip': (querySearch.value.page - 1) * perPage,
+          'PagingDto.PageFilter.Size': pageSize,
+          'PagingDto.PageFilter.Skip': (querySearch.value.page - 1) * pageSize,
           'PagingDto.PageFilter.ReturnTotalRecordsCount': true,
+          'FullName': String(querySearch.value.title ?? ''),
         }
         const response = await getProfiles(query)
         if (!response.data) throw new Error('Teacher search returned no data')
         totalDataFind.value = response.data.totalRecordsCount || 0
-        list = response.data.list
+        list = response.data.list ?? []
       }
       else {
-        const params = buildSearchParams(querySearch.value, querySearch.value.page, perPage)
-        const response = await getResults(params)
+        const params = buildSearchParams(querySearch.value, querySearch.value.page, pageSize)
+        const response = await getResults(params, { public: true })
         if (!response.data) throw new Error('Resource search returned no data')
         totalDataFind.value = response.data.num || 0
-        list = response.data.list
+        list = response.data.list ?? []
       }
 
-      if (list && list.length < perPage) {
+      if (list.length < pageSize) {
         isAllDataLoaded.value = true
       }
 
@@ -140,6 +143,7 @@ export const useSearchResults = async ({
           'PagingDto.PageFilter.Size': perPageServerSide,
           'PagingDto.PageFilter.Skip': (pageNumber - 1) * perPageServerSide,
           'PagingDto.PageFilter.ReturnTotalRecordsCount': true,
+          'FullName': String(route.query.title ?? ''),
         }
         return getProfiles(query)
       }
@@ -152,7 +156,7 @@ export const useSearchResults = async ({
 
   watchEffect(() => {
     if (initialData.value?.data) {
-      data.value = initialData.value.data.list
+      data.value = initialData.value.data.list ?? []
     }
   })
 
@@ -176,7 +180,7 @@ export const useSearchResults = async ({
   await initialDataRequest
 
   if (initialData.value?.data) {
-    data.value = initialData.value.data.list
+    data.value = initialData.value.data.list ?? []
     if (getLegacySearchType(route.query.type) == 'teacher') {
       totalDataFind.value = 'totalRecordsCount' in initialData.value.data
         ? initialData.value.data.totalRecordsCount || 0

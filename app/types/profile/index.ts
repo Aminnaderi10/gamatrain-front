@@ -1,10 +1,11 @@
-import type { ExperienceDTO } from '@/types'
+import type { ExperienceDTO, UserSubscriptionDTO } from '@/types'
 import type { SearchParameters } from '@/composables/useApiService'
 
 export interface ProfileListParams extends SearchParameters {
   'PagingDto.PageFilter.Size': number
   'PagingDto.PageFilter.Skip': number
   'PagingDto.PageFilter.ReturnTotalRecordsCount': boolean
+  'FullName'?: string
 }
 
 export interface ProfileListItemDTO {
@@ -69,4 +70,77 @@ export interface ChangePasswordDTO {
   oldpass: string
   newpass: string
   repeat_newpass: string
+}
+
+export interface EditUsernameDTO {
+  username: string
+}
+
+export interface DashboardProfileCompletionDTO {
+  total: number
+  num: number
+  notComplete: string[]
+}
+export interface DashboardUnreadMessagesDTO {
+  total: number
+}
+
+export interface DashboardStatsDTO {
+  test: DashboardTestDTO
+  file: DashboardFileDTO
+  question: DashboardQuestionDTO
+}
+
+export interface DashboardTestDTO {
+  total: number
+}
+
+export interface DashboardFileDTO {
+  total: number
+}
+
+export interface DashboardQuestionDTO {
+  total: number
+}
+
+export interface DashboardExamSuggestionsDTO {
+  total: number
+  participated: number
+  lessons: DashboardLessonDTO[]
+}
+
+export interface DashboardLessonDTO {
+  id: string
+  title: string
+  participated: number
+  total: number
+}
+
+export interface UserDashboardDTO {
+  coreId: number
+  handle: string
+  firstName: string
+  lastName: string
+  avatarUri: string
+  phoneNumber: string
+  gender: string
+  roles: string[]
+  points: number
+  enabled: boolean
+  cityId: number
+  cityTitle: string
+  schoolId: number
+  schoolTitle: string
+  board: number
+  grade: number
+  subscription: UserSubscriptionDTO | null
+  scoreCheckInfo: string
+}
+export interface GetDashboardDataDTO {
+  legacyDataAvailable: boolean
+  user: UserDashboardDTO
+  profileCompletion: DashboardProfileCompletionDTO
+  unreadMessages: DashboardUnreadMessagesDTO
+  stats: DashboardStatsDTO
+  examSuggestions: DashboardExamSuggestionsDTO
 }
