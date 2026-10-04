@@ -82,7 +82,10 @@ const formatCount = (serviceId: string) => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use 'sass:map';
+@use 'vuetify/settings' as vuetify;
+
 /* Colours, corners, hover and focus come from v-tab props; this is layout and the mobile expand animation. */
 .services-navigation {
   width: 100%;
@@ -165,7 +168,7 @@ const formatCount = (serviceId: string) => {
   display: none;
 }
 
-@media (max-width: 959px) {
+@media #{map.get(vuetify.$display-breakpoints, 'sm-and-down')} {
   .services-navigation {
     padding: 8px 12px;
     overflow: hidden;
@@ -284,7 +287,7 @@ const formatCount = (serviceId: string) => {
   }
 }
 
-@media (min-width: 960px) {
+@media #{map.get(vuetify.$display-breakpoints, 'md-and-up')} {
   .services-navigation {
     overflow: visible;
   }

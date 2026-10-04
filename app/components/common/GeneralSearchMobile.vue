@@ -332,7 +332,10 @@ watch(
 )
 </script>
 
-<style>
+<style lang="scss">
+@use 'sass:map';
+@use 'vuetify/settings' as vuetify;
+
 .line-specifier-load-more {
   width: 100%;
   height: 4px;
@@ -441,7 +444,7 @@ watch(
 .background-odd {
   background-color: #ebebeb;
 }
-@media (min-width: 600px) {
+@media #{map.get(vuetify.$display-breakpoints, 'sm-and-up')} {
   .mobile-search-sheet {
     height: 50vh;
     border-radius: 3rem 3rem 0 0;

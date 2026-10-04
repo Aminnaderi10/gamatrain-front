@@ -618,7 +618,10 @@ watch(activeFilterService, async (service, previousService) => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use 'sass:map';
+@use 'vuetify/settings' as vuetify;
+
 .filter-list-display-contents {
   display: contents;
 }
@@ -642,7 +645,7 @@ watch(activeFilterService, async (service, previousService) => {
   color: rgb(var(--v-theme-primary));
 }
 
-@media (min-width: 960px) {
+@media #{map.get(vuetify.$display-breakpoints, 'md-and-up')} {
   .header-search-teleport-source {
     display: none !important;
   }
@@ -731,7 +734,7 @@ watch(activeFilterService, async (service, previousService) => {
   text-transform: none;
 }
 
-@media (min-width: 960px) {
+@media #{map.get(vuetify.$display-breakpoints, 'md-and-up')} {
   .filter-list-sidebar-layout {
     box-sizing: border-box;
     display: grid !important;
@@ -898,7 +901,7 @@ watch(activeFilterService, async (service, previousService) => {
   }
 }
 
-@media (max-width: 959px) {
+@media #{map.get(vuetify.$display-breakpoints, 'sm-and-down')} {
   .mobile-quick-filter-bar {
     position: sticky;
     z-index: 10;

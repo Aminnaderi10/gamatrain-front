@@ -404,7 +404,10 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use 'sass:map';
+@use 'vuetify/settings' as vuetify;
+
 .board-hint {
   position: absolute;
   left: 0;
@@ -596,7 +599,7 @@ onMounted(() => {
   flex-grow: 1;
 }
 
-@media (min-width: 600px) {
+@media #{map.get(vuetify.$display-breakpoints, 'sm-and-up')} {
   .ex-category__card {
     background: linear-gradient(
       90deg,
@@ -632,7 +635,7 @@ onMounted(() => {
     width: 450px;
   }
 }
-@media (min-width: 960px) {
+@media #{map.get(vuetify.$display-breakpoints, 'md-and-up')} {
   .ex-category__card--title {
     font-size: 30px;
     font-weight: 700;

@@ -358,7 +358,10 @@ const clickOnModal = (event) => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use 'sass:map';
+@use 'vuetify/settings' as vuetify;
+
 .select-dialog-panel {
   max-height: min(82vh, 680px);
   overflow: hidden;
@@ -621,7 +624,7 @@ const clickOnModal = (event) => {
   }
 }
 
-@media only screen and (max-width: 960px) {
+@media #{map.get(vuetify.$display-breakpoints, 'sm-and-down')} {
   .mobile-style {
     position: absolute;
     bottom: 0;

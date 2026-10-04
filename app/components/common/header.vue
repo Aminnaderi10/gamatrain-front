@@ -7,7 +7,7 @@
     ]"
   >
     <v-container class="d-flex align-center justify-space-between">
-      <div class="logo-link d-flex align-center ga-4">
+      <div class="logo-link d-flex align-center flex-shrink-0 ga-4">
         <v-icon
           :color="menuSetting.linkColor"
           role="button"
@@ -81,7 +81,7 @@
         </div>
       </div>
       <div
-        class="d-flex align-center ga-3 action-button"
+        class="d-flex align-center flex-shrink-0 ga-3 action-button"
         :class="{ 'search-header-actions': isSearchExperience }"
       >
         <v-icon
@@ -321,7 +321,10 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use 'sass:map';
+@use 'vuetify/settings' as vuetify;
+
 .search-header-actions {
   flex: 1 1 auto;
   min-width: 0;
@@ -350,22 +353,16 @@ onBeforeUnmount(() => {
   width: 120px;
   height : 32px
 }
-@media (max-width: 959px) {
+@media #{map.get(vuetify.$display-breakpoints, 'sm-and-down')} {
+  .main-header {
+    z-index: 1003;
+  }
   .main-header > .v-container {
     column-gap: 10px;
   }
-  .logo-link,
-  .action-button {
-    flex-shrink: 0;
-  }
-}
-@media (max-width: 960px) {
-  .logo-image{
+  .logo-image {
     width: 80px;
-    height : 20px
-  }
-  .main-header{
-   z-index : 1003;
+    height: 20px;
   }
 }
 </style>

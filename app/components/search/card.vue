@@ -262,7 +262,10 @@ const createLinkCard = (information: SearchCardItem) =>
   `/${DETAIL_ROUTE_BY_TYPE[legacyType.value] ?? 'paper'}/${information.id}/${information.title_url}`
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use 'sass:map';
+@use 'vuetify/settings' as vuetify;
+
 /* Cover keeps the book-cover proportions; narrower on phones so the text isn't crowded */
 .cover-wrap {
   aspect-ratio: 63 / 74;
@@ -286,7 +289,7 @@ const createLinkCard = (information: SearchCardItem) =>
 .card-glyph { font-size: 16px; }
 
 /* Phones (below Vuetify's md breakpoint): no utility class covers px widths or font sizes */
-@media (max-width: 959px) {
+@media #{map.get(vuetify.$display-breakpoints, 'sm-and-down')} {
   .cover-wrap {
     width: 96px;
     aspect-ratio: auto;

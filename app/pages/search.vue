@@ -186,7 +186,10 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use 'sass:map';
+@use 'vuetify/settings' as vuetify;
+
 .subject-directory-container {
   padding-top: 16px;
 }
@@ -241,7 +244,7 @@ onMounted(() => {
   line-height: 30px;
   text-align: left;
 }
-@media (max-width: 959px) {
+@media #{map.get(vuetify.$display-breakpoints, 'sm-and-down')} {
   .subject-directory-container {
     padding-top: 0;
   }
@@ -250,7 +253,7 @@ onMounted(() => {
     font-size: 16px;
   }
 }
-@media (min-width: 960px) {
+@media #{map.get(vuetify.$display-breakpoints, 'md-and-up')} {
   .margin-top-handle {
     width: 100%;
     max-width: none !important;

@@ -230,7 +230,10 @@ const createLink = () => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use 'sass:map';
+@use 'vuetify/settings' as vuetify;
+
 .icon-div {
   min-width: 60px;
   min-height: 60px;
@@ -240,7 +243,7 @@ const createLink = () => {
   color: #ffffff;
 }
 
-@media only screen and (max-width: 600px) {
+@media #{map.get(vuetify.$display-breakpoints, 'xs')} {
   .icon-div {
     min-width: 40px;
     min-height: 40px;

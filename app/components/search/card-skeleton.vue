@@ -28,7 +28,10 @@
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@use 'sass:map';
+@use 'vuetify/settings' as vuetify;
+
 .card-skeleton {
   height: 174px;
   max-width: 1200px;
@@ -56,10 +59,11 @@
   padding: 16px 16px 8px;
 }
 
-@media (max-width: 959px) {
-  .card-skeleton {
-    height: 134px;
+/* Match the result card on phones so nothing jumps when results replace the skeleton */
+@media #{map.get(vuetify.$display-breakpoints, 'sm-and-down')} {
+  .skeleton-cover {
+    width: 96px;
+    aspect-ratio: auto;
   }
-
 }
 </style>

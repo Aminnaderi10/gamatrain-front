@@ -378,7 +378,10 @@ const upgradePlanSuccessfully = async () => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use 'sass:map';
+@use 'vuetify/settings' as vuetify;
+
 .download-file-icon {
   display: inline-flex;
   width: 20px;
@@ -454,7 +457,7 @@ const upgradePlanSuccessfully = async () => {
   background-color: #d0d5dd;
 }
 
-@media only screen and (max-width: 600px) {
+@media #{map.get(vuetify.$display-breakpoints, 'xs')} {
   .overlay-div {
     position: fixed;
     left: 0;

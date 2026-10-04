@@ -63,7 +63,10 @@ defineProps<{
 }>()
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use 'sass:map';
+@use 'vuetify/settings' as vuetify;
+
 /* px sizes: the app's 10px root font size makes Vuetify's rem-based type scale too small */
 .subject-directory-card__glyph { font-size: 22px; }
 .subject-directory-card__title { font-size: 18px; line-height: 24px; }
@@ -71,7 +74,7 @@ defineProps<{
 .subject-directory-card__action { font-size: 14px; line-height: 20px; letter-spacing: normal; }
 
 /* Phones (below Vuetify's md breakpoint): smaller text, which no utility class covers in px */
-@media (max-width: 959px) {
+@media #{map.get(vuetify.$display-breakpoints, 'sm-and-down')} {
   .subject-directory-card { min-height: 65px; }
   .subject-directory-card__glyph { font-size: 18px; }
   .subject-directory-card__title { font-size: 14px; line-height: 20px; }
