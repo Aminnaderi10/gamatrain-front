@@ -1,23 +1,17 @@
 <template>
   <v-chip-group
     v-model="selectedValue"
-    selected-class="inline-filter-option-selected"
-    class="pa-0"
+    :class="{ 'filter-option-chips--compact': compact }"
     :disabled="disabled"
     column
   >
-    <span
-      v-for="slot in leadingSpacers"
-      :key="`inline-option-spacer-${slot}`"
-      class="inline-filter-option-spacer"
-      aria-hidden="true"
-    />
     <v-chip
       v-if="allowClear"
       :value="ALL_OPTION"
-      variant="outlined"
-      class="inline-filter-option font-weight-medium ma-0"
-      :style="grouped ? { gridColumn: 1, gridRow: 1 } : undefined"
+      v-bind="chipProps"
+      class="inline-filter-option ma-0 border border-opacity-100 font-weight-medium"
+      :class="getChipClass(ALL_OPTION)"
+      :style="{ gridColumn: 1, gridRow: 1 }"
     >
       All
     </v-chip>
@@ -25,10 +19,10 @@
       v-for="(item, itemIndex) in items"
       :key="item.id"
       :value="item.id"
-      variant="outlined"
-      class="inline-filter-option font-weight-medium ma-0"
-      :class="{ 'inline-filter-option-multi-digit': isMultiDigit(item) }"
-      :style="grouped ? getGridPosition(itemIndex) : undefined"
+      v-bind="chipProps"
+      class="inline-filter-option ma-0 border border-opacity-100 font-weight-medium"
+      :class="getChipClass(item.id, isMultiDigit(item))"
+      :style="getGridPosition(itemIndex)"
     >
       {{ getTitle(item) }}
     </v-chip>
@@ -45,18 +39,16 @@ const props = withDefaults(defineProps<{
   items: FilterOption[]
   selectedItem?: FilterOption | null
   allowClear?: boolean
-  grouped?: boolean
   itemsPerRow?: number
-  leadingSpacers?: number
   disabled?: boolean
+  compact?: boolean
   itemTitle?: ((item: FilterOption) => string | undefined) | null
 }>(), {
   selectedItem: null,
   allowClear: false,
-  grouped: false,
   itemsPerRow: 3,
-  leadingSpacers: 0,
   disabled: false,
+  compact: false,
   itemTitle: null,
 })
 
@@ -89,6 +81,21 @@ const selectedValue = computed<FilterOption['id'] | undefined>({
   },
 })
 
+const isSelected = (value: FilterOption['id']) => selectedValue.value === value
+
+const getChipClass = (value: FilterOption['id'], multiDigit = false) => [
+  isSelected(value) ? 'border-brandNavy' : 'text-brandNavy border-borderSubtle',
+  props.compact ? (multiDigit ? 'px-1' : 'px-2') : (multiDigit ? 'px-2' : 'px-3'),
+]
+
+const chipProps = computed(() => ({
+  variant: 'flat' as const,
+  baseColor: 'grey25',
+  color: 'brandNavy',
+  rounded: 'lg',
+  size: props.compact ? 'small' : 'default',
+}))
+
 const getGridPosition = (itemIndex: number) => ({
   gridColumn: (itemIndex % props.itemsPerRow) + (props.allowClear ? 2 : 1),
   gridRow: Math.floor(itemIndex / props.itemsPerRow) + 1,
@@ -105,36 +112,12 @@ const getGridPosition = (itemIndex: number) => ({
   display: contents;
 }
 
+/* px sizes: the app's 10px root font size makes Vuetify's rem-based chip text too small */
 .inline-filter-option {
-  width: auto;
-  min-width: 0;
-  max-width: none;
-  height: auto !important;
-  padding: 8px 12px !important;
-  border-radius: 12px !important;
   font-size: 14px;
-  line-height: 20px;
-  color: rgb(var(--v-theme-brandNavy));
-  background: rgb(var(--v-theme-grey25));
-  border-color: rgb(var(--v-theme-borderSubtle)) !important;
-  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
-.inline-filter-option-multi-digit {
-  padding-inline: 8px !important;
-}
-
-.inline-filter-option-selected {
-  color: rgb(var(--v-theme-white)) !important;
-  background: rgb(var(--v-theme-brandNavy)) !important;
-  border-color: rgb(var(--v-theme-brandNavy)) !important;
-  box-shadow: 0 1px 2px rgba(var(--v-theme-brandNavy), 0.16);
-}
-
-.inline-filter-option-spacer {
-  width: var(--inline-filter-option-width);
-  min-width: var(--inline-filter-option-width);
-  height: var(--inline-filter-option-height);
-  flex: 0 0 var(--inline-filter-option-width);
+.filter-option-chips--compact .inline-filter-option {
+  font-size: 12px;
 }
 </style>

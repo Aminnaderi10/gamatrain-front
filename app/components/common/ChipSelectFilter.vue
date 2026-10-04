@@ -1,33 +1,29 @@
 <template>
   <div
     v-if="inlineOptions"
-    class="inline-filter-selector"
-    :class="{
-      'inline-filter-disabled': disabled,
-      'inline-filter-grouped-row': inlineGrouped,
-    }"
+    class="inline-filter-selector w-100 pt-3"
+    :class="{ 'opacity-40': disabled }"
   >
-    <div class="inline-filter-row-content">
-      <span class="inline-filter-label">{{ title }}</span>
-      <CommonFilterOptionChips
-        class="inline-filter-options"
-        :style="inlineGrouped
-          ? { gridTemplateColumns: `max-content repeat(${inlineItemsPerRow}, max-content)` }
-          : undefined"
-        :items="items"
-        :selected-item="selectedItem"
-        :allow-clear="inlineAllowClear"
-        :grouped="inlineGrouped"
-        :items-per-row="inlineItemsPerRow"
-        :leading-spacers="inlineLeadingOptionSlots"
-        :disabled="disabled"
-        :item-title="itemTitle"
-        @select="onFilterUpdate"
-      />
+    <div class="inline-filter-label text-brandNavy font-weight-semibold ms-9 mb-2">
+      {{ title }}
     </div>
-    <div
+    <CommonFilterOptionChips
+      class="inline-filter-options pa-0 ms-9 mb-3"
+      :style="{ gridTemplateColumns: `max-content repeat(${inlineItemsPerRow}, max-content)` }"
+      :items="items"
+      :selected-item="selectedItem"
+      :allow-clear="inlineAllowClear"
+      :items-per-row="inlineItemsPerRow"
+      :disabled="disabled"
+      :item-title="itemTitle"
+      compact
+      @select="onFilterUpdate"
+    />
+    <v-divider
       v-if="inlineDividerAfter"
-      class="inline-filter-divider"
+      class="inline-filter-divider mx-n4"
+      color="surfaceTertiary"
+      :opacity="1"
     />
   </div>
   <!-- Filter panel row (search sidebar and mobile filter sheet) -->
@@ -253,10 +249,6 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  inlineGrouped: {
-    type: Boolean,
-    default: false,
-  },
   inlineItemsPerRow: {
     type: Number,
     default: 3,
@@ -264,10 +256,6 @@ const props = defineProps({
   inlineDividerAfter: {
     type: Boolean,
     default: false,
-  },
-  inlineLeadingOptionSlots: {
-    type: Number,
-    default: 0,
   },
   itemTitle: {
     type: Function,
@@ -390,98 +378,14 @@ defineExpose({
   font-size: 14px;
 }
 
-.inline-filter-selector {
-  --inline-filter-option-width: 72px;
-  --inline-filter-option-height: 39px;
-
-  display: flex;
-  width: 100%;
-  max-width: 1200px;
-  min-height: 84px;
-  flex: 1 0 100%;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0;
-  padding: 16px 24px;
-  margin-top: 16px;
-  background: rgb(var(--v-theme-surface));
-  border: 1px solid rgb(var(--v-theme-grey300));
-  border-radius: 16px;
-}
-
-.inline-filter-disabled {
-  opacity: var(--v-disabled-opacity);
+/* Options sit on a grid so rows line up; gap is between Vuetify's ga-1 (4px) and ga-2 (8px) */
+.inline-filter-options {
+  display: grid;
+  gap: 6px;
 }
 
 .inline-filter-label {
-  margin-right: 72px;
   font-size: 16px;
-  font-weight: 650;
-  color: rgb(var(--v-theme-brandNavy));
-}
-
-.inline-filter-options {
-  display: flex;
-  flex: 1 1 0;
-  align-items: center;
-  min-width: 0;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.inline-filter-row-content {
-  display: contents;
-}
-
-.inline-filter-grouped-row {
-  display: block;
-  width: max-content;
-  max-width: 100%;
-  min-height: 0;
-  flex: none;
-  padding: 0;
-  margin: 0;
-  border: 0;
-  border-radius: 0;
-}
-
-.inline-filter-grouped-row .inline-filter-row-content {
-  display: grid;
-  grid-template-columns: 75px max-content;
-  align-items: center;
-  column-gap: 72px;
-}
-
-.inline-filter-grouped-row .inline-filter-label {
-  margin-right: 0;
-}
-
-.inline-filter-grouped-row .inline-filter-options {
-  flex: none;
-  gap: 8px;
-}
-
-.inline-filter-divider {
-  width: 100%;
-  margin: 12px 0;
-  border-top: 1px solid rgb(var(--v-theme-borderSubtle));
-}
-
-@media only screen and (max-width: 959px) {
-  .inline-filter-selector {
-    align-items: flex-start;
-    gap: 12px;
-    padding: 12px 16px;
-  }
-
-  .inline-filter-label {
-    flex-basis: 100%;
-    margin-right: 0;
-  }
-
-  .inline-filter-options {
-    gap: 12px;
-  }
-
+  line-height: 24px;
 }
 </style>
