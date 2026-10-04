@@ -238,7 +238,7 @@ onMounted(() => {
   display: none;
 }
 
-:deep(.inline-filter-group .inline-filter-option:not(.inline-filter-option-selected):not(:disabled):hover) {
+:deep(.inline-filter-group .inline-filter-option:not(.inline-filter-option-selected):not(.v-chip--disabled):hover) {
   --v-hover-opacity: 0;
   border-color: rgb(var(--v-theme-brandNavy)) !important;
   background-color: rgb(var(--v-theme-surfaceSecondary)) !important;
