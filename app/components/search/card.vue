@@ -509,24 +509,10 @@ const createLinkCard = (information) => {
 @media (max-width: 959px) {
   .card-search { height: 174px; }
 
-  .cover-fallback {
-    align-items: flex-start !important;
-    direction: ltr;
-    text-align: left !important;
-  }
-
-  .cover-fallback > span {
-    width: 50%;
-    max-width: 50%;
-    overflow-wrap: break-word;
-    white-space: normal;
-  }
-
-  .card-body {
-    position: relative;
-    margin-left: -74px;
-    padding: 12px 16px;
-    background: rgb(var(--v-theme-grey25));
+  /* Narrower cover on phones so the full image shows without crowding the text */
+  .cover-wrap {
+    width: 96px;
+    aspect-ratio: auto;
   }
 
   .card-title {
