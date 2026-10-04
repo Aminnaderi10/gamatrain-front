@@ -134,12 +134,24 @@
               class="select-item-icon mr-2"
             >
               <v-img
-                v-if="item.icon && !hasIconFailed(getIconSrc(item))"
+                v-if="item.icon"
                 :src="getIconSrc(item)"
                 :alt="item.title"
                 contain
-                @error="markIconFailed(getIconSrc(item))"
-              />
+              >
+                <template #error>
+                  <span
+                    v-if="item.contentIcon"
+                    :class="`${item.contentIcon} select-item-content-icon text-brandNavy`"
+                  />
+                  <v-icon
+                    v-else
+                    class="select-item-material-icon"
+                    size="34"
+                    color="brandNavy"
+                  >{{ fallbackIcon }}</v-icon>
+                </template>
+              </v-img>
               <span
                 v-else-if="item.contentIcon"
                 :class="`${item.contentIcon} select-item-content-icon text-brandNavy`"
@@ -322,7 +334,6 @@ const emit = defineEmits(['update:showDialog', 'changeSelectedItem'])
 
 // Start Section Search Item In List
 const searchText = ref('')
-const { hasIconFailed, markIconFailed } = useIconFallback()
 
 watch(
   () => props.showDialog,
