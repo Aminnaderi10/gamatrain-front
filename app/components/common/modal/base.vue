@@ -99,7 +99,7 @@ const clickOnModal = (event: MouseEvent) => {
   background: rgb(var(--v-theme-grey25)) !important;
   border: 1px solid rgb(var(--v-theme-borderSubtle));
   border-radius: 20px !important;
-  box-shadow: 0 24px 64px rgb(var(--v-theme-brandNavy) / 18%);
+  box-shadow: 0 24px 64px rgba(var(--v-theme-brandNavy), 0.18);
 }
 
 .modal-panel--publish .modal-title {
@@ -138,7 +138,7 @@ const clickOnModal = (event: MouseEvent) => {
 }
 
 .modal-panel--publish .modal-close--publish:focus-visible {
-  outline: 3px solid rgb(var(--v-theme-academicGold) / 30%);
+  outline: 3px solid rgba(var(--v-theme-primary), 0.3);
   outline-offset: 2px;
 }
 

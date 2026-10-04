@@ -36,7 +36,7 @@
   border: 1px solid rgb(var(--v-theme-borderSkeleton));
   border-radius: 16px !important;
   background: rgb(var(--v-theme-white));
-  box-shadow: 0 1px 2px rgb(var(--v-theme-grey900) / 8%);
+  box-shadow: 0 1px 2px rgba(var(--v-theme-grey900), 0.08);
 }
 
 .skeleton-cover {

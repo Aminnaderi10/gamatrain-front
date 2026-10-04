@@ -14,6 +14,11 @@ export default defineNuxtPlugin(
       ssr: true,
       theme: {
         defaultTheme: 'light',
+        variations: {
+          colors: ['primary'],
+          lighten: 0,
+          darken: 1,
+        },
         themes: {
           light: {
             colors: {
@@ -35,8 +40,6 @@ export default defineNuxtPlugin(
               grey50: '#F9FAFB',
               grey25: '#FCFCFD',
               brandNavy: '#1E2A44',
-              academicGold: '#F4B400',
-              academicGoldHover: '#E8A800',
               softGold: '#FFF8E1',
               surfaceSecondary: '#F7F8FA',
               surfaceTertiary: '#EEF1F5',
@@ -65,7 +68,6 @@ export default defineNuxtPlugin(
               generalSearchStudyMaterialsActive: '#B3E9BA',
               generalSearchQuiz: '#7B61FF',
               generalSearchQuizActive: '#D8D0FF',
-              generalSearchTutorial: '#2A91FF',
               generalSearchTutorialActive: '#C0DEFF',
               generalSearchTeacher: '#7F56D9',
               generalSearchTeacherActive: '#C7B5EE',
@@ -96,8 +98,6 @@ export default defineNuxtPlugin(
               grey50: '#F9FAFB',
               grey25: '#FCFCFD',
               brandNavy: '#1E2A44',
-              academicGold: '#F4B400',
-              academicGoldHover: '#E8A800',
               softGold: '#FFF8E1',
               surfaceSecondary: '#F7F8FA',
               surfaceTertiary: '#EEF1F5',
@@ -126,7 +126,6 @@ export default defineNuxtPlugin(
               generalSearchStudyMaterialsActive: '#B3E9BA',
               generalSearchQuiz: '#7B61FF',
               generalSearchQuizActive: '#D8D0FF',
-              generalSearchTutorial: '#2A91FF',
               generalSearchTutorialActive: '#C0DEFF',
               generalSearchTeacher: '#7F56D9',
               generalSearchTeacherActive: '#C7B5EE',

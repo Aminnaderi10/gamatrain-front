@@ -57,7 +57,7 @@
             <v-btn
               class="text-h5 font-weight-bold"
               width="250"
-              color="academicGold"
+              color="primary"
               rounded="pill"
               flat
               variant="tonal"

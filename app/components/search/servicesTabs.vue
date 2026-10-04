@@ -179,7 +179,7 @@ const formatCount = (serviceId) => {
 }
 
 .services-navigation__tab.v-tab.v-btn:focus-visible {
-  outline: 3px solid rgba(var(--v-theme-academicGold), 0.3);
+  outline: 3px solid rgba(var(--v-theme-primary), 0.3);
   outline-offset: -3px;
 }
 
@@ -256,7 +256,7 @@ const formatCount = (serviceId) => {
 
 .services-navigation__count {
   min-height: 16px;
-  color: rgb(var(--v-theme-academicGold));
+  color: rgb(var(--v-theme-primary));
   font-size: 14px;
   font-weight: 700;
   line-height: 18px;

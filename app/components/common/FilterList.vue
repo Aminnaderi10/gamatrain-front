@@ -42,7 +42,7 @@
           v-model="textSearch"
           label="Search anything...."
           variant="outlined"
-          color="academicGold"
+          color="primary"
           max-width="330"
           density="compact"
           hide-details
@@ -54,7 +54,7 @@
             <v-btn
               icon
               varient="text"
-              color="academicGold"
+              color="primary"
               width="50"
               class="rounded-ts rounded-te-xl rounded-be-xl rounded-bs h-100 ml-n2"
               flat
@@ -435,7 +435,7 @@
             class="mobile-filter-modal__footer w-100 d-flex align-center justify-center position-fixed bottom-0"
           >
             <v-btn
-              color="academicGold"
+              color="primary"
               rounded="xl"
               height="40"
               class="mobile-filter-modal__show-results text-h5 text-grey800"
@@ -639,7 +639,7 @@ watch(activeFilterService, async (service, previousService) => {
 }
 
 .header-keyword-search :deep(.v-field--focused .v-field__outline) {
-  color: rgb(var(--v-theme-academicGold));
+  color: rgb(var(--v-theme-primary));
 }
 
 @media (min-width: 960px) {
@@ -1084,7 +1084,7 @@ watch(activeFilterService, async (service, previousService) => {
   .mobile-quick-filter__control:focus-visible,
   .mobile-quick-filter__clear:focus-visible {
     z-index: 1;
-    outline: 3px solid rgba(var(--v-theme-academicGold), 0.28);
+    outline: 3px solid rgba(var(--v-theme-primary), 0.28);
     outline-offset: -3px;
   }
 

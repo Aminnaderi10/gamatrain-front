@@ -50,7 +50,7 @@ const emit = defineEmits(['click'])
 
 .filter-trigger:hover {
   background: rgb(var(--v-theme-softGold));
-  border-color: rgb(var(--v-theme-academicGoldHover));
+  border-color: rgb(var(--v-theme-primary-darken-1));
 }
 
 .filter-trigger__content {

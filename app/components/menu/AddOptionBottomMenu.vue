@@ -147,7 +147,7 @@ watch(
   background: rgb(var(--v-theme-white));
   border: 1px solid rgb(var(--v-theme-borderSubtle));
   border-radius: 14px;
-  box-shadow: 0 2px 8px rgb(var(--v-theme-brandNavy) / 5%);
+  box-shadow: 0 2px 8px rgba(var(--v-theme-brandNavy), 0.05);
   text-decoration: none;
   opacity: 1;
   transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
@@ -167,8 +167,8 @@ watch(
 
 .card-add-option:not(.v-btn--disabled):hover {
   transform: translateY(-2px);
-  border-color: rgb(var(--v-theme-academicGoldHover));
-  box-shadow: 0 10px 24px rgb(var(--v-theme-brandNavy) / 12%);
+  border-color: rgb(var(--v-theme-primary-darken-1));
+  box-shadow: 0 10px 24px rgba(var(--v-theme-brandNavy), 0.12);
 }
 
 .card-add-option:not(.v-btn--disabled):active {
@@ -176,14 +176,14 @@ watch(
 }
 
 .card-add-option:focus-visible {
-  outline: 3px solid rgb(var(--v-theme-academicGold) / 32%);
+  outline: 3px solid rgba(var(--v-theme-primary), 0.32);
   outline-offset: 2px;
 }
 
 .card-add-option.v-btn--active {
   background: rgb(var(--v-theme-softGold));
-  border-color: rgb(var(--v-theme-academicGold));
-  box-shadow: 0 0 0 1px rgb(var(--v-theme-academicGold)), 0 8px 20px rgb(var(--v-theme-brandNavy) / 10%);
+  border-color: rgb(var(--v-theme-primary));
+  box-shadow: 0 0 0 1px rgb(var(--v-theme-primary)), 0 8px 20px rgba(var(--v-theme-brandNavy), 0.1);
 }
 
 .card-add-option.v-btn--active::after {
@@ -197,7 +197,7 @@ watch(
   font-size: 14px;
   font-weight: 800;
   content: '\2713';
-  background: rgb(var(--v-theme-academicGold));
+  background: rgb(var(--v-theme-primary));
   border-radius: 50%;
   place-items: center;
 }
@@ -210,7 +210,7 @@ watch(
 .card-add-option.v-btn--disabled:hover {
   transform: none;
   border-color: rgb(var(--v-theme-borderSubtle));
-  box-shadow: 0 2px 8px rgb(var(--v-theme-brandNavy) / 5%);
+  box-shadow: 0 2px 8px rgba(var(--v-theme-brandNavy), 0.05);
 }
 
 .icon-div {

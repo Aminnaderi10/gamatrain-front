@@ -55,7 +55,7 @@
           prepend-inner-icon="md:search"
           glow
           variant="outlined"
-          color="academicGold"
+          color="primary"
           icon-color="brandNavy"
           density="compact"
           rounded="lg"
@@ -65,7 +65,7 @@
           <template #append-inner>
             <v-btn
               class="select-dialog-search-button mr-n2"
-              color="academicGold"
+              color="primary"
               width="64"
               height="32"
               rounded="lg"
@@ -170,7 +170,7 @@
         <v-progress-circular
           indeterminate
           :width="3"
-          color="academicGold"
+          color="primary"
         />
       </div>
 
@@ -369,7 +369,7 @@ const clickOnModal = (event) => {
   background: rgb(var(--v-theme-grey25)) !important;
   border: 1px solid rgb(var(--v-theme-borderSubtle));
   border-radius: 16px;
-  box-shadow: 0 20px 48px rgb(var(--v-theme-brandNavy) / 16%);
+  box-shadow: 0 20px 48px rgba(var(--v-theme-brandNavy), 0.16);
 }
 
 .select-dialog-header {
@@ -424,7 +424,7 @@ const clickOnModal = (event) => {
 }
 
 .select-dialog-close:focus-visible {
-  outline: 3px solid rgb(var(--v-theme-academicGold) / 28%);
+  outline: 3px solid rgba(var(--v-theme-primary), 0.28);
   outline-offset: 2px;
 }
 
@@ -477,7 +477,7 @@ const clickOnModal = (event) => {
 }
 
 .select-dialog-search :deep(.v-field.v-field--focused .v-field__outline) {
-  color: rgb(var(--v-theme-academicGold));
+  color: rgb(var(--v-theme-primary));
 }
 
 .select-dialog-search :deep(.v-field__prepend-inner),
@@ -488,7 +488,7 @@ const clickOnModal = (event) => {
 
 .select-dialog-search-button {
   color: rgb(var(--v-theme-brandNavy)) !important;
-  background: rgb(var(--v-theme-academicGold)) !important;
+  background: rgb(var(--v-theme-primary)) !important;
   font-size: 12px;
   font-weight: 650;
   letter-spacing: 0;
@@ -497,7 +497,7 @@ const clickOnModal = (event) => {
 }
 
 .select-dialog-search-button:hover {
-  background: rgb(var(--v-theme-academicGoldHover)) !important;
+  background: rgb(var(--v-theme-primary-darken-1)) !important;
 }
 
 .select-dialog-list {
@@ -543,7 +543,7 @@ const clickOnModal = (event) => {
   color: rgb(var(--v-theme-brandNavy)) !important;
   background: rgb(var(--v-theme-surfaceTertiary)) !important;
   border-color: rgb(var(--v-theme-borderSubtle));
-  box-shadow: 0 1px 2px rgb(var(--v-theme-brandNavy) / 8%);
+  box-shadow: 0 1px 2px rgba(var(--v-theme-brandNavy), 0.08);
 }
 
 .select-dialog-list :deep(.select-dialog-item:not(:last-child)) {

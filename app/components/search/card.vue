@@ -309,13 +309,13 @@ const createLinkCard = (information) => {
   border: 1px solid rgb(var(--v-theme-borderSubtle));
   border-radius: 16px !important;
   background: rgb(var(--v-theme-grey25));
-  box-shadow: 0 1px 2px rgb(var(--v-theme-brandNavy) / 7%);
+  box-shadow: 0 1px 2px rgba(var(--v-theme-brandNavy), 0.07);
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
 .card-search:hover {
   border-color: rgb(var(--v-theme-borderSubtle));
-  box-shadow: 0 6px 18px rgb(var(--v-theme-brandNavy) / 12%);
+  box-shadow: 0 6px 18px rgba(var(--v-theme-brandNavy), 0.12);
   transform: translateY(-2px);
 }
 
@@ -325,7 +325,7 @@ const createLinkCard = (information) => {
 }
 
 .card-primary-link:focus-visible {
-  outline: 3px solid rgb(var(--v-theme-academicGold) / 34%);
+  outline: 3px solid rgba(var(--v-theme-primary), 0.34);
   outline-offset: -3px;
 }
 
@@ -373,7 +373,7 @@ const createLinkCard = (information) => {
 
 .publisher-name {
   max-width: 260px;
-  color: rgb(var(--v-theme-brandNavy) / 68%);
+  color: rgba(var(--v-theme-brandNavy), 0.68);
   font-size: 13px;
   font-weight: 600;
   line-height: 18px;
@@ -398,7 +398,7 @@ const createLinkCard = (information) => {
 .card-description {
   max-width: 100%;
   margin: 0;
-  color: rgb(var(--v-theme-brandNavy) / 68%) !important;
+  color: rgba(var(--v-theme-brandNavy), 0.68) !important;
   font-size: 13px;
   line-height: 20px;
 }
@@ -413,7 +413,7 @@ const createLinkCard = (information) => {
   pointer-events: none;
   height: 24px;
   padding: 4px 8px !important;
-  color: rgb(var(--v-theme-brandNavy) / 68%) !important;
+  color: rgba(var(--v-theme-brandNavy), 0.68) !important;
   background: rgb(var(--v-theme-surfaceSecondary)) !important;
   border: 1px solid rgb(var(--v-theme-surfaceTertiary));
   border-radius: 6px !important;
@@ -429,7 +429,7 @@ const createLinkCard = (information) => {
   gap: 12px !important;
   min-height: 18px;
   padding-top: 0;
-  color: rgb(var(--v-theme-brandNavy) / 68%);
+  color: rgba(var(--v-theme-brandNavy), 0.68);
   font-size: 12px;
   line-height: 18px;
 }

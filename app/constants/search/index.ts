@@ -100,7 +100,7 @@ export const GENERAL_SEARCH_CATEGORIES = [
     isOldApi: true,
     keywordSearch: 'title',
     iconName: 'icon-tutorial',
-    colorClass: 'bg-generalSearchTutorial',
+    colorClass: 'bg-blue500',
     activeColorClass: 'bg-generalSearchTutorialActive',
   },
   {

@@ -81,13 +81,13 @@ defineProps({
 @media (hover: hover) and (pointer: fine) {
   .subject-directory-card:hover {
     transform: translateY(-1px);
-    border-color: rgb(var(--v-theme-academicGoldHover));
+    border-color: rgb(var(--v-theme-primary-darken-1));
     box-shadow: 0 6px 18px rgba(var(--v-theme-brandNavy), 0.12);
   }
 }
 
 .subject-directory-card:focus-visible {
-  outline: 3px solid rgba(var(--v-theme-academicGold), 0.3);
+  outline: 3px solid rgba(var(--v-theme-primary), 0.3);
   outline-offset: 2px;
 }
 
@@ -145,14 +145,14 @@ defineProps({
   font-size: 14px;
   font-weight: 600;
   line-height: 20px;
-  background: rgb(var(--v-theme-academicGold));
-  border: 1px solid rgb(var(--v-theme-academicGold));
+  background: rgb(var(--v-theme-primary));
+  border: 1px solid rgb(var(--v-theme-primary));
   border-radius: 10px;
 }
 
 .subject-directory-card:hover .subject-directory-card__action {
-  background: rgb(var(--v-theme-academicGoldHover));
-  border-color: rgb(var(--v-theme-academicGoldHover));
+  background: rgb(var(--v-theme-primary-darken-1));
+  border-color: rgb(var(--v-theme-primary-darken-1));
 }
 
 @media (max-width: 959px) {
