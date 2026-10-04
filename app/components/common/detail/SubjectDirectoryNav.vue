@@ -1,234 +1,81 @@
 <template>
-  <nuxt-link
+  <v-card
     :to="`/subject-directory?board=${contentData?.section}&grade=${contentData?.base}&subject=${contentData?.lesson}`"
-    class="subject-directory-card"
+    color="grey25"
+    elevation="1"
+    rounded="lg"
+    hover
+    class="subject-directory-card d-flex align-center justify-space-between ga-2 ga-md-6 w-100 px-4 py-1 py-md-3 border border-borderSubtle border-opacity-100 text-brandNavy"
   >
-    <div class="subject-directory-card__main">
-      <span
-        class="subject-directory-card__icon"
+    <div class="d-flex align-center flex-grow-1 ga-2 ga-md-4 overflow-hidden">
+      <v-avatar
+        color="brandNavy"
+        rounded="lg"
+        size="40"
         aria-hidden="true"
       >
-        <span
-          class="subject-directory-card__icon-glyph icon-subject-directory d-inline-flex align-center justify-center"
-        />
-      </span>
+        <!-- The glyph is drawn left of centre in the icon font; ps-1 recentres it -->
+        <span class="subject-directory-card__glyph icon-subject-directory ps-1" />
+      </v-avatar>
 
-      <div class="subject-directory-card__copy">
-        <span class="subject-directory-card__title">
+      <div class="d-flex flex-column flex-grow-1 overflow-hidden">
+        <span class="subject-directory-card__title font-weight-bold text-truncate">
           {{ contentData?.lesson_title }} Subject directory
         </span>
-        <span class="subject-directory-card__subtitle-row">
-          <span class="subject-directory-card__subtitle">
+        <div class="d-flex align-center ga-1">
+          <span class="subject-directory-card__subtitle text-brandNavy opacity-70 text-truncate">
             All resources in one place.
           </span>
-          <span class="subject-directory-card__action subject-directory-card__action--mobile">
-            Open directory <span aria-hidden="true">→</span>
-          </span>
-        </span>
+          <v-chip
+            tag="span"
+            color="primary"
+            variant="flat"
+            size="small"
+            class="subject-directory-card__action d-md-none ms-auto flex-shrink-0 text-brandNavy font-weight-semibold"
+          >
+            Open directory →
+          </v-chip>
+        </div>
       </div>
     </div>
 
-    <span class="subject-directory-card__action subject-directory-card__action--desktop">
-      Open directory <span aria-hidden="true">→</span>
-    </span>
-  </nuxt-link>
+    <v-btn
+      tag="span"
+      color="primary"
+      variant="flat"
+      rounded="lg"
+      height="40"
+      class="subject-directory-card__action d-none d-md-flex flex-shrink-0 text-none text-brandNavy font-weight-semibold"
+    >
+      Open directory →
+    </v-btn>
+  </v-card>
 </template>
 
-<script setup>
-defineProps({
-  contentData: Object,
-})
+<script setup lang="ts">
+defineProps<{
+  contentData?: {
+    section?: string | number | null
+    base?: string | number | null
+    lesson?: string | number | null
+    lesson_title?: string | null
+  }
+}>()
 </script>
 
 <style scoped>
-.subject-directory-card {
-  display: flex;
-  width: 100%;
-  min-height: 0;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 12px 16px;
-  margin-top: 0;
-  color: rgb(var(--v-theme-brandNavy));
-  text-decoration: none;
-  background: rgb(var(--v-theme-grey25));
-  border: 1px solid rgb(var(--v-theme-borderSubtle));
-  border-radius: 12px;
-  box-shadow: 0 1px 2px rgba(var(--v-theme-brandNavy), 0.07);
-  transition: transform 180ms ease-out, box-shadow 180ms ease-out;
-}
+/* px sizes: the app's 10px root font size makes Vuetify's rem-based type scale too small */
+.subject-directory-card__glyph { font-size: 22px; }
+.subject-directory-card__title { font-size: 18px; line-height: 24px; }
+.subject-directory-card__subtitle,
+.subject-directory-card__action { font-size: 14px; line-height: 20px; letter-spacing: normal; }
 
-.subject-directory-card__main {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 16px;
-}
-
-.subject-directory-card__icon {
-  display: inline-flex;
-  width: 44px;
-  height: 44px;
-  flex: 0 0 44px;
-  align-items: center;
-  justify-content: center;
-  color: rgb(var(--v-theme-white));
-  background: rgb(var(--v-theme-brandNavy));
-  border-radius: 10px;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .subject-directory-card:hover {
-    transform: translateY(-1px);
-    border-color: rgb(var(--v-theme-primary-darken-1));
-    box-shadow: 0 6px 18px rgba(var(--v-theme-brandNavy), 0.12);
-  }
-}
-
-.subject-directory-card:focus-visible {
-  outline: 3px solid rgba(var(--v-theme-primary), 0.3);
-  outline-offset: 2px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .subject-directory-card,
-  .subject-directory-card__icon {
-    transition: none;
-  }
-}
-
-.subject-directory-card__icon-glyph {
-  width: 22px;
-  height: 22px;
-  font-size: 22px;
-  line-height: 1;
-  transform: translateX(4px);
-}
-
-.subject-directory-card__copy {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.subject-directory-card__title {
-  overflow: hidden;
-  color: rgb(var(--v-theme-brandNavy));
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 24px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.subject-directory-card__subtitle {
-  color: rgba(var(--v-theme-brandNavy), 0.68);
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 20px;
-}
-
-.subject-directory-card__action.subject-directory-card__action--mobile {
-  display: none;
-}
-
-.subject-directory-card__action {
-  display: inline-flex;
-  min-height: 40px;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  color: rgb(var(--v-theme-brandNavy));
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 20px;
-  background: rgb(var(--v-theme-primary));
-  border: 1px solid rgb(var(--v-theme-primary));
-  border-radius: 10px;
-}
-
-.subject-directory-card:hover .subject-directory-card__action {
-  background: rgb(var(--v-theme-primary-darken-1));
-  border-color: rgb(var(--v-theme-primary-darken-1));
-}
-
+/* Phones (below Vuetify's md breakpoint): smaller text, which no utility class covers in px */
 @media (max-width: 959px) {
-  .subject-directory-card {
-    position: relative;
-    min-height: 65px;
-    align-items: center;
-    flex-wrap: nowrap;
-    gap: 8px;
-    padding: 2px 16px;
-  }
-
-  .subject-directory-card__main {
-    width: 100%;
-    flex: 1 1 auto;
-    gap: 8px;
-  }
-
-  .subject-directory-card__icon {
-    width: 36px;
-    height: 36px;
-    flex-basis: 36px;
-    border-radius: 8px;
-  }
-
-  .subject-directory-card__icon-glyph {
-    width: 18px;
-    height: 18px;
-    font-size: 18px;
-  }
-
-  .subject-directory-card__copy {
-    width: 100%;
-  }
-
-  .subject-directory-card__title {
-    font-size: 14px;
-    line-height: 20px;
-    white-space: nowrap;
-  }
-
-  .subject-directory-card__subtitle {
-    max-width: 100%;
-    flex: 0 0 auto;
-    overflow: hidden;
-    padding-right: 0;
-    font-size: 12px;
-    line-height: 16px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .subject-directory-card__subtitle-row {
-    display: flex;
-    min-width: 0;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 2px 4px;
-  }
-
-  .subject-directory-card__action--desktop {
-    display: none;
-  }
-
-  .subject-directory-card__action.subject-directory-card__action--mobile {
-    position: static;
-    display: inline-flex;
-    box-sizing: border-box;
-    height: 22px;
-    min-height: 22px;
-    gap: 3px;
-    padding: 2px 6px;
-    margin-left: auto;
-    font-size: 11px;
-    line-height: 16px;
-    white-space: nowrap;
-  }
+  .subject-directory-card { min-height: 65px; }
+  .subject-directory-card__glyph { font-size: 18px; }
+  .subject-directory-card__title { font-size: 14px; line-height: 20px; }
+  .subject-directory-card__subtitle { font-size: 12px; line-height: 16px; }
+  .subject-directory-card__action { font-size: 11px; line-height: 16px; }
 }
 </style>
