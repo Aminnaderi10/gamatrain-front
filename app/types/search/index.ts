@@ -90,6 +90,29 @@ export interface SearchResourceItem extends SearchMetadataFields {
   [key: string]: unknown
 }
 
+/** Fields of a /api/v1/search result that the result card renders. */
+export interface SearchCardItem extends SearchMetadataFields {
+  id: number | string
+  title?: string | null
+  title_url?: string | null
+  description?: string | null
+  summary?: string | null
+  lesson_pic?: string | null
+  avatar?: string | null
+  first_name?: string | null
+  last_name?: string | null
+  username?: string | null
+  level?: number | string | null
+  q_file?: boolean | string | null
+  a_file?: boolean | string | null
+  q_file_word?: boolean | string | null
+  referee_score?: number | string | null
+  ref_score?: number | string | null
+  tests_num?: number | string | null
+  views?: number | string | null
+  subdate?: string | null
+}
+
 export type SearchResultItem = SearchResourceItem | (ProfileListItemDTO & SearchMetadataFields)
 
 export interface SearchServiceOptions {
