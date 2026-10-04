@@ -9,50 +9,21 @@
   >
     <div class="inline-filter-row-content">
       <span class="inline-filter-label">{{ title }}</span>
-      <div
+      <CommonFilterOptionChips
         class="inline-filter-options"
         :style="inlineGrouped
           ? { gridTemplateColumns: `max-content repeat(${inlineItemsPerRow}, max-content)` }
           : undefined"
-      >
-        <span
-          v-for="slot in inlineLeadingOptionSlots"
-          :key="`inline-option-spacer-${slot}`"
-          class="inline-filter-option-spacer"
-          aria-hidden="true"
-        />
-        <v-btn
-          v-if="inlineAllowClear"
-          variant="outlined"
-          class="inline-filter-option"
-          :class="{ 'inline-filter-option-selected': !selectedItem }"
-          :style="inlineGrouped ? { gridColumn: 1, gridRow: 1 } : undefined"
-          :disabled="disabled"
-          @click="onFilterUpdate(null)"
-        >
-          All
-        </v-btn>
-        <v-btn
-          v-for="(item, itemIndex) in items"
-          :key="item.id"
-          variant="outlined"
-          class="inline-filter-option"
-          :class="{
-            'inline-filter-option-selected': selectedItem?.id == item.id,
-            'inline-filter-option-multi-digit': isMultiDigitInlineOption(item),
-          }"
-          :style="inlineGrouped
-            ? {
-              gridColumn: (itemIndex % inlineItemsPerRow) + (inlineAllowClear ? 2 : 1),
-              gridRow: Math.floor(itemIndex / inlineItemsPerRow) + 1,
-            }
-            : undefined"
-          :disabled="disabled"
-          @click="onFilterUpdate(item)"
-        >
-          {{ getInlineItemTitle(item) }}
-        </v-btn>
-      </div>
+        :items="items"
+        :selected-item="selectedItem"
+        :allow-clear="inlineAllowClear"
+        :grouped="inlineGrouped"
+        :items-per-row="inlineItemsPerRow"
+        :leading-spacers="inlineLeadingOptionSlots"
+        :disabled="disabled"
+        :item-title="itemTitle"
+        @select="onFilterUpdate"
+      />
     </div>
     <div
       v-if="inlineDividerAfter"
@@ -276,9 +247,6 @@ const emit = defineEmits(['UpdateSelectedItem', 'clear'])
 const items = ref([...props.staticList])
 const isShowSelectModal = ref(false)
 const loading = ref(false)
-const getInlineItemTitle = item => props.itemTitle?.(item) || item.title
-const isMultiDigitInlineOption = item =>
-  /^\d{2,}$/.test(String(getInlineItemTitle(item)).trim())
 
 const onFilterUpdate = (itemSelected) => {
   isShowSelectModal.value = false
@@ -375,7 +343,7 @@ defineExpose({
 })
 </script>
 
-<style>
+<style scoped>
 .search-filter-control {
   min-width: 152px;
   height: 52px !important;
@@ -407,22 +375,12 @@ defineExpose({
   justify-content: center;
 }
 
-.search-filter-icon .v-img {
+.search-filter-icon :deep(.v-img) {
   width: 100%;
   height: 100%;
 }
 
-.search-filter-content-icon {
-  display: inline-flex;
-  width: 28px;
-  height: 28px;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  line-height: 1;
-}
-
-.search-filter-icon-padded .v-icon {
+.search-filter-icon-padded :deep(.v-icon) {
   width: 100%;
   height: 100%;
   min-width: 0;
@@ -459,13 +417,13 @@ defineExpose({
   white-space: nowrap;
 }
 
-.search-filter-control .v-btn__content {
+.search-filter-control :deep(.v-btn__content) {
   flex: 1;
   justify-content: flex-start;
   overflow: hidden;
 }
 
-.search-filter-control .v-btn__content > span {
+.search-filter-control :deep(.v-btn__content > span) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -487,8 +445,8 @@ defineExpose({
 }
 
 .open-style-btn:not(.search-filter-empty) .search-filter-value,
-.open-style-btn:not(.search-filter-empty) .v-icon,
-.open-style-btn:not(.search-filter-empty) .search-filter-content-icon {
+.open-style-btn:not(.search-filter-empty) :deep(.v-icon),
+.open-style-btn:not(.search-filter-empty) :deep(.search-filter-content-icon) {
   color: rgb(var(--v-theme-brandNavy)) !important;
 }
 
@@ -503,8 +461,8 @@ defineExpose({
 }
 
 .dependent-selected-btn .search-filter-value,
-.dependent-selected-btn .v-icon,
-.dependent-selected-btn .search-filter-content-icon {
+.dependent-selected-btn :deep(.v-icon),
+.dependent-selected-btn :deep(.search-filter-content-icon) {
   color: rgb(var(--v-theme-brandNavy)) !important;
 }
 
@@ -602,32 +560,6 @@ defineExpose({
   border-top: 1px solid rgb(var(--v-theme-borderSubtle));
 }
 
-.inline-filter-option {
-  width: auto;
-  min-width: 0;
-  max-width: none;
-  height: auto !important;
-  padding: 8px 12px !important;
-  border-radius: 12px !important;
-  font-size: 14px;
-  line-height: 20px;
-  color: rgb(var(--v-theme-brandNavy));
-  background: rgb(var(--v-theme-grey25));
-  border-color: rgb(var(--v-theme-borderSubtle)) !important;
-  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
-}
-
-.inline-filter-option-multi-digit {
-  padding-inline: 8px !important;
-}
-
-.inline-filter-option-selected {
-  color: rgb(var(--v-theme-white)) !important;
-  background: rgb(var(--v-theme-brandNavy)) !important;
-  border-color: rgb(var(--v-theme-brandNavy)) !important;
-  box-shadow: 0 1px 2px rgba(var(--v-theme-brandNavy), 0.16);
-}
-
 @media only screen and (max-width: 959px) {
   .inline-filter-selector {
     align-items: flex-start;
@@ -644,12 +576,5 @@ defineExpose({
     gap: 12px;
   }
 
-}
-
-.inline-filter-option-spacer {
-  width: var(--inline-filter-option-width);
-  min-width: var(--inline-filter-option-width);
-  height: var(--inline-filter-option-height);
-  flex: 0 0 var(--inline-filter-option-width);
 }
 </style>

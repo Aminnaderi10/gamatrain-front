@@ -69,3 +69,15 @@ const fallbackSize = computed(() => {
   return 28 - (props.fallbackIconPadding * 2)
 })
 </script>
+
+<style scoped>
+.search-filter-content-icon {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  line-height: 1;
+}
+</style>

@@ -75,40 +75,20 @@
           </template>
         </v-text-field>
       </v-row>
-      <div
+      <CommonFilterOptionChips
         v-if="!isLoading && inlineOptions"
         class="select-dialog-inline-options"
         :style="{
           gridTemplateColumns: `max-content repeat(${inlineItemsPerRow}, max-content)`,
         }"
-      >
-        <v-btn
-          v-if="inlineAllowClear"
-          variant="outlined"
-          class="inline-filter-option"
-          :class="{ 'inline-filter-option-selected': !selectedItem }"
-          :style="{ gridColumn: 1, gridRow: 1 }"
-          :aria-pressed="!selectedItem"
-          @click="changeSelectedItem(null)"
-        >
-          All
-        </v-btn>
-        <v-btn
-          v-for="(item, itemIndex) in filteredItems"
-          :key="item.id"
-          variant="outlined"
-          class="inline-filter-option"
-          :class="{ 'inline-filter-option-selected': selectedItem?.id == item.id }"
-          :style="{
-            gridColumn: (itemIndex % inlineItemsPerRow) + (inlineAllowClear ? 2 : 1),
-            gridRow: Math.floor(itemIndex / inlineItemsPerRow) + 1,
-          }"
-          :aria-pressed="selectedItem?.id == item.id"
-          @click="changeSelectedItem(item)"
-        >
-          {{ getItemTitle(item) }}
-        </v-btn>
-      </div>
+        :items="filteredItems"
+        :selected-item="selectedItem"
+        :allow-clear="inlineAllowClear"
+        :items-per-row="inlineItemsPerRow"
+        :item-title="itemTitle"
+        grouped
+        @select="changeSelectedItem"
+      />
 
       <v-list
         v-else-if="!isLoading"
@@ -343,7 +323,6 @@ watch(
 )
 
 const getIconSrc = item => props.iconSrc?.(item) || item.icon
-const getItemTitle = item => props.itemTitle?.(item) || item.title
 const filteredItems = computed(() => {
   if (!searchText.value) return props.items
   return props.items.filter(item =>
