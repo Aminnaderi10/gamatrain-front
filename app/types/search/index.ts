@@ -24,17 +24,6 @@ export type SearchCountService = 'paper' | 'study-materials' | 'quizhub' | 'tuto
 
 export type SearchServiceCounts = Partial<Record<SearchCountService, number>>
 
-export interface SearchCardAnswerFields {
-  is_paper?: boolean | null
-  answer_type?: string | number | null
-  answers_at_end_of_files?: boolean | null
-  a_file?: boolean | null
-  files?: {
-    answer?: {
-      exist?: boolean | null
-    } | null
-  } | null
-}
 export type SearchServiceId = 'paper' | 'study-materials' | 'quizhub' | 'tutorial' | 'teacher' | 'multimedia' | 'forum'
 export type LegacySearchType = 'test' | 'azmoon' | 'dars' | 'teacher' | 'learnfiles' | 'question'
 export type SearchTypeAlias = SearchServiceId | LegacySearchType
