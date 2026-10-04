@@ -181,7 +181,7 @@ const formatCount = (serviceId: string) => {
   }
 
   .services-navigation__items :deep(.v-slide-group__content) {
-    gap: 6px;
+    gap: 4px;
   }
 
   /* Tabs share the row equally; the selected one grows to show its full label */
@@ -193,7 +193,7 @@ const formatCount = (serviceId: string) => {
   }
 
   .services-navigation__tab.v-tab.v-btn.v-tab--selected {
-    flex-grow: 3;
+    flex-grow: 3.5;
   }
 
   .services-navigation__tab :deep(.v-btn__content) {
@@ -225,8 +225,8 @@ const formatCount = (serviceId: string) => {
   .services-navigation__copy {
     position: absolute;
     top: 6px;
-    inset-inline-start: 36px;
-    width: calc(100% - 36px);
+    inset-inline-start: 32px;
+    width: calc(100% - 32px);
     max-width: 0;
     overflow: hidden;
     opacity: 0;
@@ -259,7 +259,7 @@ const formatCount = (serviceId: string) => {
 
   .services-navigation__tab.v-tab--selected .services-navigation__icon {
     top: 50%;
-    inset-inline-start: 6px;
+    inset-inline-start: 4px;
     transform: translateY(-50%);
   }
 
