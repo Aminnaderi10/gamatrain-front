@@ -6,7 +6,6 @@
     <v-tabs
       :model-value="selectedService"
       class="services-navigation__items"
-      color="inherit"
       hide-slider
       @update:model-value="selectService"
     >
@@ -14,49 +13,51 @@
         v-for="service in services"
         :key="service.id"
         :value="service.id"
-        class="services-navigation__tab"
+        variant="flat"
+        base-color="grey25"
+        color="brandNavy"
+        rounded="lg"
+        class="services-navigation__tab d-flex text-none font-weight-semibold pa-1 pa-md-0 px-md-5"
+        :class="{ 'text-brandNavy': selectedService !== service.id }"
         :aria-label="service.title"
         aria-controls="search-service-filters"
       >
-        <span class="services-navigation__item">
-          <span class="services-navigation__content">
-            <span
-              class="services-navigation__icon"
-              aria-hidden="true"
-            >
-              <span
-                :class="service.icon"
-              />
-            </span>
-            <span class="services-navigation__copy">
-              <span class="services-navigation__count">
-                {{ formatCount(service.id) }}
-              </span>
-              <span class="services-navigation__title services-navigation__title--full">{{ service.title }}</span>
-            </span>
-            <span class="services-navigation__title services-navigation__title--short">{{ service.shortTitle }}</span>
+        <span class="services-navigation__content d-flex align-center ga-2 w-100 h-100">
+          <span
+            class="services-navigation__icon d-inline-flex align-center justify-center flex-shrink-0"
+            aria-hidden="true"
+          >
+            <span :class="service.icon" />
           </span>
+          <span class="services-navigation__copy d-flex flex-column align-start">
+            <span class="services-navigation__count font-weight-bold">
+              {{ formatCount(service.id) }}
+            </span>
+            <span class="services-navigation__title text-truncate">{{ service.title }}</span>
+          </span>
+          <span class="services-navigation__title services-navigation__title--short text-truncate">{{ service.shortTitle }}</span>
         </span>
       </v-tab>
     </v-tabs>
   </nav>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import type { SearchServiceCounts, SearchServiceId } from '@/types/search'
 import { SEARCH_SERVICE_OPTIONS } from '@/constants'
 
-const props = defineProps({
-  activeService: {
-    type: String,
-    default: 'paper',
-  },
-  serviceCounts: {
-    type: Object,
-    default: () => ({}),
-  },
+const props = withDefaults(defineProps<{
+  activeService?: SearchServiceId | string
+  serviceCounts?: SearchServiceCounts
+}>(), {
+  activeService: 'paper',
+  serviceCounts: () => ({}),
 })
 
-const emit = defineEmits(['change'])
+const emit = defineEmits<{
+  change: [serviceId: string]
+}>()
+
 const selectedService = ref(props.activeService)
 
 watch(
@@ -66,8 +67,8 @@ watch(
   },
 )
 
-const selectService = (serviceId) => {
-  if (!serviceId || selectedService.value === serviceId) return
+const selectService = (serviceId: unknown) => {
+  if (typeof serviceId !== 'string' || selectedService.value === serviceId) return
 
   selectedService.value = serviceId
   emit('change', serviceId)
@@ -75,18 +76,18 @@ const selectService = (serviceId) => {
 
 const services = SEARCH_SERVICE_OPTIONS
 
-const formatCount = (serviceId) => {
-  const count = props.serviceCounts[serviceId]
+const formatCount = (serviceId: string) => {
+  const count = props.serviceCounts[serviceId as keyof SearchServiceCounts]
   return count == null ? '—' : new Intl.NumberFormat().format(count)
 }
 </script>
 
 <style scoped>
+/* Colours, corners, hover and focus come from v-tab props; this is layout and the mobile expand animation. */
 .services-navigation {
   width: 100%;
   max-width: 1200px;
   min-width: 0;
-  padding: 0;
   border-bottom: 1px solid rgb(var(--v-theme-borderSubtle));
   overflow-x: auto;
   scrollbar-width: none;
@@ -101,91 +102,22 @@ const formatCount = (serviceId) => {
 
   width: max-content;
   height: auto;
-  min-width: 0;
-  margin-inline: 0;
 }
 
-.services-navigation__items :deep(.v-slide-group__container) {
-  height: 100%;
-  min-width: 0;
-}
-
+/* Tabs fill the row (needed for the mobile expand) and v-slide-group must not shift it */
 .services-navigation__items :deep(.v-slide-group__content) {
   width: 100%;
-  min-width: 0;
   flex: 1 1 auto;
-  align-items: stretch;
   gap: 8px;
   transform: none !important;
   transition: none !important;
 }
 
+/* Three classes to outrank Vuetify's own .v-tab.v-tab.v-btn min-width */
 .services-navigation__tab.v-tab.v-btn {
-  position: relative;
-  display: flex;
-  width: 216px;
-  min-width: 0;
-  max-width: none;
-  height: 72px !important;
   flex: 0 0 216px;
-  padding: 0;
-  border: 0;
-  color: inherit;
-  background: transparent;
-  letter-spacing: normal;
-  text-transform: none;
-}
-
-.services-navigation__item {
-  box-sizing: border-box;
-  display: flex;
-  width: 100%;
   min-width: 0;
-  height: 72px;
-  flex: 1 1 auto;
-  align-items: center;
-  justify-content: stretch;
-  padding: 0 20px;
-  border: 0;
-  border-radius: 12px 12px 0 0;
-  color: rgb(var(--v-theme-brandNavy));
-  background: rgb(var(--v-theme-grey25));
-  font-size: 15px;
-  font-weight: 600;
   letter-spacing: normal;
-  text-transform: none;
-  transition: background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
-}
-
-.services-navigation__content {
-  position: relative;
-  display: flex;
-  width: 100%;
-  min-width: 0;
-  height: 100%;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-  overflow: hidden;
-}
-
-.services-navigation__tab.v-tab--selected .services-navigation__item {
-  color: rgb(var(--v-theme-white));
-  background-color: rgb(var(--v-theme-brandNavy));
-}
-
-.services-navigation__tab:not(.v-tab--selected):hover .services-navigation__item {
-  background: rgb(var(--v-theme-surfaceSecondary));
-}
-
-.services-navigation__tab.v-tab.v-btn:focus-visible {
-  outline: 3px solid rgba(var(--v-theme-primary), 0.3);
-  outline-offset: -3px;
-}
-
-.services-navigation__tab :deep(.v-btn__overlay),
-.services-navigation__tab :deep(.v-btn__underlay) {
-  opacity: 0;
 }
 
 .services-navigation__tab :deep(.v-btn__content) {
@@ -194,83 +126,39 @@ const formatCount = (serviceId) => {
   height: 100%;
 }
 
-.services-navigation__icon {
-  box-sizing: border-box;
-  display: inline-flex;
-  width: 36px;
-  height: 36px;
-  flex: 0 0 36px;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  margin: 0;
+.services-navigation__content {
+  position: relative;
   overflow: hidden;
-  font-size: 36px;
-  letter-spacing: 0;
-  line-height: 1;
-  text-indent: 0;
-  color: rgb(var(--v-theme-brandNavy));
 }
 
+.services-navigation__icon,
 .services-navigation__icon > span {
-  box-sizing: border-box;
-  display: inline-flex;
   width: 36px;
   height: 36px;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  margin: 0;
-  overflow: hidden;
   font-size: 36px;
-  letter-spacing: 0;
   line-height: 36px;
-  text-indent: 0;
-}
-
-.services-navigation__icon > span::before {
-  box-sizing: border-box;
-  display: block;
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  margin: 0;
-  overflow: hidden;
-  font-size: 36px;
-  letter-spacing: 0;
-  line-height: 36px;
-  text-indent: 0;
-}
-
-.services-navigation__tab.v-tab--selected .services-navigation__icon {
-  color: rgb(var(--v-theme-white));
 }
 
 .services-navigation__copy {
-  display: flex;
   min-width: 0;
-  flex-direction: column;
-  align-items: flex-start;
   line-height: 1.15;
+}
+
+/* px sizes: the app's 10px root font size makes Vuetify's rem-based type scale too small */
+.services-navigation__title {
+  font-size: 15px;
+  line-height: 20px;
 }
 
 .services-navigation__count {
   min-height: 16px;
-  color: rgb(var(--v-theme-primary));
   font-size: 14px;
-  font-weight: 700;
   line-height: 18px;
+  color: rgb(var(--v-theme-primary));
 }
 
 .services-navigation__tab:not(.v-tab--selected) .services-navigation__count {
   color: rgba(var(--v-theme-brandNavy), 0.68);
-}
-
-.services-navigation__title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  line-height: 20px;
 }
 
 .services-navigation__title--short {
@@ -279,7 +167,6 @@ const formatCount = (serviceId) => {
 
 @media (max-width: 959px) {
   .services-navigation {
-    max-width: none;
     padding: 8px 12px;
     overflow: hidden;
   }
@@ -288,22 +175,16 @@ const formatCount = (serviceId) => {
     --v-tabs-height: 59px;
 
     width: 100%;
-    max-width: none;
   }
 
   .services-navigation__items :deep(.v-slide-group__content) {
-    width: 100%;
-    min-width: 0;
     gap: 6px;
   }
 
+  /* Tabs share the row equally; the selected one grows to show its full label */
   .services-navigation__tab.v-tab.v-btn {
-    width: auto;
-    min-width: 44px;
-    max-width: none;
-    height: 59px !important;
-    flex-basis: 0;
     flex: 1 1 0;
+    min-width: 44px;
     overflow: hidden;
     transition: flex-grow 360ms cubic-bezier(0.22, 1, 0.36, 1);
   }
@@ -312,42 +193,18 @@ const formatCount = (serviceId) => {
     flex-grow: 3;
   }
 
-  .services-navigation__item {
-    display: flex !important;
-    width: 100%;
-    min-width: 0;
-    height: 59px;
-    flex: 1 1 auto;
-    align-items: stretch;
-    justify-content: stretch;
-    overflow: hidden;
-    padding: 4px;
-    border-radius: 14px;
-    transition:
-      background-color 220ms ease,
-      color 220ms ease,
-      box-shadow 220ms ease;
-  }
-
   .services-navigation__tab :deep(.v-btn__content) {
     display: block;
-    width: 100%;
-    min-width: 0;
-    height: 100%;
-    flex: 1 1 auto;
-    overflow: hidden;
   }
 
   .services-navigation__content {
-    display: block;
+    display: block !important;
   }
 
   .services-navigation__icon,
-  .services-navigation__icon > span,
-  .services-navigation__icon > span::before {
+  .services-navigation__icon > span {
     width: 22px;
     height: 22px;
-    flex-basis: 22px;
     font-size: 22px;
     line-height: 22px;
   }
@@ -362,24 +219,12 @@ const formatCount = (serviceId) => {
       transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  .services-navigation__tab.v-tab--selected .services-navigation__icon,
-  .services-navigation__tab.v-tab--selected .services-navigation__icon > span,
-  .services-navigation__tab.v-tab--selected .services-navigation__icon > span::before {
-    width: 24px;
-    height: 24px;
-    flex-basis: 24px;
-    font-size: 24px;
-    line-height: 24px;
-  }
-
   .services-navigation__copy {
     position: absolute;
     top: 6px;
     inset-inline-start: 36px;
     width: calc(100% - 36px);
-    min-width: 0;
     max-width: 0;
-    align-items: flex-start;
     overflow: hidden;
     opacity: 0;
     transform: translateX(-6px);
@@ -395,15 +240,18 @@ const formatCount = (serviceId) => {
     position: absolute;
     bottom: 3px;
     inset-inline: 0;
-    max-width: 100%;
-    overflow: hidden;
     font-size: 11px;
-    font-weight: 600;
     line-height: 14px;
     text-align: center;
-    text-overflow: ellipsis;
-    opacity: 1;
     transition: opacity 120ms ease;
+  }
+
+  .services-navigation__tab.v-tab--selected .services-navigation__icon,
+  .services-navigation__tab.v-tab--selected .services-navigation__icon > span {
+    width: 24px;
+    height: 24px;
+    font-size: 24px;
+    line-height: 24px;
   }
 
   .services-navigation__tab.v-tab--selected .services-navigation__icon {
@@ -426,10 +274,8 @@ const formatCount = (serviceId) => {
     line-height: 14px;
   }
 
-  .services-navigation__tab.v-tab--selected .services-navigation__title--full {
-    color: rgb(var(--v-theme-white));
+  .services-navigation__tab.v-tab--selected .services-navigation__title:not(.services-navigation__title--short) {
     font-size: 14px;
-    font-weight: 600;
     line-height: 18px;
   }
 
@@ -448,25 +294,13 @@ const formatCount = (serviceId) => {
     max-width: 836px;
   }
 
-  .services-navigation__items :deep(.v-slide-group__content) {
-    width: 100%;
-  }
-
   .services-navigation__tab.v-tab.v-btn {
     flex: 1 1 0;
-    min-width: 0;
-    max-width: none;
-  }
-
-  .services-navigation__item {
-    width: 100%;
-    min-width: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .services-navigation__tab,
-  .services-navigation__item,
   .services-navigation__icon,
   .services-navigation__copy,
   .services-navigation__title--short {
