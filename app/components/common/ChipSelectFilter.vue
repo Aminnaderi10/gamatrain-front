@@ -9,7 +9,6 @@
     </div>
     <CommonFilterOptionChips
       class="inline-filter-options pa-0 ms-9 mb-3"
-      :style="{ gridTemplateColumns: `max-content repeat(${inlineItemsPerRow}, max-content)` }"
       :items="items"
       :selected-item="selectedItem"
       :allow-clear="inlineAllowClear"
@@ -383,12 +382,6 @@ defineExpose({
 
 .search-filter-value {
   font-size: 14px;
-}
-
-/* Options sit on a grid so rows line up; gap is between Vuetify's ga-1 (4px) and ga-2 (8px) */
-.inline-filter-options {
-  display: grid;
-  gap: 6px;
 }
 
 .inline-filter-label {

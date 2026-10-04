@@ -78,9 +78,6 @@
       <CommonFilterOptionChips
         v-if="!isLoading && inlineOptions"
         class="select-dialog-inline-options"
-        :style="{
-          gridTemplateColumns: `max-content repeat(${inlineItemsPerRow}, max-content)`,
-        }"
         :items="filteredItems"
         :selected-item="selectedItem"
         :allow-clear="inlineAllowClear"
@@ -509,11 +506,9 @@ const clickOnModal = (event) => {
 }
 
 .select-dialog-inline-options {
-  display: grid;
   width: max-content;
   max-width: 100%;
   min-height: 0;
-  gap: 8px;
   padding: 24px;
   overflow-x: auto;
   overflow-y: auto;

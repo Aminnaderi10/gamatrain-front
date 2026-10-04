@@ -1,6 +1,7 @@
 <template>
   <v-chip-group
     v-model="selectedValue"
+    class="filter-option-chips align-start"
     :class="{ 'filter-option-chips--compact': compact }"
     :disabled="disabled"
     column
@@ -9,23 +10,24 @@
       v-if="allowClear"
       :value="ALL_OPTION"
       v-bind="chipProps"
-      class="inline-filter-option ma-0 border border-opacity-100 font-weight-medium"
+      class="inline-filter-option ma-0 border border-opacity-100 font-weight-medium flex-shrink-0"
       :class="getChipClass(ALL_OPTION)"
-      :style="{ gridColumn: 1, gridRow: 1 }"
     >
       All
     </v-chip>
-    <v-chip
-      v-for="(item, itemIndex) in items"
-      :key="item.id"
-      :value="item.id"
-      v-bind="chipProps"
-      class="inline-filter-option ma-0 border border-opacity-100 font-weight-medium"
-      :class="getChipClass(item.id, isMultiDigit(item))"
-      :style="getGridPosition(itemIndex)"
-    >
-      {{ getTitle(item) }}
-    </v-chip>
+    <!-- Options sit in their own grid so every row lines up in the columns next to "All" -->
+    <div class="filter-option-chips__items">
+      <v-chip
+        v-for="item in items"
+        :key="item.id"
+        :value="item.id"
+        v-bind="chipProps"
+        class="inline-filter-option ma-0 border border-opacity-100 font-weight-medium"
+        :class="getChipClass(item.id, isMultiDigit(item))"
+      >
+        {{ getTitle(item) }}
+      </v-chip>
+    </div>
   </v-chip-group>
 </template>
 
@@ -95,11 +97,6 @@ const chipProps = computed(() => ({
   rounded: 'lg',
   size: props.compact ? 'small' : 'default',
 }))
-
-const getGridPosition = (itemIndex: number) => ({
-  gridColumn: (itemIndex % props.itemsPerRow) + (props.allowClear ? 2 : 1),
-  gridRow: Math.floor(itemIndex / props.itemsPerRow) + 1,
-})
 </script>
 
 <style scoped>
@@ -110,6 +107,23 @@ const getGridPosition = (itemIndex: number) => ({
 :deep(.v-slide-group__container),
 :deep(.v-slide-group__content) {
   display: contents;
+}
+
+/* One gap for the "All" column and the options grid; between Vuetify's ga-1 and ga-2 when compact */
+.filter-option-chips {
+  --filter-option-gap: 8px;
+
+  gap: var(--filter-option-gap);
+}
+
+.filter-option-chips--compact {
+  --filter-option-gap: 6px;
+}
+
+.filter-option-chips__items {
+  display: grid;
+  grid-template-columns: repeat(v-bind(itemsPerRow), max-content);
+  gap: var(--filter-option-gap);
 }
 
 /* px sizes: the app's 10px root font size makes Vuetify's rem-based chip text too small */

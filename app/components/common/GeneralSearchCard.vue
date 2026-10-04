@@ -7,7 +7,6 @@
       <div
         class="icon-div rounded-circle d-flex align-center justify-center"
         :class="category.colorClass"
-        :style="category.colorClass ? undefined : { backgroundColor: category.backgroundColor }"
       >
         <span :class="`icon-span ${category.iconName}`" />
       </div>

@@ -1,8 +1,10 @@
 <template>
   <header
     class="w-100 main-header d-flex align-center justify-center"
-    :class="{ 'position-fixed top-0': fixed }"
-    :style="{ backgroundColor: menuSetting.bgColor, boxShadow: menuSetting.boxShadow }"
+    :class="[
+      { 'position-fixed top-0': fixed },
+      isTransparentMenu ? 'bg-transparent' : 'bg-white elevation-2',
+    ]"
   >
     <v-container class="d-flex align-center justify-space-between">
       <div class="logo-link d-flex align-center ga-4">
@@ -46,7 +48,7 @@
               >
                 {{ link.icon }}
               </v-icon>
-              <span :style="{ color: menuSetting.linkColor }">{{ link.title }}</span>
+              <span :class="isTransparentMenu ? 'text-white' : 'text-grey800'">{{ link.title }}</span>
               <!-- <span
                 v-if="link.badge"
                 class="text-primary text-subtitle-2 py-1 px-2 rounded-pill badge-header"
@@ -67,7 +69,7 @@
               >
                 {{ link.icon }}
               </v-icon>
-              <span :style="{ color: menuSetting.linkColor }">{{ link.title }}</span>
+              <span :class="isTransparentMenu ? 'text-white' : 'text-grey800'">{{ link.title }}</span>
               <!-- <span
                 v-if="link.badge"
                 class="text-primary text-subtitle-2 py-1 px-2 rounded-pill badge-header"
@@ -228,6 +230,8 @@ const whiteMenuSetting: MenuSetting = {
   linkColor: theme.current.value.colors['grey800']!,
 }
 const menuSetting = ref<MenuSetting>(whiteMenuSetting)
+// Over the dark homepage hero the menu is transparent with white links.
+const isTransparentMenu = computed(() => menuSetting.value.bgColor === blackMenuSetting.bgColor)
 
 const routeNeedChangeMenuSetting = ['index', 'smart-learning', 'services', 'school-service', 'faq', 'governance', 'terms', 'about-us', 'earn-money', 'leader-board', 'get-token']
 
