@@ -21,7 +21,7 @@
             />
           </template>
           <template #after-inline-filters>
-            <div class="subject-directory-container w-100 d-flex align-start justify-start max-width-container">
+            <div class="subject-directory-container w-100 d-flex align-start justify-start max-width-container pt-0 pt-md-4">
               <CommonDetailSubjectDirectoryNav :content-data="data[0]" />
             </div>
           </template>
@@ -190,8 +190,9 @@ onMounted(() => {
 @use 'sass:map';
 @use 'vuetify/settings' as vuetify;
 
-.subject-directory-container {
-  padding-top: 16px;
+/* The banner renders nothing without a subject (empty results, teacher search); drop its spacing too */
+.subject-directory-container:empty {
+  display: none !important;
 }
 .top-info-div {
   display: contents !important;
@@ -245,10 +246,6 @@ onMounted(() => {
   text-align: left;
 }
 @media #{map.get(vuetify.$display-breakpoints, 'sm-and-down')} {
-  .subject-directory-container {
-    padding-top: 0;
-  }
-
   .search-results-title {
     font-size: 16px;
   }

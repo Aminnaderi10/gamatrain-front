@@ -1,6 +1,7 @@
 <template>
   <v-card
-    :to="`/subject-directory?board=${contentData?.section}&grade=${contentData?.base}&subject=${contentData?.lesson}`"
+    v-if="directoryLink"
+    :to="directoryLink"
     color="grey25"
     elevation="1"
     rounded="lg"
@@ -20,7 +21,7 @@
 
       <div class="d-flex flex-column flex-grow-1 overflow-hidden">
         <span class="subject-directory-card__title font-weight-bold text-truncate">
-          {{ contentData?.lesson_title }} Subject directory
+          {{ subjectTitle }} Subject directory
         </span>
         <div class="d-flex align-center ga-1">
           <span class="subject-directory-card__subtitle text-brandNavy opacity-70 text-truncate">
@@ -53,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   contentData?: {
     section?: string | number | null
     base?: string | number | null
@@ -61,6 +62,23 @@ defineProps<{
     lesson_title?: string | null
   }
 }>()
+
+const hasValue = (value: unknown) => value !== undefined && value !== null && value !== ''
+
+// Only link when board, grade and subject are all known: empty result lists and teacher
+// profiles have none of them, which used to produce ?board=undefined&grade=undefined&subject=undefined.
+const directoryLink = computed(() => {
+  const { section, base, lesson } = props.contentData ?? {}
+  if (![section, base, lesson].every(hasValue)) return null
+
+  return {
+    path: '/subject-directory',
+    query: { board: String(section), grade: String(base), subject: String(lesson) },
+  }
+})
+
+// The search API pads some titles (e.g. " Mathematics 5").
+const subjectTitle = computed(() => props.contentData?.lesson_title?.trim() ?? '')
 </script>
 
 <style scoped lang="scss">
