@@ -331,5 +331,4 @@ onMounted(() => {
     align-items: flex-end !important;
   }
 }
-
 </style>

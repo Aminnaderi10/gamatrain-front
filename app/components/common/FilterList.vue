@@ -38,35 +38,35 @@
         :to="headerSearchActive ? keywordSearchTarget : null"
         :disabled="!headerSearchActive"
       >
-      <v-text-field
-        v-model="textSearch"
-        label="Search anything...."
-        variant="outlined"
-        color="academicGold"
-        max-width="330"
-        density="compact"
-        hide-details
-        class="custom-search-text-field"
-        :class="{ 'header-keyword-search': keywordSearchInHeader }"
-        @update:model-value="changeTextSearch"
-      >
-        <template #append>
-          <v-btn
-            icon
-            varient="text"
-            color="academicGold"
-            width="50"
-            class="rounded-ts rounded-te-xl rounded-be-xl rounded-bs h-100 ml-n2"
-            flat
-          >
-            <v-icon
-              size="x-large"
-              icon="md:search"
-              color="grey800"
-            />
-          </v-btn>
-        </template>
-      </v-text-field>
+        <v-text-field
+          v-model="textSearch"
+          label="Search anything...."
+          variant="outlined"
+          color="academicGold"
+          max-width="330"
+          density="compact"
+          hide-details
+          class="custom-search-text-field"
+          :class="{ 'header-keyword-search': keywordSearchInHeader }"
+          @update:model-value="changeTextSearch"
+        >
+          <template #append>
+            <v-btn
+              icon
+              varient="text"
+              color="academicGold"
+              width="50"
+              class="rounded-ts rounded-te-xl rounded-be-xl rounded-bs h-100 ml-n2"
+              flat
+            >
+              <v-icon
+                size="x-large"
+                icon="md:search"
+                color="grey800"
+              />
+            </v-btn>
+          </template>
+        </v-text-field>
       </Teleport>
     </v-col>
 
@@ -186,103 +186,103 @@
               :is="filterContainer || 'div'"
               :class="{ 'filter-list-display-contents': !filterContainer }"
             >
-            <div
-              class="w-100 d-none d-md-flex justify-center align-center flex-wrap ga-4"
-              :class="filterContainer ? 'mt-4' : 'mt-2'"
-            >
-              <div class="d-flex flex-wrap w-100 max-width-container justify-start ga-2">
-                <template
-                  v-for="(filter, index) in filters"
-                  :key="filter.title || index"
-                >
-                  <CommonChipSelectFilter
-                    v-if="!filter.inlineOptions && !($slots['services-navigation'] && filter.queryKey === 'type')"
-                    :ref="(el) => setFilterRef(filter, el)"
-                    :title="filter.title"
-                    :api="filter.api"
-                    :selected-item="filter.selectedItem"
-                    :extra-api-params="filter.extraApiParams"
-                    :static-list="filter.staticList"
-                    :item-filter="filter.itemFilter"
-                    :item-transform="filter.itemTransform"
-                    :item-sort="filter.itemSort"
-                    :list-transform="filter.listTransform"
-                    :show-item-icon="filter.showItemIcon"
-                    :icon-src="filter.iconSrc"
-                    :fallback-icon="filter.fallbackIcon"
-                    :fallback-icon-padding="filter.fallbackIconPadding"
-                    :boxed="filter.boxed"
-                    :show-clear="Boolean(filterContainer && filter.closable && !filter.defaultValue)"
-                    :selected-variant="filter.selectedVariant"
-                    :control-icon="filter.controlIcon"
-                    :control-icon-padded="filter.controlIconPadded"
-                    :inline-options="filter.inlineOptions"
-                    :inline-allow-clear="filter.inlineAllowClear"
-                    :item-title="filter.itemTitle"
-                    :disabled="filter.disabled"
-                    :has-search="filter.hasSearch"
-                    @update-selected-item="updateSelectedItem($event, index)"
-                    @clear="clearFilter(index)"
-                  />
-                </template>
-              </div>
               <div
-                v-if="!filterContainer"
-                class="justify-start d-flex w-100 max-width-container"
+                class="w-100 d-none d-md-flex justify-center align-center flex-wrap ga-4"
+                :class="filterContainer ? 'mt-4' : 'mt-2'"
               >
-                <div class="d-flex flex-wrap ga-2 px-2">
-                  <template v-for="(filter, index) in filters">
-                    <v-chip
-                      v-if="filter.selectedItem && !filter.defaultValue && !filter.inlineOptions"
-                      :key="filter.title"
-                      variant="flat"
-                      class="text-h5 pl-5 pr-5"
-                      color="grey100"
-                    >
-                      <span class="text-grey500">{{ filter.selectedItem?.title }}</span>
-                      <template #close>
-                        <v-icon
-                          v-if="filter.closable"
-                          class="filter-clear-icon"
-                          color="grey500"
-                          @click="clearFilter(index)"
-                        >
-                          md:cancel
-                        </v-icon>
-                      </template>
-                    </v-chip>
+                <div class="d-flex flex-wrap w-100 max-width-container justify-start ga-2">
+                  <template
+                    v-for="(filter, index) in filters"
+                    :key="filter.title || index"
+                  >
+                    <CommonChipSelectFilter
+                      v-if="!filter.inlineOptions && !($slots['services-navigation'] && filter.queryKey === 'type')"
+                      :ref="(el) => setFilterRef(filter, el)"
+                      :title="filter.title"
+                      :api="filter.api"
+                      :selected-item="filter.selectedItem"
+                      :extra-api-params="filter.extraApiParams"
+                      :static-list="filter.staticList"
+                      :item-filter="filter.itemFilter"
+                      :item-transform="filter.itemTransform"
+                      :item-sort="filter.itemSort"
+                      :list-transform="filter.listTransform"
+                      :show-item-icon="filter.showItemIcon"
+                      :icon-src="filter.iconSrc"
+                      :fallback-icon="filter.fallbackIcon"
+                      :fallback-icon-padding="filter.fallbackIconPadding"
+                      :boxed="filter.boxed"
+                      :show-clear="Boolean(filterContainer && filter.closable && !filter.defaultValue)"
+                      :selected-variant="filter.selectedVariant"
+                      :control-icon="filter.controlIcon"
+                      :control-icon-padded="filter.controlIconPadded"
+                      :inline-options="filter.inlineOptions"
+                      :inline-allow-clear="filter.inlineAllowClear"
+                      :item-title="filter.itemTitle"
+                      :disabled="filter.disabled"
+                      :has-search="filter.hasSearch"
+                      @update-selected-item="updateSelectedItem($event, index)"
+                      @clear="clearFilter(index)"
+                    />
                   </template>
                 </div>
+                <div
+                  v-if="!filterContainer"
+                  class="justify-start d-flex w-100 max-width-container"
+                >
+                  <div class="d-flex flex-wrap ga-2 px-2">
+                    <template v-for="(filter, index) in filters">
+                      <v-chip
+                        v-if="filter.selectedItem && !filter.defaultValue && !filter.inlineOptions"
+                        :key="filter.title"
+                        variant="flat"
+                        class="text-h5 pl-5 pr-5"
+                        color="grey100"
+                      >
+                        <span class="text-grey500">{{ filter.selectedItem?.title }}</span>
+                        <template #close>
+                          <v-icon
+                            v-if="filter.closable"
+                            class="filter-clear-icon"
+                            color="grey500"
+                            @click="clearFilter(index)"
+                          >
+                            md:cancel
+                          </v-icon>
+                        </template>
+                      </v-chip>
+                    </template>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div
-              v-if="hasInlineFilters"
-              class="inline-filter-group-wrapper"
-            >
-              <div class="inline-filter-group">
-                <CommonChipSelectFilter
-                  v-for="(entry, inlineIndex) in inlineFilterEntries"
-                  :key="`inline-${entry.filter.title || entry.index}`"
-                  :ref="(el) => setFilterRef(entry.filter, el)"
-                  :title="entry.filter.title"
-                  :api="entry.filter.api"
-                  :selected-item="entry.filter.selectedItem"
-                  :extra-api-params="entry.filter.extraApiParams"
-                  :static-list="entry.filter.staticList"
-                  :item-filter="entry.filter.itemFilter"
-                  :inline-options="true"
-                  :inline-allow-clear="entry.filter.inlineAllowClear"
-                  :inline-grouped="true"
-                  :inline-items-per-row="resolveInlineItemsPerRow(entry.filter)"
-                  :inline-divider-after="inlineIndex === 0 && inlineFilterEntries.length > 1"
-                  :inline-leading-option-slots="entry.filter.inlineLeadingOptionSlots"
-                  :item-title="entry.filter.itemTitle"
-                  :disabled="entry.filter.disabled"
-                  @update-selected-item="updateSelectedItem($event, entry.index)"
-                />
+              <div
+                v-if="hasInlineFilters"
+                class="inline-filter-group-wrapper"
+              >
+                <div class="inline-filter-group">
+                  <CommonChipSelectFilter
+                    v-for="(entry, inlineIndex) in inlineFilterEntries"
+                    :key="`inline-${entry.filter.title || entry.index}`"
+                    :ref="(el) => setFilterRef(entry.filter, el)"
+                    :title="entry.filter.title"
+                    :api="entry.filter.api"
+                    :selected-item="entry.filter.selectedItem"
+                    :extra-api-params="entry.filter.extraApiParams"
+                    :static-list="entry.filter.staticList"
+                    :item-filter="entry.filter.itemFilter"
+                    :inline-options="true"
+                    :inline-allow-clear="entry.filter.inlineAllowClear"
+                    :inline-grouped="true"
+                    :inline-items-per-row="resolveInlineItemsPerRow(entry.filter)"
+                    :inline-divider-after="inlineIndex === 0 && inlineFilterEntries.length > 1"
+                    :inline-leading-option-slots="entry.filter.inlineLeadingOptionSlots"
+                    :item-title="entry.filter.itemTitle"
+                    :disabled="entry.filter.disabled"
+                    @update-selected-item="updateSelectedItem($event, entry.index)"
+                  />
+                </div>
               </div>
-            </div>
             </component>
           </div>
         </div>
@@ -338,118 +338,120 @@
         fullscreen
         scrim="white"
       >
-      <div class="mobile-filter-modal w-100 h-100 d-flex flex-column overflow-y-auto position-relative">
-        <v-container class="mobile-filter-modal__container flex-column">
-          <section class="mobile-filter-panel">
-            <div class="mobile-filter-panel__header d-flex align-center justify-space-between">
-              <span class="mobile-filter-panel__title d-flex align-center ga-2">
-                <v-icon size="18">md:filter_list</v-icon>
-                Filters
-              </span>
-              <div class="d-flex align-center ga-1">
-                <v-btn
-                  variant="text"
-                  class="mobile-filter-panel__clear"
-                  @click="clearAllFilter"
-                >
-                  Clear
-                </v-btn>
-                <v-btn
-                  icon
-                  variant="text"
-                  class="mobile-filter-panel__close"
-                  aria-label="Close filters"
-                  @click="dialogFilterMobileModel = false"
-                >
-                  <v-icon size="20">md:close</v-icon>
-                </v-btn>
+        <div class="mobile-filter-modal w-100 h-100 d-flex flex-column overflow-y-auto position-relative">
+          <v-container class="mobile-filter-modal__container flex-column">
+            <section class="mobile-filter-panel">
+              <div class="mobile-filter-panel__header d-flex align-center justify-space-between">
+                <span class="mobile-filter-panel__title d-flex align-center ga-2">
+                  <v-icon size="18">md:filter_list</v-icon>
+                  Filters
+                </span>
+                <div class="d-flex align-center ga-1">
+                  <v-btn
+                    variant="text"
+                    class="mobile-filter-panel__clear"
+                    @click="clearAllFilter"
+                  >
+                    Clear
+                  </v-btn>
+                  <v-btn
+                    icon
+                    variant="text"
+                    class="mobile-filter-panel__close"
+                    aria-label="Close filters"
+                    @click="dialogFilterMobileModel = false"
+                  >
+                    <v-icon size="20">
+                      md:close
+                    </v-icon>
+                  </v-btn>
+                </div>
               </div>
-            </div>
 
-            <div class="mobile-filter-control-list">
-              <template
-                v-for="(filter, index) in filters"
-                :key="`mobile-${filter.title || index}`"
+              <div class="mobile-filter-control-list">
+                <template
+                  v-for="(filter, index) in filters"
+                  :key="`mobile-${filter.title || index}`"
+                >
+                  <div
+                    v-if="!filter.inlineOptions && !($slots['services-navigation'] && filter.queryKey === 'type')"
+                    :ref="(element) => setMobileFilterSectionRef(filter, element)"
+                    class="mobile-filter-control-wrapper"
+                    @click.capture="handleMobileFilterControlClick($event, filter)"
+                  >
+                    <CommonChipSelectFilter
+                      :title="filter.title"
+                      :api="filter.api"
+                      :selected-item="filter.selectedItem"
+                      :extra-api-params="filter.extraApiParams"
+                      :static-list="filter.staticList"
+                      :item-filter="filter.itemFilter"
+                      :item-transform="filter.itemTransform"
+                      :item-sort="filter.itemSort"
+                      :list-transform="filter.listTransform"
+                      :show-item-icon="filter.showItemIcon"
+                      :icon-src="filter.iconSrc"
+                      :fallback-icon="filter.fallbackIcon"
+                      :fallback-icon-padding="filter.fallbackIconPadding"
+                      :boxed="filter.boxed"
+                      :show-clear="Boolean(filter.closable && !filter.defaultValue)"
+                      :selected-variant="filter.selectedVariant"
+                      :control-icon="filter.controlIcon"
+                      :control-icon-padded="filter.controlIconPadded"
+                      :item-title="filter.itemTitle"
+                      :disabled="filter.disabled"
+                      :has-search="filter.hasSearch"
+                      @clear="clearFilter(index)"
+                    />
+                  </div>
+                </template>
+              </div>
+
+              <div
+                v-if="hasInlineFilters"
+                class="mobile-inline-filter-group"
               >
                 <div
-                  v-if="!filter.inlineOptions && !($slots['services-navigation'] && filter.queryKey === 'type')"
-                  :ref="(element) => setMobileFilterSectionRef(filter, element)"
-                  class="mobile-filter-control-wrapper"
-                  @click.capture="handleMobileFilterControlClick($event, filter)"
+                  v-for="(entry, inlineIndex) in inlineFilterEntries"
+                  :key="`mobile-inline-${entry.filter.title || entry.index}-${getMobileFilterItemsSignature(entry.filter)}`"
+                  :ref="(element) => setMobileFilterSectionRef(entry.filter, element)"
+                  class="mobile-inline-filter-row-wrapper"
                 >
                   <CommonChipSelectFilter
-                    :title="filter.title"
-                    :api="filter.api"
-                    :selected-item="filter.selectedItem"
-                    :extra-api-params="filter.extraApiParams"
-                    :static-list="filter.staticList"
-                    :item-filter="filter.itemFilter"
-                    :item-transform="filter.itemTransform"
-                    :item-sort="filter.itemSort"
-                    :list-transform="filter.listTransform"
-                    :show-item-icon="filter.showItemIcon"
-                    :icon-src="filter.iconSrc"
-                    :fallback-icon="filter.fallbackIcon"
-                    :fallback-icon-padding="filter.fallbackIconPadding"
-                    :boxed="filter.boxed"
-                    :show-clear="Boolean(filter.closable && !filter.defaultValue)"
-                    :selected-variant="filter.selectedVariant"
-                    :control-icon="filter.controlIcon"
-                    :control-icon-padded="filter.controlIconPadded"
-                    :item-title="filter.itemTitle"
-                    :disabled="filter.disabled"
-                    :has-search="filter.hasSearch"
-                    @clear="clearFilter(index)"
+                    class="mobile-inline-filter-row"
+                    :title="entry.filter.title"
+                    :api="null"
+                    :selected-item="entry.filter.selectedItem"
+                    :static-list="getMobileFilterItems(entry.filter)"
+                    :inline-options="true"
+                    :inline-allow-clear="entry.filter.inlineAllowClear"
+                    :inline-grouped="true"
+                    :inline-items-per-row="resolveInlineItemsPerRow(entry.filter)"
+                    :inline-divider-after="inlineIndex === 0 && inlineFilterEntries.length > 1"
+                    :inline-leading-option-slots="entry.filter.inlineLeadingOptionSlots"
+                    :item-title="entry.filter.itemTitle"
+                    :disabled="entry.filter.disabled"
+                    @update-selected-item="updateSelectedItem($event, entry.index)"
                   />
                 </div>
-              </template>
-            </div>
-
-            <div
-              v-if="hasInlineFilters"
-              class="mobile-inline-filter-group"
-            >
-              <div
-                v-for="(entry, inlineIndex) in inlineFilterEntries"
-                :key="`mobile-inline-${entry.filter.title || entry.index}-${getMobileFilterItemsSignature(entry.filter)}`"
-                :ref="(element) => setMobileFilterSectionRef(entry.filter, element)"
-                class="mobile-inline-filter-row-wrapper"
-              >
-                <CommonChipSelectFilter
-                  class="mobile-inline-filter-row"
-                  :title="entry.filter.title"
-                  :api="null"
-                  :selected-item="entry.filter.selectedItem"
-                  :static-list="getMobileFilterItems(entry.filter)"
-                  :inline-options="true"
-                  :inline-allow-clear="entry.filter.inlineAllowClear"
-                  :inline-grouped="true"
-                  :inline-items-per-row="resolveInlineItemsPerRow(entry.filter)"
-                  :inline-divider-after="inlineIndex === 0 && inlineFilterEntries.length > 1"
-                  :inline-leading-option-slots="entry.filter.inlineLeadingOptionSlots"
-                  :item-title="entry.filter.itemTitle"
-                  :disabled="entry.filter.disabled"
-                  @update-selected-item="updateSelectedItem($event, entry.index)"
-                />
               </div>
-            </div>
-          </section>
-        </v-container>
-        <div
-          class="mobile-filter-modal__footer w-100 d-flex align-center justify-center position-fixed bottom-0"
-        >
-          <v-btn
-            color="academicGold"
-            rounded="xl"
-            height="40"
-            class="mobile-filter-modal__show-results text-h5 text-grey800"
-            :loading="loading"
-            @click="dialogFilterMobileModel = false"
+            </section>
+          </v-container>
+          <div
+            class="mobile-filter-modal__footer w-100 d-flex align-center justify-center position-fixed bottom-0"
           >
-            Show {{ $numberFormat(countDataFound) }} Results
-          </v-btn>
+            <v-btn
+              color="academicGold"
+              rounded="xl"
+              height="40"
+              class="mobile-filter-modal__show-results text-h5 text-grey800"
+              :loading="loading"
+              @click="dialogFilterMobileModel = false"
+            >
+              Show {{ $numberFormat(countDataFound) }} Results
+            </v-btn>
+          </div>
         </div>
-      </div>
       </v-dialog>
     </div>
   </div>

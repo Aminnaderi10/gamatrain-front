@@ -21,17 +21,17 @@
           class="inline-filter-option-spacer"
           aria-hidden="true"
         />
-      <v-btn
-        v-if="inlineAllowClear"
-        variant="outlined"
-        class="inline-filter-option"
-        :class="{ 'inline-filter-option-selected': !selectedItem }"
-        :style="inlineGrouped ? { gridColumn: 1, gridRow: 1 } : undefined"
-        :disabled="disabled"
-        @click="onFilterUpdate(null)"
-      >
-        All
-      </v-btn>
+        <v-btn
+          v-if="inlineAllowClear"
+          variant="outlined"
+          class="inline-filter-option"
+          :class="{ 'inline-filter-option-selected': !selectedItem }"
+          :style="inlineGrouped ? { gridColumn: 1, gridRow: 1 } : undefined"
+          :disabled="disabled"
+          @click="onFilterUpdate(null)"
+        >
+          All
+        </v-btn>
         <v-btn
           v-for="(item, itemIndex) in items"
           :key="item.id"
