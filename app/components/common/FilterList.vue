@@ -34,40 +34,44 @@
       class="d-none d-md-flex justify-end justify-md-center"
       :class="{ 'header-search-teleport-source': keywordSearchInHeader }"
     >
-      <Teleport
-        :to="headerSearchActive ? keywordSearchTarget : null"
-        :disabled="!headerSearchActive"
-      >
-        <v-text-field
-          v-model="textSearch"
-          label="Search anything...."
-          variant="outlined"
-          color="primary"
-          max-width="330"
-          density="compact"
-          hide-details
-          class="custom-search-text-field"
-          :class="{ 'header-keyword-search': keywordSearchInHeader }"
-          @update:model-value="changeTextSearch"
+      <!-- Where the box renders depends on the screen size, which the server can't know:
+           render it on the client only so hydration matches. -->
+      <ClientOnly>
+        <Teleport
+          :to="headerSearchActive ? keywordSearchTarget : null"
+          :disabled="!headerSearchActive"
         >
-          <template #append>
-            <v-btn
-              icon
-              varient="text"
-              color="primary"
-              width="50"
-              class="rounded-ts rounded-te-xl rounded-be-xl rounded-bs h-100 ml-n2"
-              flat
-            >
-              <v-icon
-                size="x-large"
-                icon="md:search"
-                color="grey800"
-              />
-            </v-btn>
-          </template>
-        </v-text-field>
-      </Teleport>
+          <v-text-field
+            v-model="textSearch"
+            label="Search anything...."
+            variant="outlined"
+            color="primary"
+            max-width="330"
+            density="compact"
+            hide-details
+            class="custom-search-text-field"
+            :class="{ 'header-keyword-search': keywordSearchInHeader }"
+            @update:model-value="changeTextSearch"
+          >
+            <template #append>
+              <v-btn
+                icon
+                varient="text"
+                color="primary"
+                width="50"
+                class="rounded-ts rounded-te-xl rounded-be-xl rounded-bs h-100 ml-n2"
+                flat
+              >
+                <v-icon
+                  size="x-large"
+                  icon="md:search"
+                  color="grey800"
+                />
+              </v-btn>
+            </template>
+          </v-text-field>
+        </Teleport>
+      </ClientOnly>
     </v-col>
 
     <div

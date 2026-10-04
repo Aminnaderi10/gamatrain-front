@@ -43,7 +43,25 @@ export const useSearchServiceCounts = () => {
     return 'types_stats' in data ? data.types_stats : data
   }
 
-  const fetchServiceCounts = async (query: SearchParameters): Promise<SearchServiceCounts> => {
+  // Counts depend only on the filter keys above (not on the selected service tab), so switching
+  // tabs or toggling back to an earlier filter reuses the request instead of refetching.
+  const countsByFilters = new Map<string, Promise<SearchServiceCounts>>()
+
+  const fetchServiceCounts = (query: SearchParameters): Promise<SearchServiceCounts> => {
+    const key = JSON.stringify(buildParams(query, 1))
+    const cached = countsByFilters.get(key)
+    if (cached) return cached
+
+    const request = requestServiceCounts(query)
+    countsByFilters.set(key, request)
+    // Don't keep a failed lookup; let the next call try again.
+    request.then((counts) => {
+      if (!Object.keys(counts).length) countsByFilters.delete(key)
+    })
+    return request
+  }
+
+  const requestServiceCounts = async (query: SearchParameters): Promise<SearchServiceCounts> => {
     const [paperResult, studyMaterialsResult] = await Promise.allSettled([
       getTypesStats(buildParams(query, 1)),
       getTypesStats(buildParams(query, 0)),
