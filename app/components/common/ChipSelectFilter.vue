@@ -68,7 +68,8 @@
     </v-list-item-title>
     <v-list-item-subtitle
       v-if="selectedItem"
-      class="search-filter-value font-weight-bold opacity-100"
+      class="search-filter-value d-block font-weight-bold opacity-100 text-truncate"
+      :title="selectedItem.title"
     >
       {{ selectedItem.title }}
     </v-list-item-subtitle>
@@ -372,16 +373,20 @@ defineExpose({
 
 <style scoped>
 /* px sizes: the app's 10px root font size makes Vuetify's rem-based list typography too small */
+/* Line-heights too: Vuetify's are rem-based (1rem = 10px here), which collapses long values */
 .search-filter-label {
   font-size: 12px;
+  line-height: 16px;
 }
 
 .search-filter-empty .search-filter-label {
   font-size: 16px;
+  line-height: 24px;
 }
 
 .search-filter-value {
   font-size: 14px;
+  line-height: 20px;
 }
 
 .inline-filter-label {
