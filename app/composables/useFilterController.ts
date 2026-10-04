@@ -31,13 +31,11 @@ export const useFilterController = ({
     ...filter,
     dependencies: filter.dependencies ?? [],
     extraApiParams: filter.extraApiParams ?? {},
-    initialDisabled: filter.disabled,
   })
 
   const filters = ref(filterList.value.map(createFilterState))
   const countFilterSelect = ref(getActiveFilterCount(route.query))
   const textSearch = ref(route.query.title ? route.query.title : '')
-  const hasExclusiveDisabledState = ref(false)
   const filterDataLoads = new WeakMap<FilterState, { key: string, promise: Promise<void> }>()
   const timer = ref<ReturnType<typeof setTimeout> | null>(null)
   let pendingServiceChange = false
@@ -49,31 +47,6 @@ export const useFilterController = ({
 
   const isCurrentFilterSync = (syncVersion?: number) =>
     syncVersion === undefined || syncVersion === filterListSyncVersion
-
-  const isExclusiveFilterSelected = (index: number) => {
-    const filter = filters.value[index]
-
-    return filter?.selectedItem && filter.disableOtherFiltersOnSelectedIds?.includes(
-      filter.selectedItem.id,
-    )
-  }
-
-  const restoreDisabledState = () => {
-    filters.value.forEach((filter) => {
-      filter.disabled = filter.initialDisabled
-    })
-  }
-
-  const disableOtherFilters = (sourceIndex: number) => {
-    hasExclusiveDisabledState.value = true
-
-    filters.value.forEach((filter, index) => {
-      if (index === sourceIndex) return
-
-      filter.selectedItem = null
-      filter.disabled = true
-    })
-  }
 
   const resetDescendants = (indexFilter: number) => {
     const filterParent = filters.value[indexFilter]
@@ -179,18 +152,6 @@ export const useFilterController = ({
           continue
         }
 
-        const queryKeyParent = child.parentIndexChangeQueryKey
-          ? filters.value[child.parentIndexChangeQueryKey]?.selectedItem
-          : null
-        if (
-          child.queryMap
-          && child.parentIndexChangeQueryKey
-          && queryKeyParent
-        ) {
-          const id = queryKeyParent.id
-          child.queryKey = child.queryMap[id] ?? child.queryKey
-        }
-
         child.disabled = false
         if (child.api && !child.staticList?.length) {
           if (!child.idInParams) {
@@ -244,22 +205,9 @@ export const useFilterController = ({
     if (!filter) return
     filter.selectedItem = itemSelected
 
-    const isExclusiveSelected = isExclusiveFilterSelected(index)
-    if (hasExclusiveDisabledState.value && !isExclusiveSelected) {
-      restoreDisabledState()
-      hasExclusiveDisabledState.value = false
-    }
-
     resetDescendants(index)
-
-    if (isExclusiveSelected) {
-      disableOtherFilters(index)
-      updateQueryFromFilters()
-    }
-    else {
-      await enableReadyChildren(index)
-      updateQueryFromFilters()
-    }
+    await enableReadyChildren(index)
+    updateQueryFromFilters()
   }
 
   const selectService = (serviceId: FilterId) => {
@@ -284,11 +232,6 @@ export const useFilterController = ({
     const filter = filters.value[index]
     if (!filter) return
     filter.selectedItem = null
-
-    if (hasExclusiveDisabledState.value) {
-      restoreDisabledState()
-      hasExclusiveDisabledState.value = false
-    }
 
     resetDescendants(index)
     updateQueryFromFilters()
@@ -349,10 +292,6 @@ export const useFilterController = ({
         )
         filter.selectedItem = selected || null
         if (!selected) continue
-        if (isExclusiveFilterSelected(index)) {
-          disableOtherFilters(index)
-          continue
-        }
         await enableReadyChildren(index, syncVersion)
         if (!isCurrentFilterSync(syncVersion)) return
       }
@@ -360,10 +299,6 @@ export const useFilterController = ({
         const selected = await filter.refElement?.getItemById(queryValue, filterKey)
         filter.selectedItem = selected || null
         if (!selected) continue
-        if (isExclusiveFilterSelected(index)) {
-          disableOtherFilters(index)
-          continue
-        }
         await enableReadyChildren(index, syncVersion)
         if (!isCurrentFilterSync(syncVersion)) return
       }
@@ -402,7 +337,6 @@ export const useFilterController = ({
       Object.assign(existingFilter, filterConfig, runtimeState, {
         dependencies: filterConfig.dependencies ?? [],
         extraApiParams: filterConfig.extraApiParams ?? {},
-        initialDisabled: filterConfig.disabled,
       })
 
       return existingFilter
@@ -447,7 +381,6 @@ export const useFilterController = ({
     filterList,
     async (filterConfiguration) => {
       filters.value = reconcileFilterConfiguration(filterConfiguration)
-      hasExclusiveDisabledState.value = false
       await syncFiltersFromQuery()
     },
     { flush: 'post' },
@@ -458,6 +391,11 @@ export const useFilterController = ({
     () => syncFiltersFromQuery(),
     { deep: true },
   )
+
+  // A pending keyword search must not fire after the page using it is gone.
+  onScopeDispose(() => {
+    if (timer.value) clearTimeout(timer.value)
+  })
 
   return {
     changeTextSearch,

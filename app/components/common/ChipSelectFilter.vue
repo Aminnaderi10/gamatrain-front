@@ -274,7 +274,12 @@ const onFilterUpdate = (itemSelected) => {
   emit('UpdateSelectedItem', itemSelected)
 }
 
+// Only the latest request may update the list, so a slow response for a
+// previously selected parent cannot overwrite the current options.
+let itemsRequestId = 0
+
 const getItems = async (extraIdParam = '') => {
+  const requestId = ++itemsRequestId
   try {
     loading.value = true
     if (props.api) {
@@ -293,6 +298,7 @@ const getItems = async (extraIdParam = '') => {
       }
 
       const response = await useApiService.get(url, params, { public: true })
+      if (requestId !== itemsRequestId) return
 
       if (response.succeeded || response.status == 1) {
         const responseList = response.data.list || response.data
@@ -301,6 +307,7 @@ const getItems = async (extraIdParam = '') => {
           : responseList
         if (props.listTransform) {
           transformedList = await props.listTransform(transformedList)
+          if (requestId !== itemsRequestId) return
         }
         const filteredList = props.itemFilter
           ? transformedList.filter(props.itemFilter)
@@ -326,7 +333,7 @@ const getItems = async (extraIdParam = '') => {
     console.log('error', error)
   }
   finally {
-    loading.value = false
+    if (requestId === itemsRequestId) loading.value = false
   }
 }
 

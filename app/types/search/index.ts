@@ -148,9 +148,6 @@ export interface FilterConfiguration {
   children?: number[]
   childrenForGetStaticData?: number[]
   dependenciesForGetStaticData?: number[]
-  disableOtherFiltersOnSelectedIds?: FilterId[]
-  parentIndexChangeQueryKey?: number
-  queryMap?: Record<string, string>
   staticList?: FilterItem[]
   getStaticList?: (id?: SearchQueryValue) => FilterItem[]
   defaultValue?: FilterItem
@@ -173,7 +170,6 @@ export interface FilterConfiguration {
 }
 
 export interface FilterState extends FilterConfiguration {
-  initialDisabled: boolean
   dependencies: FilterDependency[]
   extraApiParams: SearchParameters
 }
