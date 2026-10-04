@@ -171,7 +171,6 @@ export interface FilterConfiguration {
   iconSrc?: (item: FilterItem) => string | null | undefined
   fallbackIcon?: string
   fallbackIconPadding?: number
-  selectedVariant?: string
   controlIcon?: string
   controlIconPadded?: boolean
   inlineOptions?: boolean

@@ -30,75 +30,112 @@
       class="inline-filter-divider"
     />
   </div>
-  <v-btn
-    v-else
-    :class="[
-      'text-h5',
-      { 'open-style-btn': isShowSelectModal || (selectedItem && selectedVariant !== 'dependent-green') },
-      { 'dependent-selected-btn': selectedItem && selectedVariant === 'dependent-green' },
-      { 'search-filter-empty': !selectedItem },
-      { 'search-filter-control': boxed },
-      { 'search-filter-has-icon': showItemIcon || controlIcon },
-    ]"
-    variant="outlined"
-    :rounded="boxed ? 'lg' : 'xl'"
-    value="board"
-    color="grey200"
+  <!-- Filter panel row (search sidebar and mobile filter sheet) -->
+  <v-list-item
+    v-else-if="boxed"
+    class="search-filter-control text-brandNavy border-b border-surfaceTertiary border-opacity-100"
+    :class="{
+      'search-filter-selected bg-borderSubtle': selectedItem,
+      'search-filter-empty': !selectedItem,
+    }"
+    min-height="56"
+    prepend-gap="8"
+    rounded="0"
     :disabled="disabled"
-    :loading="loading"
     @click="isShowSelectModal = !isShowSelectModal"
   >
-    <span
-      v-if="showItemIcon || controlIcon"
-      class="search-filter-icon text-brandNavy mr-2"
-      :class="{ 'search-filter-icon-padded pa-1': controlIconPadded }"
+    <template #prepend>
+      <!-- Rendered even without an icon so every row's text lines up -->
+      <v-avatar
+        size="28"
+        rounded="0"
+        variant="text"
+        :class="{ 'pa-1': controlIconPadded }"
+      >
+        <CommonFilterControlIcon
+          v-if="showItemIcon || controlIcon"
+          :selected-item="selectedItem"
+          :show-item-icon="showItemIcon"
+          :icon-src="iconSrc"
+          :fallback-icon="fallbackIcon"
+          :fallback-icon-padding="fallbackIconPadding"
+          :control-icon="controlIcon"
+          :icon-size="controlIconPadded ? 20 : null"
+        />
+      </v-avatar>
+    </template>
+
+    <v-list-item-title
+      class="search-filter-label"
+      :class="selectedItem ? 'font-weight-medium' : 'font-weight-semibold'"
     >
-      <CommonFilterControlIcon
-        :selected-item="selectedItem"
-        :show-item-icon="showItemIcon"
-        :icon-src="iconSrc"
-        :fallback-icon="fallbackIcon"
-        :fallback-icon-padding="fallbackIconPadding"
-        :control-icon="controlIcon"
-      />
-    </span>
-    <span
-      v-if="boxed"
-      class="search-filter-copy text-grey700"
+      {{ title }}
+    </v-list-item-title>
+    <v-list-item-subtitle
+      v-if="selectedItem"
+      class="search-filter-value font-weight-bold opacity-100"
     >
-      <span class="search-filter-label">{{ title }}</span>
-      <span
-        v-if="selectedItem"
-        class="search-filter-value"
-      >{{ selectedItem.title }}</span>
-    </span>
-    <span
-      v-else
-      class="text-grey700"
-    >{{ selectedItem ? selectedItem.title : title }}</span>
+      {{ selectedItem.title }}
+    </v-list-item-subtitle>
+
     <template #append>
-      <v-icon
+      <v-progress-circular
+        v-if="loading"
+        indeterminate
+        size="16"
+        width="2"
+        class="mr-2"
+      />
+      <v-btn
         v-if="showClear && selectedItem"
         class="search-filter-clear-icon mr-1"
+        icon
+        variant="text"
+        density="comfortable"
+        size="small"
         color="grey500"
-        size="18"
-        role="button"
-        tabindex="0"
         :aria-label="`Clear ${title}`"
         @click.stop="emit('clear')"
-        @keydown.enter.stop.prevent="emit('clear')"
-        @keydown.space.stop.prevent="emit('clear')"
       >
-        md:cancel
+        <v-icon size="18">
+          md:cancel
+        </v-icon>
+      </v-btn>
+      <v-icon :color="selectedItem ? 'brandNavy' : 'grey500'">
+        md:keyboard_arrow_down
       </v-icon>
+    </template>
+  </v-list-item>
+
+  <!-- Compact pill (filter bars such as the leader board) -->
+  <v-chip
+    v-else
+    class="text-h5"
+    :variant="selectedItem ? 'flat' : 'outlined'"
+    :color="selectedItem ? 'borderSubtle' : isShowSelectModal ? 'brandNavy' : 'grey200'"
+    size="large"
+    :disabled="disabled"
+    @click="isShowSelectModal = !isShowSelectModal"
+  >
+    <v-progress-circular
+      v-if="loading"
+      indeterminate
+      size="16"
+      width="2"
+      class="mr-2"
+    />
+    <span :class="selectedItem ? 'text-brandNavy' : 'text-grey700'">
+      {{ selectedItem ? selectedItem.title : title }}
+    </span>
+    <template #append>
       <v-icon
-        class="mt-1"
-        color="grey500"
+        class="ml-1"
+        :color="selectedItem ? 'brandNavy' : 'grey500'"
       >
         md:keyboard_arrow_down
       </v-icon>
     </template>
-  </v-btn>
+  </v-chip>
 
   <search-select-dialog
     v-model:show-dialog="isShowSelectModal"
@@ -199,10 +236,6 @@ const props = defineProps({
   showClear: {
     type: Boolean,
     default: false,
-  },
-  selectedVariant: {
-    type: String,
-    default: '',
   },
   controlIcon: {
     type: String,
@@ -344,143 +377,17 @@ defineExpose({
 </script>
 
 <style scoped>
-.search-filter-control {
-  min-width: 152px;
-  height: 52px !important;
-  justify-content: space-between;
-  padding-inline: 16px;
-  color: rgb(var(--v-theme-brandNavy));
-  background: rgb(var(--v-theme-grey25));
-  border-color: rgb(var(--v-theme-borderSubtle)) !important;
-  border-radius: 12px !important;
-  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
-}
-
-.search-filter-control:hover {
-  background: rgb(var(--v-theme-surfaceSecondary));
-  border-color: rgb(var(--v-theme-academicGoldHover)) !important;
-}
-
-.search-filter-control:focus-visible {
-  box-shadow: 0 0 0 3px rgba(var(--v-theme-academicGold), 0.28);
-}
-
-.search-filter-icon {
-  box-sizing: border-box;
-  display: inline-flex;
-  width: 28px;
-  height: 28px;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-}
-
-.search-filter-icon :deep(.v-img) {
-  width: 100%;
-  height: 100%;
-}
-
-.search-filter-icon-padded :deep(.v-icon) {
-  width: 100%;
-  height: 100%;
-  min-width: 0;
-  font-size: 20px !important;
-}
-
-.search-filter-copy {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  align-items: flex-start;
-  line-height: 1.2;
-}
-
+/* px sizes: the app's 10px root font size makes Vuetify's rem-based list typography too small */
 .search-filter-label {
   font-size: 12px;
-  font-weight: 500;
-  color: rgba(var(--v-theme-brandNavy), 0.68);
 }
 
 .search-filter-empty .search-filter-label {
   font-size: 16px;
-  font-weight: 600;
-  color: rgb(var(--v-theme-brandNavy));
 }
 
 .search-filter-value {
-  max-width: 120px;
-  overflow: hidden;
   font-size: 14px;
-  font-weight: 650;
-  color: rgb(var(--v-theme-brandNavy));
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.search-filter-control :deep(.v-btn__content) {
-  flex: 1;
-  justify-content: flex-start;
-  overflow: hidden;
-}
-
-.search-filter-control :deep(.v-btn__content > span) {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.open-style-btn {
-  background-color: rgb(var(--v-theme-grey25));
-  border: 1px solid rgb(var(--v-theme-brandNavy));
-}
-
-.open-style-btn:not(.search-filter-empty) {
-  color: rgb(var(--v-theme-brandNavy)) !important;
-  background-color: rgb(var(--v-theme-borderSubtle)) !important;
-  border-color: transparent !important;
-}
-
-.open-style-btn:not(.search-filter-empty) .search-filter-label {
-  color: rgb(var(--v-theme-brandNavy)) !important;
-}
-
-.open-style-btn:not(.search-filter-empty) .search-filter-value,
-.open-style-btn:not(.search-filter-empty) :deep(.v-icon),
-.open-style-btn:not(.search-filter-empty) :deep(.search-filter-content-icon) {
-  color: rgb(var(--v-theme-brandNavy)) !important;
-}
-
-.dependent-selected-btn {
-  color: rgb(var(--v-theme-brandNavy)) !important;
-  background-color: rgb(var(--v-theme-borderSubtle)) !important;
-  border-color: transparent !important;
-}
-
-.dependent-selected-btn .search-filter-label {
-  color: rgb(var(--v-theme-brandNavy)) !important;
-}
-
-.dependent-selected-btn .search-filter-value,
-.dependent-selected-btn :deep(.v-icon),
-.dependent-selected-btn :deep(.search-filter-content-icon) {
-  color: rgb(var(--v-theme-brandNavy)) !important;
-}
-
-.v-btn .search-filter-clear-icon {
-  color: rgb(var(--v-theme-grey500)) !important;
-}
-
-.open-style-btn:not(.search-filter-empty) .search-filter-clear-icon,
-.dependent-selected-btn .search-filter-clear-icon {
-  color: rgb(var(--v-theme-grey500)) !important;
-}
-
-.v-btn .search-filter-clear-icon:hover {
-  color: rgb(var(--v-theme-errorStrong)) !important;
-}
-
-.v-btn:has(.search-filter-clear-icon:hover) {
-  --v-hover-opacity: 0;
 }
 
 .inline-filter-selector {

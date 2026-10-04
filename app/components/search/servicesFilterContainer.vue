@@ -22,11 +22,7 @@
   background: transparent;
 }
 
-.services-filter-container :deep(.search-filter-control.open-style-btn:not(.search-filter-empty)),
-.services-filter-container :deep(.search-filter-control.dependent-selected-btn),
-.services-filter-container :deep(.search-filter-control.open-style-btn:not(.search-filter-empty):hover),
-.services-filter-container :deep(.search-filter-control.dependent-selected-btn:hover) {
+.services-filter-container :deep(.search-filter-selected) {
   background-color: rgb(var(--v-theme-surfaceTertiary)) !important;
-  border-color: transparent !important;
 }
 </style>

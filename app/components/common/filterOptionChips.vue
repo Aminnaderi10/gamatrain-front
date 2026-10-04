@@ -16,7 +16,7 @@
       v-if="allowClear"
       :value="ALL_OPTION"
       variant="outlined"
-      class="inline-filter-option ma-0"
+      class="inline-filter-option font-weight-medium ma-0"
       :style="grouped ? { gridColumn: 1, gridRow: 1 } : undefined"
     >
       All
@@ -26,7 +26,7 @@
       :key="item.id"
       :value="item.id"
       variant="outlined"
-      class="inline-filter-option ma-0"
+      class="inline-filter-option font-weight-medium ma-0"
       :class="{ 'inline-filter-option-multi-digit': isMultiDigit(item) }"
       :style="grouped ? getGridPosition(itemIndex) : undefined"
     >

@@ -136,7 +136,6 @@ export const useSearchFilters = ({
         extraApiParams: { type: 'topic' },
         dependencies: [{ parent: index.subject, targetKey: 'lesson_id', sourceKey: 'id' }],
         queryKey: 'topic',
-        selectedVariant: 'dependent-green',
         controlIcon: 'md:sell_outlined',
         controlIconPadded: true,
       }),
@@ -147,7 +146,6 @@ export const useSearchFilters = ({
           .reverse()
           .map(year => ({ title: `${year}`, id: year })),
         queryKey: 'edu_year',
-        selectedVariant: 'dependent-green',
         controlIcon: 'md:calendar_today_outlined',
         controlIconPadded: true,
       }),
@@ -162,7 +160,6 @@ export const useSearchFilters = ({
           return months || ALL_SEARCH_MONTHS
         },
         queryKey: 'edu_month',
-        selectedVariant: 'dependent-green',
       }),
       'paper': () => makeFilter({
         title: 'Paper',
@@ -202,14 +199,12 @@ export const useSearchFilters = ({
         dependencies: [{ parent: index.board, targetKey: 'section_id', sourceKey: 'code' }],
         itemFilter: item => item.is_paper === false,
         queryKey: 'test_type',
-        selectedVariant: 'dependent-green',
       }),
       'exam-type': () => makeFilter({
         title: 'Exam Type',
         api: '/api/v1/types/list',
         extraApiParams: { type: 'exam_type' },
         queryKey: 'exam_type',
-        selectedVariant: 'dependent-green',
       }),
     }
 

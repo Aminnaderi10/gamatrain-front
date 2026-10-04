@@ -213,7 +213,6 @@
                       :fallback-icon-padding="filter.fallbackIconPadding"
                       :boxed="filter.boxed"
                       :show-clear="Boolean(filterContainer && filter.closable && !filter.defaultValue)"
-                      :selected-variant="filter.selectedVariant"
                       :control-icon="filter.controlIcon"
                       :control-icon-padded="filter.controlIconPadded"
                       :inline-options="filter.inlineOptions"
@@ -395,7 +394,6 @@
                       :fallback-icon-padding="filter.fallbackIconPadding"
                       :boxed="filter.boxed"
                       :show-clear="Boolean(filter.closable && !filter.defaultValue)"
-                      :selected-variant="filter.selectedVariant"
                       :control-icon="filter.controlIcon"
                       :control-icon-padded="filter.controlIconPadded"
                       :item-title="filter.itemTitle"
@@ -860,58 +858,6 @@ watch(activeFilterService, async (service, previousService) => {
     gap: 0 !important;
   }
 
-  .filter-list-sidebar-layout :deep(.search-filter-control) {
-    width: 100%;
-    min-width: 0;
-    height: 56px !important;
-    justify-content: stretch !important;
-    padding-inline: 16px;
-    direction: ltr;
-    text-align: left;
-    background: transparent;
-    border: 0 !important;
-    border-bottom: 1px solid rgb(var(--v-theme-surfaceTertiary)) !important;
-    border-radius: 0 !important;
-    box-shadow: none;
-  }
-
-  .filter-list-sidebar-layout :deep(.search-filter-control:not(.search-filter-has-icon)) {
-    padding-left: 52px;
-  }
-
-  .filter-list-sidebar-layout :deep(.search-filter-control .v-btn__content) {
-    justify-content: flex-start !important;
-  }
-
-  .filter-list-sidebar-layout :deep(.search-filter-copy) {
-    width: 0;
-    flex: 1 1 auto;
-    align-items: flex-start;
-    overflow: hidden;
-    text-align: left;
-  }
-
-  .filter-list-sidebar-layout :deep(.search-filter-control:hover) {
-    background: rgb(var(--v-theme-surfaceSecondary));
-  }
-
-  .filter-list-sidebar-layout :deep(.search-filter-control.open-style-btn) {
-    background: rgb(var(--v-theme-grey25));
-  }
-
-  .filter-list-sidebar-layout :deep(.search-filter-control.open-style-btn:not(.search-filter-empty)) {
-    background: rgb(var(--v-theme-borderSubtle));
-  }
-
-  .filter-list-sidebar-layout :deep(.search-filter-control.dependent-selected-btn) {
-    background: rgb(var(--v-theme-borderSubtle));
-  }
-
-  .filter-list-sidebar-layout :deep(.search-filter-value) {
-    width: 100%;
-    max-width: 100%;
-  }
-
   .filter-list-sidebar-layout .inline-filter-group-wrapper {
     display: block;
     max-width: none;
@@ -1364,49 +1310,6 @@ watch(activeFilterService, async (service, previousService) => {
 
   .mobile-filter-control-wrapper {
     width: 100%;
-  }
-
-  .mobile-filter-control-list :deep(.search-filter-control) {
-    width: 100%;
-    min-width: 0;
-    height: 56px !important;
-    justify-content: stretch !important;
-    padding-inline: 16px;
-    direction: ltr;
-    color: rgb(var(--v-theme-brandNavy));
-    text-align: left;
-    background: rgb(var(--v-theme-grey25));
-    border: 0 !important;
-    border-bottom: 1px solid rgb(var(--v-theme-surfaceTertiary)) !important;
-    border-radius: 0 !important;
-    box-shadow: none;
-  }
-
-  .mobile-filter-control-list :deep(.search-filter-control:not(.search-filter-has-icon)) {
-    padding-left: 52px;
-  }
-
-  .mobile-filter-control-list :deep(.search-filter-control .v-btn__content) {
-    justify-content: flex-start !important;
-  }
-
-  .mobile-filter-control-list :deep(.search-filter-copy) {
-    align-items: flex-start;
-    text-align: left;
-  }
-
-  .mobile-filter-control-list :deep(.search-filter-control:hover) {
-    background: rgb(var(--v-theme-surfaceSecondary));
-  }
-
-  .mobile-filter-control-list :deep(.search-filter-control.open-style-btn:not(.search-filter-empty)),
-  .mobile-filter-control-list :deep(.search-filter-control.dependent-selected-btn) {
-    background: rgb(var(--v-theme-borderSubtle));
-    border-color: transparent !important;
-  }
-
-  .mobile-filter-control-list :deep(.search-filter-value) {
-    max-width: min(190px, 48vw);
   }
 
   .mobile-inline-filter-group {
