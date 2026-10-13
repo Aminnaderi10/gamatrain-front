@@ -7,7 +7,6 @@ import { createVuetify } from 'vuetify'
 import { aliases as mdiAliases, mdi } from 'vuetify/iconsets/mdi'
 import { mdSymbols } from '../utils/iconsets/mdSymbols'
 import { defineNuxtPlugin } from 'nuxt/app'
-import { DIRECTORY_COLORS, DIRECTORY_FILTER_COLORS } from '~/constants/pastpaper/directory'
 
 export default defineNuxtPlugin(
   (app: { vueApp: { use: (plugin: unknown) => void } }) => {
@@ -77,8 +76,14 @@ export default defineNuxtPlugin(
               generalSearchBlog: '#FF9400',
               generalSearchBlogActive: '#FFDFB3',
               white: '#FFFFFF',
-              ...DIRECTORY_COLORS,
-              ...DIRECTORY_FILTER_COLORS,
+              // Shared palette from redesign/search.
+              brandNavy: '#1E2A44',
+              softGold: '#FFF8E1',
+              surfaceSecondary: '#F7F8FA',
+              surfaceTertiary: '#EEF1F5',
+              borderSubtle: '#D8DEE8',
+              errorStrong: '#C93C37',
+              teal500: '#008080',
             },
           },
           dark: {
@@ -137,8 +142,14 @@ export default defineNuxtPlugin(
               generalSearchBlog: '#FF9400',
               generalSearchBlogActive: '#FFDFB3',
               white: '#FFFFFF',
-              ...DIRECTORY_COLORS,
-              ...DIRECTORY_FILTER_COLORS,
+              // Shared palette from redesign/search.
+              brandNavy: '#1E2A44',
+              softGold: '#FFF8E1',
+              surfaceSecondary: '#F7F8FA',
+              surfaceTertiary: '#EEF1F5',
+              borderSubtle: '#D8DEE8',
+              errorStrong: '#C93C37',
+              teal500: '#008080',
             },
           },
         },
