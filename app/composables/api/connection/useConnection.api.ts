@@ -12,6 +12,14 @@ export const useConnection = () => {
   const loadingUnfollow = ref(false)
   const loadingCheckConnectionStatus = ref(false)
 
+  // A 401 already opens the login dialog (useApiService), so an error toast on top of it is only noise.
+  const handleConnectionFailure = <T>(err: unknown, data: T | null = null) => {
+    const failure = createApiFailure<T>(err, data)
+    if (failure.status !== 401) handleApiCatchError(err)
+
+    return failure
+  }
+
   const follow = async (id: number) => {
     loadingFollow.value = true
 
@@ -33,9 +41,7 @@ export const useConnection = () => {
       return response
     }
     catch (err: unknown) {
-      handleApiCatchError(err)
-
-      return createApiFailure<boolean>(err, false)
+      return handleConnectionFailure<boolean>(err, false)
     }
     finally {
       loadingFollow.value = false
@@ -64,9 +70,7 @@ export const useConnection = () => {
       return response
     }
     catch (err: unknown) {
-      handleApiCatchError(err)
-
-      return createApiFailure<boolean>(err, false)
+      return handleConnectionFailure<boolean>(err, false)
     }
     finally {
       loadingUnfollow.value = false
@@ -85,9 +89,7 @@ export const useConnection = () => {
       return response
     }
     catch (err: unknown) {
-      handleApiCatchError(err)
-
-      return createApiFailure<ConnectionStatusResponseDTO[]>(err)
+      return handleConnectionFailure<ConnectionStatusResponseDTO[]>(err)
     }
     finally {
       loadingCheckConnectionStatus.value = false

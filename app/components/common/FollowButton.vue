@@ -22,7 +22,6 @@ const props = defineProps<IFollowButton>()
 
 const { isAuthenticated } = useAuth()
 const { user } = useUser()
-const router = useRouter()
 const { follow, unFollow, checkConnectionStatus, loadingFollow, loadingUnfollow } = useConnection()
 
 const authorId = computed(() => Number(props.userId))
@@ -53,19 +52,8 @@ const refreshStatus = async () => {
   checkingStatus.value = false
 }
 
-const redirectToLogin = () => {
-  router.push({})
-  setTimeout(() => {
-    router.push({ query: { auth_form: 'login', auth_noredirect: 'true' } })
-  }, 100)
-}
-
+// No sign-in check here: a signed-out click gets a 401, and useApiService opens the login dialog for it.
 const toggleFollow = async () => {
-  if (!isAuthenticated.value) {
-    redirectToLogin()
-    return
-  }
-
   const response = isFollowing.value
     ? await unFollow(authorId.value)
     : await follow(authorId.value)
