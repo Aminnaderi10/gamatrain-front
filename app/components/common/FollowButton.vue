@@ -21,24 +21,28 @@ interface IFollowButton {
 const props = defineProps<IFollowButton>()
 
 const { isAuthenticated } = useAuth()
+// Set only once the profile request succeeds (init-user plugin or the login dialog), so it means the token is valid.
 const { user } = useUser()
+const router = useRouter()
 const { follow, unFollow, checkConnectionStatus, loadingFollow, loadingUnfollow } = useConnection()
 
 const authorId = computed(() => Number(props.userId))
 const hasAuthor = computed(() => Number.isInteger(authorId.value) && authorId.value > 0)
-const isOwnContent = computed(() => isAuthenticated.value && user.value?.coreId === authorId.value)
+const isOwnContent = computed(() => user.value?.coreId === authorId.value)
 const showButton = computed(() => hasAuthor.value && !isOwnContent.value)
 
 const isFollowing = ref(false)
-// The auth cookie is readable on the server, so a signed-in viewer gets the loading state from the first render
-// instead of a "follow" that flips to "unfollow" once the status arrives.
+// The user is loaded on the client only, but the auth cookie is readable on the server, so a probably signed-in
+// viewer gets the loading state from the first render instead of a "follow" that flips to "unfollow".
 const checkingStatus = ref(isAuthenticated.value && hasAuthor.value)
+// A signed-out click opens the login dialog; the follow is finished once the login succeeds.
+const followAfterLogin = ref(false)
 let statusRequest = 0
 
 const refreshStatus = async () => {
   const request = ++statusRequest
 
-  if (!isAuthenticated.value || !hasAuthor.value) {
+  if (!user.value || !showButton.value) {
     isFollowing.value = false
     checkingStatus.value = false
     return
@@ -52,8 +56,14 @@ const refreshStatus = async () => {
   checkingStatus.value = false
 }
 
-// No sign-in check here: a signed-out click gets a 401, and useApiService opens the login dialog for it.
 const toggleFollow = async () => {
+  if (!user.value) {
+    followAfterLogin.value = true
+    // The header opens the login dialog for this query and then clears it, so the page stays where it is.
+    router.push({ query: { auth_form: 'login' } })
+    return
+  }
+
   const response = isFollowing.value
     ? await unFollow(authorId.value)
     : await follow(authorId.value)
@@ -63,7 +73,19 @@ const toggleFollow = async () => {
   else await refreshStatus()
 }
 
+const onUserChange = async () => {
+  await refreshStatus()
+
+  if (!followAfterLogin.value || !user.value) return
+  followAfterLogin.value = false
+  if (showButton.value && !isFollowing.value) await toggleFollow()
+}
+
 onMounted(refreshStatus)
 // Logging in through the dialog keeps the page, and navigating between papers reuses this component.
-watch([isAuthenticated, authorId], refreshStatus)
+watch(user, onUserChange)
+watch(authorId, () => {
+  followAfterLogin.value = false
+  refreshStatus()
+})
 </script>

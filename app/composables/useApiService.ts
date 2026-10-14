@@ -20,8 +20,6 @@ type UseFetchOptions = {
   pick?: string[]
   proxy?: boolean
   public?: boolean
-  /** Do not open the login dialog on a 401, for background requests the user did not ask for. */
-  silentUnauthorized?: boolean
 }
 
 interface AuthHeaders {
@@ -65,7 +63,7 @@ const apiRequest = <T = unknown>(
       response: _response,
       options: _options,
     }) {
-      if ((_response?.status == 401 || _response?.status == 403) && !opts?.silentUnauthorized) {
+      if (_response?.status == 401 || _response?.status == 403) {
         router.push({ query: { auth_form: 'login' } })
       }
     },
