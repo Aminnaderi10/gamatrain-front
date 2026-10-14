@@ -84,6 +84,8 @@ export const useConnection = () => {
       const response = await useApiService.post<ApiResult<ConnectionStatusResponseDTO[]>>(
         `/api/v2/connections/status`,
         { ...data },
+        // Runs on page load: an expired session just shows "follow"; the login opens when the user clicks it.
+        { silentUnauthorized: true },
       )
 
       return response
