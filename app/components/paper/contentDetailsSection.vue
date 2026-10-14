@@ -12,10 +12,7 @@
         {{ contentData?.first_name }} {{ contentData?.last_name }}
       </p>
     </div>
-    <span class="text-h5 d-flex align-center text-info ga-1">
-      <v-icon color="info">md:notifications_outlined</v-icon>
-      follow
-    </span>
+    <common-follow-button :user-id="contentData?.user_" />
   </div>
 
   <div
@@ -129,6 +126,7 @@ interface IContentDetailsSection {
   lesson_title: string
   edu_month_title: string
   edu_year: string
+  user_: string
 }
 
 const props = defineProps<{
