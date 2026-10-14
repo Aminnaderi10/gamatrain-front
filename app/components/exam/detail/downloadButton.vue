@@ -253,7 +253,13 @@ const upgradePlanSuccessfully = async () => {
   }
 }
 
+const { user } = useUser()
+
 onMounted(() => {
+  fetchPrices()
+})
+// Logging in through the dialog keeps the page: reload so "Owned" shows the user's purchases (and clears on logout).
+watch(user, () => {
   fetchPrices()
 })
 </script>
