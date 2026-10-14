@@ -4,8 +4,6 @@ import type {
   ConnectionStatusResponseDTO,
 } from '@/types'
 
-// const NAME = 'Connection'
-
 export const useConnection = () => {
   const { $toast } = useNuxtApp()
   const { handleApiResponseError, handleApiCatchError, createApiFailure } = useApiErrorHandler()
@@ -14,7 +12,7 @@ export const useConnection = () => {
   const loadingUnfollow = ref(false)
   const loadingCheckConnectionStatus = ref(false)
 
-  const follow = async (id: string) => {
+  const follow = async (id: number) => {
     loadingFollow.value = true
 
     try {
@@ -44,14 +42,15 @@ export const useConnection = () => {
     }
   }
 
-  const unFollow = async (id: string) => {
+  const unFollow = async (id: number) => {
     loadingUnfollow.value = true
 
     try {
       const response = await useApiService.post<ApiResult<boolean>>(
         `/api/v2/connections/users/${id}/unfollow?idType=CoreId`,
         {
-          twoWayRevoke: true,
+          // Only stop following them; the author's own follow of this user is not ours to remove.
+          twoWayRevoke: false,
         },
       )
 

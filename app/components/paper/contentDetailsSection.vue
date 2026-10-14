@@ -12,23 +12,7 @@
         {{ contentData?.first_name }} {{ contentData?.last_name }}
       </p>
     </div>
-    <span class="text-h5 d-flex align-center ga-1 cursor-pointer">
-      <v-progress-circular
-        v-if="loadingFollow || loadingCheckConnectionStatus || loadingUnfollow"
-        color="info"
-        size="20"
-        indeterminate
-        :width="2"
-      />
-      <div
-        v-else
-        class="text-h5 d-flex align-center text-info ga-1"
-        @click="startFollowProccess"
-      >
-        <v-icon color="info">{{ isFollow ? 'md:notifications':'md:notifications_outlined' }}</v-icon>
-        {{ isFollow ? 'unfollow':'follow' }}
-      </div>
-    </span>
+    <common-follow-button :user-id="contentData?.user_" />
   </div>
 
   <div
@@ -136,7 +120,6 @@ interface IContentDetailsSection {
   lesson_title: string
   edu_month_title: string
   edu_year: string
-  ownerIdentity: string
   user_: string
 }
 
@@ -146,38 +129,8 @@ const props = defineProps<{
 
 const { fromNowLocal } = useDateTime()
 const { mdAndDown } = useDisplay()
-const { follow, loadingFollow, unFollow, loadingUnfollow, checkConnectionStatus, loadingCheckConnectionStatus } = useConnection()
-const { isAuthenticated } = useAuth()
-const router = useRouter()
 
 const seeCompleteDescription = ref(false)
-const isFollow = ref(false)
-
-const startFollowProccess = async () => {
-  if (isAuthenticated.value) {
-    if (isFollow.value) {
-      // const response =
-      await unFollow(props.contentData.user_)
-      // if (response.succeeded) {
-      //   isFollow.value = false
-      // }
-    }
-    else {
-      // const response =
-      await follow(props.contentData.user_)
-      // if (response.succeeded) {
-      //   isFollow.value = true
-      // }
-    }
-  }
-  else {
-    router.push({})
-    setTimeout(() => {
-      router.push({ query: { auth_form: 'login', auth_noredirect: 'true' } })
-    }, 100)
-  }
-}
-
 const descriptionContent = ref<HTMLElement | null>(null)
 const hasOverflow = ref(false)
 const collapsedDescriptionHeight = 70
@@ -194,16 +147,6 @@ onMounted(async () => {
   if (descriptionContent.value && typeof ResizeObserver !== 'undefined') {
     descriptionResizeObserver = new ResizeObserver(updateDescriptionOverflow)
     descriptionResizeObserver.observe(descriptionContent.value)
-  }
-
-  if (isAuthenticated.value) {
-    const response = await checkConnectionStatus({
-      ids: [Number(props.contentData.user_)],
-      idType: 'CoreId',
-    })
-    if (response.succeeded && response.data && response.data.length > 0) {
-      isFollow.value = response.data[0]?.isFollowing || false
-    }
   }
 })
 
