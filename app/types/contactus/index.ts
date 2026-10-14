@@ -26,6 +26,8 @@ export interface AdminReplyTicketListDTO {
   id: number
   body: string
   creationUser: string
+  /** Written by support (an admin reply), not by the customer. */
+  bySupport: boolean
   creationDate: string
   fileUri: string
   receivers: string[]
