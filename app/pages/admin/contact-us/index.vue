@@ -361,7 +361,8 @@ const headers: DataTableHeader<AdminContactUsDTO>[] = [
       {
         icon: 'md:mark_email_unread',
         tooltip: 'Mark as unread',
-        show: (item: AdminContactUsDTO) => !isUnread(item),
+        // Disabled rather than hidden, so every row keeps the same icons in the same places.
+        disabled: (item: AdminContactUsDTO) => isUnread(item),
         onClick: (item: AdminContactUsDTO) => markContactAsUnread(item),
       },
       {
