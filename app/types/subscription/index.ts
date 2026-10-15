@@ -288,6 +288,7 @@ export interface AdminUserSubscriptionDetailDTO {
 }
 
 export interface SearchFilterAdminUserSubscription {
+  search: string
   userId: string
   status: UserSubscriptionStatus | ''
 }
