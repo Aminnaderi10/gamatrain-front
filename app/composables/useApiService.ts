@@ -39,6 +39,7 @@ const apiRequest = <T = unknown>(
 
   let baseURL = ''
   let cleanRequest = request
+  let isGamaApi = false
 
   // if (opts?.proxy) {
   //   baseURL = ''
@@ -52,11 +53,15 @@ const apiRequest = <T = unknown>(
   else if (request.includes('/api/v1/')) {
     baseURL = config.public.apiV1BaseUrl as string
     cleanRequest = request.replace(/^\/api\/v1\//, '/')
+    isGamaApi = true
   }
   // }
 
   const fetchOpts: FetchOptions = {
-    credentials: 'include',
+    // gama-api (v1) trusts its own gama_sessions cookie over the Bearer token: once that cookie's session is
+    // logged out, every call answered "login first" even with a fresh token, and signing in again couldn't
+    // fix it. The Bearer token is how it's authenticated, so never send it cookies.
+    credentials: isGamaApi ? 'omit' : 'include',
     onResponse({ request: _request, response: _response, options: _options }) {
       // Process the response data
     },
