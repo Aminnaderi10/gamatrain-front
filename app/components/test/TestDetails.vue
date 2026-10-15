@@ -80,6 +80,7 @@
                   'border-success': getChoiceStatus(item.key) === 'success' || getChoiceStatus(item.key) === 'correct',
                   'border-lightError': getChoiceStatus(item.key) === 'error',
                   'border-primary': getChoiceStatus(item.key) === 'loading',
+                  'choice-correct': getChoiceStatus(item.key) === 'correct',
                 },
               ]"
             >
@@ -105,13 +106,6 @@
               >
                 md:close
               </v-icon>
-
-              <!-- Same filled marker the result's answer sheet uses for the correct option. A plain CSS dot, not
-                   the md:circle glyph: the icon font drew it ~2px left of the box's center. -->
-              <span
-                v-else
-                class="correct-dot bg-success rounded-circle"
-              />
             </div>
             <div
               :class="[
@@ -464,9 +458,9 @@ const getQuestionQueryValue = (data: TestDetailsContent, field: string) => {
   max-height: 24px;
   font-size: 1.4rem;
 }
-.correct-dot {
-  width: 14px;
-  height: 14px;
+/* The correct-option dot, painted from the box's own center: a separate dot element rounded half a pixel off it. */
+.choice-correct {
+  background: radial-gradient(circle, rgb(var(--v-theme-success)) 7px, transparent 7.5px);
 }
 .choice-text {
   min-width: 0;
