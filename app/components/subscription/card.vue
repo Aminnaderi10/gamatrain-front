@@ -252,6 +252,23 @@ const confirmUpgrade = async () => {
     return
   }
 
+  // Not a decline: the bank wants the user to confirm the payment (3-D Secure / OTP), which can't happen on
+  // the off-session charge, so send them to Stripe's payment page. The plan switches once it's paid there.
+  if (response.data?.paymentActionUrl) {
+    showConfirmUpgradeModal.value = false
+    $toast.info('Your bank needs you to confirm this payment. Taking you to the payment page...')
+    window.location.href = response.data.paymentActionUrl
+    return
+  }
+
+  // Not a decline either: the bank is still processing the payment. The plan switches by itself once it's
+  // confirmed, so don't invite a retry.
+  if (response.data?.paymentProcessing) {
+    showConfirmUpgradeModal.value = false
+    $toast.info(response.errors?.[0]?.message ?? 'Your payment is being processed by your bank. Your plan will switch automatically once it\'s confirmed.')
+    return
+  }
+
   if (response.errors && response.errors.length > 0) {
     const messages = response.errors.map(error => error.message)
     if (messages.includes(SWITCH_NOT_ALLOWED_WHILE_CANCELLATION_PENDING_ERROR)) {
