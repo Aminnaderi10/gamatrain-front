@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="!contentData && !fetchError"
+    v-if="!contentData && !fetchError && !needsSignIn"
     class="d-flex justify-center align-center"
     style="height: 80vh"
   >
@@ -9,6 +9,48 @@
       color="teal"
       size="64"
     />
+  </div>
+  <div
+    v-else-if="needsSignIn"
+    class="d-flex flex-column align-center justify-center text-center ga-4 px-4"
+    style="min-height: 60vh"
+  >
+    <v-icon
+      size="56"
+      color="primary"
+    >
+      md:lock_outline
+    </v-icon>
+    <p class="text-h4 font-weight-bold mb-0">
+      Sign in to start this exam
+    </p>
+    <p class="text-h6 text-grey600 mb-0">
+      Your answers and result are saved to your account.
+    </p>
+    <div class="d-flex align-center justify-center ga-3 flex-wrap">
+      <v-btn
+        rounded="pill"
+        variant="outlined"
+        color="grey500"
+        height="40"
+        min-width="110"
+        class="text-h5 font-weight-bold"
+        @click="router.back()"
+      >
+        Back
+      </v-btn>
+      <v-btn
+        rounded="pill"
+        color="primary"
+        height="40"
+        min-width="110"
+        class="text-h5 font-weight-bold"
+        flat
+        @click="openSignIn"
+      >
+        Sign in
+      </v-btn>
+    </div>
   </div>
   <div
     v-else-if="fetchError"
@@ -179,10 +221,12 @@ const route = useRoute()
 
 const router = useRouter()
 const auth = useAuth()
-const authToken = auth.getUserToken()
+const { user } = useUser()
 
 const contentData = ref(null)
 const fetchError = ref(null)
+// A guest can't start an exam: ask them to sign in here rather than showing an error.
+const needsSignIn = ref(!auth.getUserToken())
 const submit_loading = ref(false)
 const allExamStats = ref([])
 const examStats = reactive({
@@ -197,10 +241,10 @@ const examStats = reactive({
 
 // Exam start is per-user and backed by localStorage state, so load it on the client only;
 // on the server the request has no Authorization header.
-const { data, error, status } = await useAsyncData(
+const { data, error, status, refresh } = await useAsyncData(
   `exam-start-${route.params.id}`,
   () => {
-    if (!authToken) {
+    if (!auth.getUserToken()) {
       throw createError({
         statusCode: 401,
         statusMessage: 'You must be logged in to start an exam.',
@@ -212,6 +256,11 @@ const { data, error, status } = await useAsyncData(
 )
 
 const handleExamResponse = () => {
+  if (!auth.getUserToken()) {
+    needsSignIn.value = true
+    return
+  }
+
   if (error.value) {
     if (error.value.statusCode === 400 && error.value.data?.data?.id) {
       // Replace, so the browser's Back button leaves the result for the page before the exam
@@ -391,6 +440,19 @@ const endExam = async () => {
     submit_loading.value = false
   }
 }
+
+const openSignIn = () => {
+  router.push({ query: { auth_form: 'login', auth_noredirect: 'true' } })
+}
+
+// Signing in through the dialog keeps this page: load the exam as soon as the user is known.
+watch(user, async (value) => {
+  if (!value || !needsSignIn.value) return
+
+  needsSignIn.value = false
+  fetchError.value = null
+  await refresh()
+})
 
 watch(status, (value) => {
   if (value === 'success' || value === 'error') handleExamResponse()
