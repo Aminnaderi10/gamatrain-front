@@ -106,11 +106,13 @@
                 md:close
               </v-icon>
 
+              <!-- Same filled marker the result's answer sheet uses for the correct option. -->
               <v-icon
                 v-else
                 color="success"
+                size="18"
               >
-                md:radio_button_unchecked
+                md:circle
               </v-icon>
             </div>
             <div
