@@ -80,6 +80,7 @@
                   'border-success': getChoiceStatus(item.key) === 'success' || getChoiceStatus(item.key) === 'correct',
                   'border-lightError': getChoiceStatus(item.key) === 'error',
                   'border-primary': getChoiceStatus(item.key) === 'loading',
+                  'choice-correct': getChoiceStatus(item.key) === 'correct',
                 },
               ]"
             >
@@ -104,15 +105,6 @@
                 color="lightError"
               >
                 md:close
-              </v-icon>
-
-              <!-- Same filled marker the result's answer sheet uses for the correct option. -->
-              <v-icon
-                v-else
-                color="success"
-                size="18"
-              >
-                md:circle
               </v-icon>
             </div>
             <div
@@ -465,6 +457,10 @@ const getQuestionQueryValue = (data: TestDetailsContent, field: string) => {
   max-width : 24px;
   max-height: 24px;
   font-size: 1.4rem;
+}
+/* The correct-option dot, painted from the box's own center: a separate dot element rounded half a pixel off it. */
+.choice-correct {
+  background: radial-gradient(circle, rgb(var(--v-theme-success)) 7px, transparent 7.5px);
 }
 .choice-text {
   min-width: 0;
