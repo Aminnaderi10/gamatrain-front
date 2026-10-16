@@ -1,14 +1,11 @@
 <template>
   <div
     v-if="!contentData && !fetchError && !needsSignIn"
-    class="d-flex justify-center align-center"
-    style="height: 80vh"
+    class="mt-20"
   >
-    <v-progress-circular
-      indeterminate
-      color="primary"
-      size="64"
-    />
+    <v-container class="px-0 px-sm-4">
+      <exam-start-skeleton />
+    </v-container>
   </div>
   <div
     v-else-if="needsSignIn"
@@ -71,11 +68,11 @@
     v-else-if="contentData"
     class="mt-20"
   >
-    <v-container>
+    <v-container class="px-0 px-sm-4">
       <!-- Header -->
       <v-card
         id="participating-exam-header"
-        class="mb-4"
+        class="exam-card mb-4"
       >
         <div class="d-flex align-center flex-wrap ga-3 pa-3 px-sm-6">
           <div class="d-flex align-center ga-2">
@@ -137,7 +134,7 @@
       </v-card>
 
       <!-- Main Content -->
-      <v-card class="test-list mb-4 mt-4">
+      <v-card class="exam-card test-list mb-4 mt-4">
         <v-card-title class="text-h4 font-weight-bold text-wrap py-6 mt-6 px-4 px-sm-6 px-md-8">
           {{ contentData.exam?.title || "" }}
         </v-card-title>
@@ -173,7 +170,7 @@
           </div>
 
           <!-- Submit buttons -->
-          <v-row class="mb-16 mt-4">
+          <v-row class="mb-4 mb-md-16 mt-4">
             <v-col
               cols="12"
               md="6"
@@ -216,6 +213,11 @@
 <script setup>
 import QuestionItem from '~/components/exam/QuestionItem.vue'
 import { useAuth } from '~/composables/useAuth'
+
+// A timed exam is a focus mode: no mobile bottom nav taking space or tempting the user to leave mid-exam.
+definePageMeta({
+  hideBottomNav: true,
+})
 
 const route = useRoute()
 
@@ -494,7 +496,17 @@ watch(status, (value) => {
 }, { immediate: true })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use 'sass:map';
+@use 'vuetify/settings' as vuetify;
+
+/* On phones the cards run edge to edge, so the exam gets the full screen width. */
+@media #{map.get(vuetify.$display-breakpoints, 'xs')} {
+  .exam-card {
+    border-radius: 0;
+  }
+}
+
 #participating-exam-header {
   position: sticky;
   top: 64px;
