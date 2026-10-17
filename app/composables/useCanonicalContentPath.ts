@@ -1,7 +1,7 @@
 import type { SlugContentType } from '@/utils/contentPath'
 
 // Canonical path and absolute URL of a detail page, plus a 301 to it when the page was reached by any other
-// path: a missing or renamed slug, a trailing slash, or a zero-padded id. Every such variant otherwise answers
+// path: a missing or renamed slug, a trailing slash, or a zero-padded id (the redirect lands on the bare path). Every such variant otherwise answers
 // 200 and shows up in Search Console as an "Alternate page with proper canonical tag"; a permanent redirect
 // folds it, and its link signals, into the one URL instead.
 // Call it after the page's data is awaited and the not-found case has been thrown, with the API's own slug.
@@ -20,8 +20,10 @@ export const useCanonicalContentPath = async (type: SlugContentType, id: string 
   // `/` another segment), so it would never compare equal and would redirect forever. Serve those as they are.
   const isRedirectable = !slug || !/[/?#%]/.test(slug)
 
+  // The query is dropped: none of these pages read one, and leftovers like the legacy `?section=6627` would
+  // otherwise travel along and keep the redirect target a duplicate of the canonical.
   if (!isCanonical && isRedirectable) {
-    await navigateTo({ path, query: route.query, hash: route.hash }, { redirectCode: 301, replace: true })
+    await navigateTo({ path, hash: route.hash }, { redirectCode: 301, replace: true })
   }
 
   return { path, url }
