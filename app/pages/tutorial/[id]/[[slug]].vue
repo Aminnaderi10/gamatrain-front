@@ -247,6 +247,8 @@ if (!contentData.value) {
   })
 }
 
+const { url: canonicalUrl } = await useCanonicalContentPath('tutorial', contentData.value.id, contentData.value.title_url)
+
 const { data: lessonTree } = await useAsyncData(
   `lessonTree-${route.params.id}`,
   async () => {
@@ -316,7 +318,6 @@ onMounted(() => {
   }
 })
 
-const requestURL = ref(useRequestURL().host)
 const stripHtmlTags = (input: string, length = 1200) => {
   if (!input) return ''
 
@@ -345,7 +346,7 @@ const schema = computed(() => {
 
   const dto = contentData.value
 
-  const url = `https://${requestURL.value}/tutorial/${dto.id}/${dto.title_url}`
+  const url = canonicalUrl
 
   const title = pageTitle.value
   const description = pageDescribe.value
@@ -449,7 +450,7 @@ const setMetaData = () => {
     link: [
       {
         rel: 'canonical',
-        href: `https://${requestURL.value}/tutorial/${dto.id}/${dto.title_url}`,
+        href: canonicalUrl,
       },
     ],
     script: schema.value

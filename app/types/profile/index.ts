@@ -25,6 +25,8 @@ export interface ProfileListResponseDTO {
 export type OnlineStatus = 'Online' | 'ActiveRecently' | 'OnlineToday' | 'ActiveThisWeek' | 'ActiveThisMonth' | 'ActiveLongTimeAgo' | 'NewUser'
 
 export interface ProfileDTO {
+  // The profile's canonical URL segment (its chosen handle, or "{id}-{first}-{last}").
+  handle?: string
   profileView: number
   avatarUri: string
   registrationDate: string

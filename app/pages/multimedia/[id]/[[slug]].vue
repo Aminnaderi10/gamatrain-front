@@ -124,7 +124,6 @@ interface BreadCrumb {
 const route = useRoute()
 const { getItemById } = useMultimedia()
 
-const requestURL = ref(useRequestURL().host)
 const breads = ref<BreadCrumb[]>([])
 const openShare = ref(false)
 const openCrashReport = ref(false)
@@ -152,6 +151,8 @@ if (!contentData.value) {
     fatal: true,
   })
 }
+
+const { url: canonicalUrl } = await useCanonicalContentPath('multimedia', contentData.value.id, contentData.value.title_url)
 
 const initBreadCrumb = () => {
   if (!contentData.value) return
@@ -256,7 +257,7 @@ useHead(() => ({
   link: [
     {
       rel: 'canonical',
-      href: `https://${requestURL.value}/multimedia/${contentData.value?.id}/${contentData.value?.title_url}`,
+      href: canonicalUrl,
     },
   ],
 }))
