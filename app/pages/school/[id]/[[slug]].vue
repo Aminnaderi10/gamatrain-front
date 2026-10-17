@@ -311,7 +311,7 @@ const breadcrumbSchema = computed(() => {
 
   return {
     '@type': 'BreadcrumbList',
-    '@id': 'https://gamatrain.com/school/123#breadcrumb',
+    '@id': `${canonicalUrl}#breadcrumb`,
     'itemListElement': [
       {
         '@type': 'ListItem',
@@ -329,7 +329,7 @@ const breadcrumbSchema = computed(() => {
         '@type': 'ListItem',
         'position': 3,
         'name': contentData.value.name,
-        'item': `https://${requestURL.value}/school/${contentData.value.id}/${contentData.value.slug}`,
+        'item': canonicalUrl,
       },
     ],
   }
@@ -363,10 +363,10 @@ const schoolSchema = computed(() => {
     '@id': `https://${requestURL.value}/school/${contentData.value.id}#school`,
     'name': contentData.value.name,
     'description': contentData.value.description,
-    'url': `https://${requestURL.value}/school/${contentData.value.id}/${contentData.value.slug}`,
+    'url': canonicalUrl,
     'mainEntityOfPage': {
       '@type': 'WebPage',
-      '@id': `https://${requestURL.value}/school/${contentData.value.id}/${contentData.value.slug}`,
+      '@id': canonicalUrl,
     },
     'image': [{
       '@type': 'ImageObject',
@@ -521,6 +521,8 @@ if (!contentDataRaw.value?.data) {
   })
 }
 
+const { url: canonicalUrl } = await useCanonicalContentPath('school', contentDataRaw.value.data.id, contentDataRaw.value.data.slug)
+
 const {
   data: ratingDataRaw,
   status: _ratingStatus,
@@ -555,9 +557,7 @@ useHead(() => ({
   link: [
     {
       rel: 'canonical',
-      href: contentData.value
-        ? `https://${requestURL.value}/school/${contentData.value.id}/${contentData.value.slug}`
-        : `https://${requestURL.value}/school/${route.params.id}`,
+      href: canonicalUrl,
     },
     {
       rel: 'icon',
@@ -575,8 +575,7 @@ useSeoMeta({
   description: () => metaDescription.value,
   ogTitle: () => `${contentData.value?.name} | GamaTrain Schools`,
   ogDescription: () => metaDescription.value,
-  ogUrl: () =>
-    `${requestURL.value}/school/${contentData.value?.id}/${contentData?.value?.slug}`,
+  ogUrl: canonicalUrl,
   twitterTitle: () => `${contentData.value?.name} | GamaTrain Schools`,
   twitterDescription: () => metaDescription.value,
   twitterCard: 'summary_large_image',

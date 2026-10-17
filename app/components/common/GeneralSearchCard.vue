@@ -218,10 +218,10 @@ const createLink = () => {
     link = `/${props.category.typePaper}/${props.information.id}/${props.information.title_url}`
   }
   else if (props.category.type == 'school') {
-    link = `/school/${props.information.id}/${props.information.slug}`
+    link = contentPath('school', props.information.id, props.information.slug)
   }
   else if (props.category.type == 'post') {
-    link = `/post/${props.information.id}/${props.information.slug}`
+    link = contentPath('post', props.information.id, props.information.slug)
   }
   else if (props.category.type == 'teacher') {
     link = `/profile/${props.information.handle}`

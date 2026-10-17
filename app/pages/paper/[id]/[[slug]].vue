@@ -182,7 +182,6 @@ const { buildCambridgeMeta } = useCambridgeSeo()
 
 const { buildSchema } = useSeoSchema()
 
-const requestURL = ref(useRequestURL().host)
 const pageDescribe = ref('')
 const pageTitle = ref('')
 const breads = ref<BreadCrumb[]>([])
@@ -223,12 +222,14 @@ if (!contentData.value) {
   })
 }
 
+const { url: canonicalUrl } = await useCanonicalContentPath('paper', contentData.value.id, contentData.value.title_url)
+
 const schema = computed(() => {
   if (!contentData.value) return null
 
   const dto = contentData.value
 
-  const url = `https://${requestURL.value}/paper/${dto.id}/${dto.title_url}`
+  const url = canonicalUrl
 
   const title = pageTitle.value
   const description = pageDescribe.value
@@ -339,9 +340,7 @@ const setMetaData = () => {
     link: [
       {
         rel: 'canonical',
-        href: dto
-          ? `https://${requestURL.value}/paper/${dto.id}/${dto.title_url}`
-          : `https://${requestURL.value}/paper/${route.params.id}`,
+        href: canonicalUrl,
       },
     ],
   })

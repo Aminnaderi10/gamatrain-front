@@ -18,7 +18,7 @@
               width="30"
               height="30"
               :disabled="!contentData.previousId"
-              :to="`/post/${contentData.previousId}`"
+              :to="contentData.previousId ? contentPath('post', contentData.previousId, contentData.previousSlug) : undefined"
             >
               <v-icon
                 color="primary"
@@ -37,7 +37,7 @@
               width="30"
               height="30"
               :disabled="!contentData.nextId"
-              :to="`/post/${contentData.nextId}`"
+              :to="contentData.nextId ? contentPath('post', contentData.nextId, contentData.nextSlug) : undefined"
             >
               <v-icon
                 color="primary"
@@ -158,7 +158,7 @@
         <v-btn
           v-for="(item, index) in contentData.keywords.split(',')"
           :key="index"
-          :to="`/post/${postId}/${contentData.slug}`"
+          :to="canonicalPath"
           variant="plain"
           class="text-h5 font-weight-bold"
           :x-small="xs"
@@ -218,7 +218,6 @@ const { formatLocal } = useDateTime()
 const route = useRoute()
 const postId = route.params.id
 const { xs, sm } = useDisplay()
-const requestURL = ref(useRequestURL().host)
 const postContentRef = ref(null)
 
 const { data: contentData, error } = await useAsyncData(
@@ -253,6 +252,9 @@ if (!contentData.value) {
   })
 }
 
+// The post API doesn't echo the id back, so the route's is normalised: "/post/0126" is post 126.
+const { path: canonicalPath, url: canonicalUrl } = await useCanonicalContentPath('post', Number(postId), contentData.value.slug)
+
 const organizationSchema = {
   '@type': 'Organization',
   '@id': 'https://gamatrain.com/#organization',
@@ -283,7 +285,7 @@ const breadcrumbSchema = computed(() => {
         '@type': 'ListItem',
         'position': 2,
         'name': contentData.value.title,
-        'item': `https://${requestURL.value}/post/${postId}/${contentData.value.slug}`,
+        'item': canonicalUrl,
       },
     ],
   }
@@ -304,7 +306,7 @@ const articleSchema = computed(() => {
     'image': [image],
     'mainEntityOfPage': {
       '@type': 'WebPage',
-      '@id': `https://${requestURL.value}/post/${postId}/${contentData.value.slug}`,
+      '@id': canonicalUrl,
     },
     'author': {
       '@type': 'Person',
@@ -322,7 +324,7 @@ const articleSchema = computed(() => {
       ? contentData.value.body.replace(/<[^>]*>/g, '').substring(0, 5000)
       : '',
     'wordCount': contentData.value?.content?.length || 0,
-    'url': `https://${requestURL.value}/post/${postId}/${contentData.value.slug}`,
+    'url': canonicalUrl,
   }
 })
 
@@ -412,9 +414,7 @@ useHead({
   link: [
     {
       rel: 'canonical',
-      href: contentData.value
-        ? `https://${requestURL.value}/post/${postId}/${contentData.value.slug}`
-        : `https://${requestURL.value}/post/${postId}`,
+      href: canonicalUrl,
     },
   ],
 })
@@ -425,7 +425,7 @@ const share = async () => {
       await navigator.share({
         title: contentData.value.title,
         text: contentData.value.summary,
-        url: `https://gamatrain.com/post/${postId}`,
+        url: canonicalUrl,
       })
     }
     catch (error) {
@@ -434,7 +434,7 @@ const share = async () => {
   }
   else {
     try {
-      await navigator.clipboard.writeText(requestURL.value)
+      await navigator.clipboard.writeText(canonicalUrl)
       $toast.success('Link copied to clipboard!')
     }
     catch (error) {
