@@ -200,6 +200,32 @@ const ogImage
     && contentData.value?.previewData.preview.length > 0
     ? contentData.value?.previewData.preview[0]
     : null
+
+const { buildSchema } = useSeoSchema()
+
+// Most multimedia items are documents (PDF, Word, slides) rather than videos, so a LearningResource
+// describes them; breadcrumbs are what Google shows in results.
+const schema = computed(() => {
+  const item = contentData.value
+  if (!item) return null
+  const author = [item.first_name, item.last_name].filter(Boolean).join(' ')
+  return buildSchema({
+    dto: item,
+    url: canonicalUrl,
+    title: item.title,
+    description: item.description || item.title,
+    breadcrumbs: breads.value,
+    types: ['webpage', 'learning', 'breadcrumb'],
+    learning: {
+      learningResourceType: item.content_type_title || item.type_title || 'Learning material',
+      teaches: item.lesson_title?.trim() || undefined,
+      educationalLevel: item.base_title?.trim() || undefined,
+      image: ogImage || item.lesson_pic || undefined,
+      ...(author && { author: { '@type': 'Person', 'name': author } }),
+    },
+  })
+})
+
 useHead(() => ({
   title: contentData.value?.title || 'Multimedia Details',
   meta: [
@@ -254,6 +280,9 @@ useHead(() => ({
       content: ogImage,
     },
   ],
+  script: schema.value
+    ? [{ key: 'json-ld-schema', type: 'application/ld+json', innerHTML: JSON.stringify(schema.value) }]
+    : [],
   link: [
     {
       rel: 'canonical',

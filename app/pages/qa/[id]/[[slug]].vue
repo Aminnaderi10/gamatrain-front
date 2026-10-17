@@ -494,6 +494,7 @@
                   >
                     <v-row
                       v-for="answer in answer_list"
+                      :id="`answer-${answer.id}`"
                       :key="answer.id"
                     >
                       <!-- Score action -->
@@ -1382,6 +1383,43 @@ async function reInit() {
 
 await reInit()
 
+const qaUrl = `https://gamatrain.com/qa/${contentData.value?.id}/${contentData.value?.title_url}`
+const toAnswerSchema = a => ({
+  '@type': 'Answer',
+  'text': a.answer,
+  'dateCreated': new Date(a.subdate).toISOString(),
+  'upvoteCount': parseInt(a.score) || 0,
+  'url': `${qaUrl}#answer-${a.id}`,
+  'author': { '@type': 'Person', 'name': a.name },
+})
+// Only the reply the asker picked is the accepted answer; the rest are suggested. Sorted on a copy - the
+// list is the one rendered on the page, and sorting it in place reordered the visible answers.
+const answers = (repliesData.value?.data?.list ?? []).filter(a => a.answer)
+const accepted = answers.find(a => String(a.selected) === '1' || String(a.id) === String(contentData.value?.selected_reply))
+const suggested = answers
+  .filter(a => a !== accepted)
+  .sort((a, b) => parseInt(b.score) - parseInt(a.score))
+  .slice(0, 5)
+const qaPageSchema = answers.length
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'QAPage',
+      'mainEntity': {
+        '@type': 'Question',
+        'name': contentData.value?.title,
+        // Some questions are a title only.
+        'text': contentData.value?.question || contentData.value?.title,
+        'dateCreated': new Date(contentData.value?.subdate).toISOString(),
+        'author': { '@type': 'Person', 'name': contentData.value?.name },
+        'upvoteCount': parseInt(contentData.value?.score) || 0,
+        'answerCount': Math.max(parseInt(repliesData.value?.data?.num) || 0, answers.length),
+        'url': qaUrl,
+        ...(accepted && { acceptedAnswer: toAnswerSchema(accepted) }),
+        ...(suggested.length && { suggestedAnswer: suggested.map(toAnswerSchema) }),
+      },
+    }
+  : null
+
 useHead({
   title: contentData.value?.title || 'Gama Train',
   link: [
@@ -1390,59 +1428,8 @@ useHead({
       href: `https://${requestURL.value}/qa/${contentData.value.id}/${contentData.value.title_url}`,
     },
   ],
-  script: [
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'QAPage',
-        'mainEntity': {
-          '@type': 'Question',
-          'name': contentData.value?.title,
-          'text': contentData.value?.question,
-          'dateCreated': new Date(contentData.value?.subdate).toISOString(),
-          'author': {
-            '@type': 'Person',
-            'name': contentData.value?.name,
-            // url: this.contentData.userLink,
-          },
-          'upvoteCount': parseInt(contentData.value?.score) || 0,
-          'answerCount': parseInt(repliesData.value?.data.num) || 0,
-          'url': `https://gamatrain.com/qa/${contentData.value?.id}/${contentData.value?.title_url}`,
-          'acceptedAnswer': repliesData.value?.data.list
-            ?.sort((a, b) => parseInt(b.score) - parseInt(a.score))
-            .slice(0, 5)
-            .map(a => ({
-              '@type': 'Answer',
-              'text': a.answer,
-              'dateCreated': new Date(a.subdate).toISOString(),
-              'upvoteCount': parseInt(a.score) || 0,
-              'url': `https://gamatrain.com/qa/${contentData.value?.id}/${contentData.value?.title_url}#answer-${a.id}`,
-              'author': {
-                '@type': 'Person',
-                'name': a.name,
-                // url: a.userLink,
-              },
-            })),
-          'suggestedAnswer': repliesData.value?.data.list
-            ?.sort((a, b) => parseInt(b.score) - parseInt(a.score))
-            .slice(0, 5)
-            .map(a => ({
-              '@type': 'Answer',
-              'text': a.answer,
-              'dateCreated': new Date(a.subdate).toISOString(),
-              'upvoteCount': parseInt(a.score) || 0,
-              'url': `https://gamatrain.com/qa/${contentData.value?.id}/${contentData.value?.title_url}#answer-${a.id}`,
-              'author': {
-                '@type': 'Person',
-                'name': a.name,
-                // url: a.userLink,
-              },
-            })),
-        },
-      }),
-    },
-  ],
+  // Google's Q&A result needs at least one answer, so an unanswered question gets no QAPage markup at all.
+  script: qaPageSchema ? [{ type: 'application/ld+json', innerHTML: JSON.stringify(qaPageSchema) }] : [],
 })
 
 function openEditReplyDialog(item_id, answer) {

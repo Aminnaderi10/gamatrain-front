@@ -323,7 +323,7 @@ const breadcrumbSchema = computed(() => {
         '@type': 'ListItem',
         'position': 2,
         'name': 'Schools',
-        'item': 'https://gamatrain.com/schools',
+        'item': 'https://gamatrain.com/school',
       },
       {
         '@type': 'ListItem',
