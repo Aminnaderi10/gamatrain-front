@@ -197,7 +197,7 @@
 
 <script setup lang="ts">
 import { useDisplay } from 'vuetify'
-import type { ApiResult, TutorialDTO, AppError, LessonTreeDTO } from '@/types'
+import type { ApiResult, TutorialDTO, LessonTreeDTO } from '@/types'
 
 interface BreadCrumb {
   text: string
@@ -209,7 +209,6 @@ const { $renderMathInElement, $ensureMathJaxReady } = useNuxtApp()
 const { fromNowLocal } = useDateTime()
 const { mdAndUp } = useDisplay()
 const route = useRoute()
-const router = useRouter()
 
 const { buildSchema } = useSeoSchema()
 
@@ -230,30 +229,23 @@ const { data: contentData } = await useAsyncData(
         `/api/v1/tutorials/${route.params.id}`, undefined, { public: true },
       )) as ApiResult<TutorialDTO>
 
-      if (response.status === 1) {
-        return response.data
-      }
-      else {
-        showError({
-          statusCode: 404,
-          statusMessage: 'Page Not Founded!',
-        })
-        return response.data
-      }
+      return response.status === 1 && response.data ? response.data : null
     }
-    catch (e: unknown) {
-      showError({
-        statusCode: 404,
-        statusMessage: 'Page Not Founded!',
-      })
-      const error = e as AppError
-      if (error?.status === 404) {
-        router.push('/search?type=test')
-      }
-      throw error
+    catch {
+      return null
     }
   },
 )
+
+// showError inside the handler only lands in useAsyncData's error, so SSR answered 200 with an empty page.
+// Throwing from setup makes Nuxt render the error page with a real 404.
+if (!contentData.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Page Not Found',
+    fatal: true,
+  })
+}
 
 const { data: lessonTree } = await useAsyncData(
   `lessonTree-${route.params.id}`,

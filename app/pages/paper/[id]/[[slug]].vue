@@ -167,7 +167,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ApiResult, PastPaperDTO, AppError } from '@/types'
+import type { ApiResult, PastPaperDTO } from '@/types'
 
 interface BreadCrumb {
   text: string
@@ -176,7 +176,6 @@ interface BreadCrumb {
 }
 
 const route = useRoute()
-const router = useRouter()
 const { user } = useUser()
 const { isAuthenticated } = useAuth()
 const { buildCambridgeMeta } = useCambridgeSeo()
@@ -205,33 +204,24 @@ const { data: contentData } = await useAsyncData(
         },
       )) as ApiResult<PastPaperDTO>
 
-      if (response.data) {
-        return response.data
-      }
-      else {
-        showError({
-          statusCode: 404,
-          statusMessage: 'Page Not Founded!',
-        })
-        return null
-      }
+      return response.data ?? null
     }
-    catch (e: unknown) {
-      showError({
-        statusCode: 404,
-        statusMessage: 'Page Not Founded!',
-      })
-      const error = e as AppError
-      if (error?.status === 404) {
-        router.push('/search?type=paper')
-      }
-      throw error
-    }
-    finally {
-      // Reset loading states if needed
+    catch {
+      // Missing and non-public papers (the API answers those with 403 permissionDenied) both end up as 404 below.
+      return null
     }
   },
 )
+
+// showError inside the handler only lands in useAsyncData's error, so SSR answered 200 with an empty page
+// (just the layout's blog slider). Throwing from setup makes Nuxt render the error page with a real 404.
+if (!contentData.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Page Not Found',
+    fatal: true,
+  })
+}
 
 const schema = computed(() => {
   if (!contentData.value) return null
