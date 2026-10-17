@@ -197,16 +197,23 @@ useHead(() => {
   const ogImage = getAbsoluteUrl(
     profile?.avatarUri || '/images/default-user.svg',
   )
+  // A ProfilePage around the Person is what Google reads as a profile (the "Profile page" rich result);
+  // a bare Person isn't picked up.
   const fullSchema = {
     '@context': 'https://schema.org',
-    '@type': 'Person',
-    'name': fullName || handle,
+    '@type': 'ProfilePage',
     'url': canonical,
-    'image': ogImage,
-    'description': pageDescribe,
-    'affiliation': {
-      '@type': 'Organization',
-      'name': 'GamaTrain',
+    'mainEntity': {
+      '@type': 'Person',
+      'name': fullName || handle,
+      'alternateName': handle,
+      'url': canonical,
+      'image': ogImage,
+      'description': pageDescribe,
+      'affiliation': {
+        '@type': 'Organization',
+        'name': 'GamaTrain',
+      },
     },
   }
 

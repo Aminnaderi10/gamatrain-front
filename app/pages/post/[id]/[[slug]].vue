@@ -283,7 +283,7 @@ const breadcrumbSchema = computed(() => {
       },
       {
         '@type': 'ListItem',
-        'position': 2,
+        'position': 3,
         'name': contentData.value.title,
         'item': canonicalUrl,
       },
@@ -299,8 +299,11 @@ const articleSchema = computed(() => {
       || contentData.value?.imageUri?.replace(/^http:\/\//, 'https://')
       || 'https://gamatrain.com/android-chrome-512x512-light.png'
 
+  const plainBody = (contentData.value?.body ?? '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+
   return {
-    '@type': 'PostPosting',
+    // BlogPosting: "PostPosting" isn't a schema.org type, so Google ignored the whole article markup.
+    '@type': 'BlogPosting',
     'headline': contentData.value?.title || 'Post Post',
     'description': contentData.value?.summary || 'Read this post post on Gamatrain',
     'image': [image],
@@ -320,10 +323,8 @@ const articleSchema = computed(() => {
     'datePublished': new Date(contentData.value.publishDate).toISOString(),
     'keywords': contentData.value?.keywords || '',
     'articleSection': contentData.value?.category || 'General',
-    'articleBody': contentData.value?.body
-      ? contentData.value.body.replace(/<[^>]*>/g, '').substring(0, 5000)
-      : '',
-    'wordCount': contentData.value?.content?.length || 0,
+    'articleBody': plainBody.substring(0, 5000),
+    'wordCount': plainBody ? plainBody.split(' ').length : 0,
     'url': canonicalUrl,
   }
 })

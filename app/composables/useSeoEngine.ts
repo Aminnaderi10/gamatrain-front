@@ -247,7 +247,8 @@ export function useSeoSchema() {
       'itemListElement': items.map((item, index) => ({
         '@type': 'ListItem',
         'position': index + 1,
-        'name': item.text,
+        // Board/grade titles come from the API with stray spaces (" Science Combined (0653)").
+        'name': item.text?.trim(),
         'item': `${SITE_URL}${item.href}`,
       })),
     }
