@@ -1136,32 +1136,26 @@ const { data: contentData } = await useAsyncData(
   async () => {
     try {
       const content = await useApiService.get(`/api/v1/questions/${route.params.id}`)
-      if (content.status === 1) {
-        return content.data
-      }
-      else {
-        showError({
-          statusCode: 404,
-          statusMessage: 'Page Not Founded!',
-        })
-        return {}
-      }
+      return content.status === 1 ? content.data : null
     }
-    catch (e) {
-      showError({
-        statusCode: 404,
-        statusMessage: 'Page Not Founded!',
-      })
-      if (e?.status === 404) {
-        // router.push("/search?type=forum");
-      }
-      throw e
+    catch {
+      return null
     }
   },
   {
     watch: [() => route.params.id],
   },
 )
+
+// showError inside the handler only lands in useAsyncData's error, so SSR went on rendering and answered 500
+// (useHead read contentData.value.id on null). Throwing from setup makes Nuxt render a real 404.
+if (!contentData.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Page Not Found',
+    fatal: true,
+  })
+}
 
 // Reactive States
 const textAreaHeight = ref(10)

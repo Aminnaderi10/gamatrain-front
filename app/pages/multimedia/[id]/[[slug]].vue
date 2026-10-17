@@ -115,8 +115,6 @@
 </template>
 
 <script setup lang="ts">
-import type { AppError } from '@/types'
-
 interface BreadCrumb {
   text: string
   disabled: boolean
@@ -124,7 +122,6 @@ interface BreadCrumb {
 }
 
 const route = useRoute()
-const router = useRouter()
 const { getItemById } = useMultimedia()
 
 const requestURL = ref(useRequestURL().host)
@@ -138,31 +135,23 @@ const { data: contentData } = await useAsyncData(
   async () => {
     try {
       const response = await getItemById(route.params.id as string)
-
-      if (response.status == 1 && response.data) {
-        return response.data
-      }
-      else {
-        showError({
-          statusCode: 404,
-          statusMessage: 'Page Not Founded!',
-        })
-        return null
-      }
+      return response.status == 1 && response.data ? response.data : null
     }
-    catch (e: unknown) {
-      showError({
-        statusCode: 404,
-        statusMessage: 'Page Not Founded!',
-      })
-      const error = e as AppError
-      if (error?.status === 404) {
-        router.push('/search?type=multimedia')
-      }
-      throw error
+    catch {
+      return null
     }
   },
 )
+
+// showError inside the handler only lands in useAsyncData's error, so SSR answered 200 with an empty page.
+// Throwing from setup makes Nuxt render the error page with a real 404.
+if (!contentData.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Page Not Found',
+    fatal: true,
+  })
+}
 
 const initBreadCrumb = () => {
   if (!contentData.value) return
