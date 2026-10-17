@@ -215,7 +215,7 @@ const getOnlineStatusText = useOnlineStatusText
 const createLink = () => {
   let link = ''
   if (props.category.type == 'paper') {
-    link = `/${props.category.typePaper}/${props.information.id}/${props.information.title_url}`
+    link = contentPath(props.category.typePaper, props.information.id, props.information.title_url)
   }
   else if (props.category.type == 'school') {
     link = contentPath('school', props.information.id, props.information.slug)
