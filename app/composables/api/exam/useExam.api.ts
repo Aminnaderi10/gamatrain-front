@@ -1,6 +1,8 @@
 import type {
   ApiResult,
   ExamDetaiDTO,
+  ExamRelatedContentDTO,
+  RelatedContentDTO,
 } from '@/types'
 
 const loadingGetItemById = ref(false)
@@ -33,8 +35,26 @@ export const useExam = () => {
     }
   }
 
+  // Other quizzes for the same subject, for the "More ... quizzes" row. The recommendation already leaves the
+  // quiz itself out; a failed request just means no row, so it never reports an error.
+  const getRelatedExams = async (id: string | number): Promise<ExamRelatedContentDTO[]> => {
+    try {
+      const response = await useApiService.get<ApiResult<RelatedContentDTO>>(
+        '/api/v1/recommendations/related',
+        { source: 'exam', request: 'exam', id },
+        { public: true },
+      )
+
+      return (response.data?.exams ?? []).filter(exam => String(exam.id) !== String(id))
+    }
+    catch {
+      return []
+    }
+  }
+
   return {
     getItemById,
+    getRelatedExams,
     loadingGetItemById,
   }
 }
