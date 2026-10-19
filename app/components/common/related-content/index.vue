@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="loading || pastpaper.length > 0"
+    v-if="shows(`test`) && (loading || pastpaper.length > 0)"
     class="mx-4 my-6"
   >
     <div class="d-flex align-center mb-4 ga-2">
@@ -70,7 +70,7 @@
   </div>
 
   <div
-    v-if="loading || multimedias.length > 0"
+    v-if="shows(`file`) && (loading || multimedias.length > 0)"
     class="mx-4 my-6"
   >
     <div class="d-flex align-center mb-4 ga-2">
@@ -140,7 +140,7 @@
   </div>
 
   <div
-    v-if="loading || exams.length > 0"
+    v-if="shows(`exam`) && (loading || exams.length > 0)"
     class="mx-4 my-6"
   >
     <div class="d-flex align-center mb-4 ga-2">
@@ -210,7 +210,7 @@
   </div>
 
   <div
-    v-if="loading || tutorials.length > 0"
+    v-if="shows(`tutorial`) && (loading || tutorials.length > 0)"
     class="mx-4 my-6"
   >
     <div class="d-flex align-center mb-6 ga-2">
@@ -284,6 +284,9 @@ interface IRelatedPortraitContent {
 }
 
 const props = defineProps<IRelatedPortraitContent>()
+
+// The endpoint answers with every content type whatever `request` says, so a section shows only when asked for.
+const shows = (type: requestType) => props.request.includes(type)
 
 const infoMap = {
   paper: {
