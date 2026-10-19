@@ -181,6 +181,8 @@ const form = reactive<AdminAppSettingsDTO>({
   commissionPayoutRequestedEmailTemplate: '',
   commissionPayoutPaidEmailTemplate: '',
   twoFactorSetupEmailTemplate: '',
+  checkoutRecoveryDiscountPercent: undefined,
+  checkoutRecoveryOfferDays: undefined,
 })
 const fields: FieldConfig[] = [
   { key: 'gridPageSize', label: 'Grid Page Size', type: 'text', valueType: 'number' },
@@ -207,6 +209,8 @@ const fields: FieldConfig[] = [
   { key: 'examExportPowerPointMultiplier', label: 'Exam Export PowerPoint Multiplier (x questions)', type: 'text', valueType: 'optionalNumber' },
   { key: 'contentOwnerCommissionPercent', label: 'Content Owner Commission (%)', type: 'text', valueType: 'optionalNumber' },
   { key: 'contentOwnerCommissionPayoutThresholdUsd', label: 'Minimum Commission Payout (USD, at least 100)', type: 'text', valueType: 'optionalNumber' },
+  { key: 'checkoutRecoveryDiscountPercent', label: 'Checkout Recovery Email Discount (% off first payment, 1-90)', type: 'text', valueType: 'optionalNumber' },
+  { key: 'checkoutRecoveryOfferDays', label: 'Checkout Recovery Offer Valid For (days, 1-30)', type: 'text', valueType: 'optionalNumber' },
 
   { key: 'schoolCommentContributionConfirmationEmailTemplate', label: 'School Comment Email', type: 'textarea', valueType: 'string' },
   { key: 'schoolImageContributionConfirmationEmailTemplate', label: 'School Image Confirmation Email', type: 'textarea', valueType: 'string' },
