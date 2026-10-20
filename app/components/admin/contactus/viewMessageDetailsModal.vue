@@ -326,10 +326,18 @@ const getReplyList = async () => {
   await fetchReplyList(props.id)
 }
 
+// Addresses come as "Support dep <support@gamatrain.com>"; match the address, not the label.
+const selectSupportSender = () => {
+  if (selectedFromEmail.value)
+    return
+
+  selectedFromEmail.value = fromEmailList.value.find((email: string) => email.toLowerCase().includes('<support@')) ?? ''
+}
+
 onMounted(async () => {
   await Promise.allSettled([
     getDetail(),
-    getEmailAddresses(),
+    getEmailAddresses().then(selectSupportSender),
     getReplyList(),
   ])
 })
