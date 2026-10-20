@@ -1,11 +1,12 @@
 import { computed, onScopeDispose, reactive, shallowRef, watch } from 'vue'
 import { searchDirectorySubjects } from '~/utils/directorySubjectSearch'
-import type { BoardDTO } from '~/types/board'
+import type { BoardDTO, GradeDTO } from '~/types/board'
 import type { DirectorySelection, DirectorySubjectSearchState } from '~/types/subject-directory/cascader'
 
 export const useDirectorySubjectSearch = (
   getBoard: () => BoardDTO | null,
   loadPaths: (board: BoardDTO) => Promise<DirectorySelection[]>,
+  getGrade: () => GradeDTO | null,
 ) => {
   const state = reactive<DirectorySubjectSearchState>({ query: '', loading: false, error: '' })
   const paths = shallowRef<DirectorySelection[]>([])
@@ -54,7 +55,7 @@ export const useDirectorySubjectSearch = (
   })
 
   const results = computed(() => searchDirectorySubjects(
-    paths.value.filter(path => String(path.board.code) === boardCode.value), state.query,
+    paths.value.filter(path => String(path.board.code) === boardCode.value), state.query, getGrade()?.id,
   ))
   return { state, results, retry: load }
 }

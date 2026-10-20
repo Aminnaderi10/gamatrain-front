@@ -34,6 +34,7 @@ export const useDirectoryCascader = async () => {
   const { state: searchState, results: searchResults, retry: retrySearch } = useDirectorySubjectSearch(
     () => state.board || state.selection?.board || null,
     api.getBoardSubjectPaths,
+    () => state.grade,
   )
   let revision = 0
   let initialized = false

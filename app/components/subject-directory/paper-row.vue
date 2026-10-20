@@ -232,7 +232,8 @@ const paperCode = computed(() => getDirectoryPaperCode(props.paper, props.subjec
   min-width: 0;
 }
 
-.directory-download {
+.directory-download,
+.directory-download.v-btn--disabled {
   padding-inline: 8px;
   border: 1px solid rgb(var(--v-theme-borderSubtle));
   color: rgb(var(--v-theme-brandNavy));
@@ -240,6 +241,14 @@ const paperCode = computed(() => getDirectoryPaperCode(props.paper, props.subjec
   height: auto !important;
   min-height: 40px;
   padding-block: 6px;
+}
+
+.directory-download.v-btn--disabled {
+  opacity: 1;
+}
+
+.directory-download.v-btn--disabled :deep(.v-btn__overlay) {
+  opacity: 0;
 }
 
 .directory-download__title {
@@ -252,15 +261,18 @@ const paperCode = computed(() => getDirectoryPaperCode(props.paper, props.subjec
   white-space: nowrap;
 }
 
-.directory-download--extra {
+.directory-download--extra,
+.directory-download--extra.v-btn--disabled {
   background-color: rgb(var(--v-theme-surfaceTertiary));
 }
 
-.directory-download--answer {
+.directory-download--answer,
+.directory-download--answer.v-btn--disabled {
   background-color: rgb(var(--v-theme-surfaceTertiary));
 }
 
-.directory-download--question {
+.directory-download--question,
+.directory-download--question.v-btn--disabled {
   color: rgb(var(--v-theme-white));
   background-color: rgb(var(--v-theme-brandNavy));
   border-color: rgb(var(--v-theme-brandNavy));

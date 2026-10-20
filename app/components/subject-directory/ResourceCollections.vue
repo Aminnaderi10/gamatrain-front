@@ -10,7 +10,7 @@
   >
     <h2
       id="resource-collections-title"
-      class="resource-collections__heading bg-brandNavy text-white d-flex align-center px-3 py-2"
+      class="resource-collections__heading bg-borderSubtle text-brandNavy d-flex align-center px-3 py-2"
     >
       Resources
     </h2>

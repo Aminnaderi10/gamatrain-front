@@ -1,9 +1,14 @@
 import type { DirectorySelection, DirectorySubjectSearchResult } from '~/types/subject-directory/cascader'
 
-export const searchDirectorySubjects = (paths: DirectorySelection[], query: string): DirectorySubjectSearchResult[] => {
+export const searchDirectorySubjects = (
+  paths: DirectorySelection[],
+  query: string,
+  selectedGradeId?: string | number | null,
+): DirectorySubjectSearchResult[] => {
   const normalizedQuery = query.trim().toLocaleLowerCase()
   if (!normalizedQuery) return []
   const terms = normalizedQuery.split(/\s+/)
+  const preferredGradeId = String(selectedGradeId ?? '')
   const uniquePaths = new Map(paths.map(selection => [
     JSON.stringify([selection.board.code, selection.grade.id, selection.subject.id]), selection,
   ]))
@@ -20,7 +25,9 @@ export const searchDirectorySubjects = (paths: DirectorySelection[], query: stri
         exactCode: codes.includes(normalizedQuery),
       }
     })
-    .sort((first, second) => Number(second.exactCode) - Number(first.exactCode)
+    .sort((first, second) => Number(String(second.selection.grade.id) === preferredGradeId)
+      - Number(String(first.selection.grade.id) === preferredGradeId)
+      || Number(second.exactCode) - Number(first.exactCode)
       || first.title.localeCompare(second.title, undefined, { sensitivity: 'base', numeric: true })
       || first.path.localeCompare(second.path, undefined, { sensitivity: 'base', numeric: true }))
 }
