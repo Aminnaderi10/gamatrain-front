@@ -1,4 +1,4 @@
-// Detail pages whose canonical URL is `/{type}/{id}/{slug}`, or `/{type}/{id}` for types without a slug (test).
+// Detail pages whose canonical URL is `/{type}/{id}/{slug}`, or `/test/{code}` (no slug).
 export type SlugContentType = 'post' | 'school' | 'paper' | 'exam' | 'tutorial' | 'multimedia' | 'qa' | 'test'
 
 // The path a detail page declares as canonical, and the one the sitemap lists: `/{type}/{id}/{slug}`, or

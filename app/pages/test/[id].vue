@@ -81,10 +81,9 @@ if (!contentData.value) {
   })
 }
 
-// The page also answers to the question's short code (/test/Las3zk); the numeric id is the one canonical URL.
-// Server-only: the "next question" button only gets a code from the API, and a client-side redirect there
-// would load the question twice.
-const { url: canonicalUrl } = await useCanonicalContentPath('test', contentData.value.id, null, { serverOnly: true })
+// The page answers to both the numeric id and the short code; the code is the one canonical URL, since
+// sequential ids are easy for scrapers to walk. /test/25704 301s to /test/Las3zk.
+const { url: canonicalUrl } = await useCanonicalContentPath('test', contentData.value.code || contentData.value.id)
 
 const stripHtmlTags = (input: string, length = 1200) => {
   if (!input) return ''
