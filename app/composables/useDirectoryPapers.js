@@ -1,6 +1,6 @@
 import { onMounted, onScopeDispose } from 'vue'
 import { useAsyncData } from '#app'
-import { useApiService } from '~/composables/useApiService'
+import { useDirectoryPapersApi } from '~/composables/api/subject-directory/useDirectoryPapers.api'
 import { useDirectoryFilterOptions } from '~/composables/useDirectoryFilterOptions'
 import { DIRECTORY_FILTERS } from '~/constants/pastpaper/directory'
 import { getDirectoryPaperSessions, PAST_PAPER_YEAR_OPTIONS } from '~/constants/pastpaper/sessions'
@@ -8,6 +8,7 @@ import { createDirectoryPaperLoader } from '~/utils/directoryPaperLoader'
 import { getDirectorySessionKey } from '~/utils/directoryPapers'
 import { createDirectorySessionAvailability } from '~/utils/directorySessionAvailability'
 import { createDirectoryLatestSessionExpansion } from '~/utils/directoryPaperExpansion'
+import { loadDirectoryInitialPapers } from '~/utils/directoryInitialPapers'
 
 export const useDirectoryPapers = async (context) => {
   const filters = reactive({ year: '', series: '', paper: '', variant: '' })
@@ -15,12 +16,9 @@ export const useDirectoryPapers = async (context) => {
   const expandedSessions = reactive({})
   const { optionLists, optionLoading, optionErrors, fetchOptions } = useDirectoryFilterOptions(context)
 
-  const loader = createDirectoryPaperLoader((params, signal) =>
-    useApiService.get('/api/v1/tests/search', params, { public: true, signal }),
-  { makeState: reactive })
-  const availability = createDirectorySessionAvailability((params, signal) =>
-    useApiService.get('/api/v1/tests/search', params, { public: true, signal }),
-  { makeState: reactive })
+  const { fetchPapers } = useDirectoryPapersApi()
+  const loader = createDirectoryPaperLoader(fetchPapers, { makeState: reactive })
+  const availability = createDirectorySessionAvailability(fetchPapers, { makeState: reactive })
   let availabilityReady = false
   let resettingSubjectFilters = false
 
@@ -31,7 +29,6 @@ export const useDirectoryPapers = async (context) => {
   const visibleSessions = computed(() => filters.series
     ? sessions.value.filter(item => String(item.id) === filters.series)
     : sessions.value)
-  const firstSession = () => visibleSessions.value[0]?.id
 
   const filterButtons = computed(() => DIRECTORY_FILTERS.map(filter => ({
     ...filter,
@@ -157,7 +154,6 @@ export const useDirectoryPapers = async (context) => {
 
   onMounted(() => {
     availabilityReady = true
-    automaticExpansion.openLatest()
   })
 
   onScopeDispose(() => {
@@ -166,17 +162,24 @@ export const useDirectoryPapers = async (context) => {
     availability.clear()
   })
 
-  // Hydrate the latest candidate from Nuxt's payload so the availability check
-  // and subsequent expansion can reuse it without another page request.
-  if (context.subjectId && firstSession() != null) {
-    const query = sessionQuery(PAST_PAPER_YEAR_OPTIONS[0].id, firstSession())
-    const { data } = await useAsyncData(`directory-papers:${getDirectorySessionKey(query)}`, () =>
-      useApiService.get('/api/v1/tests/search', {
-        ...query, is_paper: true, directory: true, page: 1, perpage: 20,
-      }, { public: true }))
-    if (Number(data.value?.status) === 1 && Array.isArray(data.value?.data?.list)) {
-      loader.seed(query, data.value)
-      availability.seed(query, Number(data.value.data.num) > 0)
+  if (context.subjectId) {
+    const subjectId = context.subjectId
+    const gradeId = context.gradeId
+    const initialSessions = sessions.value
+    const { data } = await useAsyncData(`directory-initial-papers:${JSON.stringify([subjectId, gradeId])}`, () =>
+      loadDirectoryInitialPapers({
+        subjectId, years: PAST_PAPER_YEAR_OPTIONS, sessions: initialSessions, fetchPapers,
+      }))
+    if (data.value && context.subjectId === subjectId && context.gradeId === gradeId) {
+      for (const session of data.value.sessions) {
+        Object.assign(loader.getState(session.query), session.papers, { items: [...session.papers.items] })
+        availability.getState(session.query).status = session.availability
+      }
+      if (data.value.selected) {
+        const { year, month } = data.value.selected
+        expandedYears.value = [year]
+        expandedSessions[year] = [month]
+      }
     }
   }
 

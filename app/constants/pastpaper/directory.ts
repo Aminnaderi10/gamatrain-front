@@ -1,3 +1,5 @@
+export const DIRECTORY_DEFAULT_BOARD_CODE = 6659
+
 export const DIRECTORY_FILTERS = [
   { key: 'year', title: 'Year', icon: 'md:calendar_today_outlined' },
   { key: 'series', title: 'Session' },
@@ -13,17 +15,6 @@ export const getDirectoryFilterColumns = (key: string, boardId: string | number)
   ? Number(boardId) === 6657 ? 2 : 4
   : 3
 
-export const DIRECTORY_BOARD_IMAGE_BY_TITLE: Record<string, string> = {
-  Cambridge: 'CIE',
-  Edexcel: 'Edexcel',
-  AQA: 'AQA',
-  OCR: 'OCR',
-  GAMA: 'GAMA',
-  CXC: 'CXC',
-  Nigerian: 'Nijeria',
-  Olympiad: 'Scientific Competition',
-}
-
 export const DIRECTORY_BOARD_ORDER = [
   'Cambridge',
   'Edexcel',
@@ -34,8 +25,3 @@ export const DIRECTORY_BOARD_ORDER = [
   'Nigerian',
   'Olympiad',
 ]
-
-export const getDirectoryBoardImageSrc = (board?: { title?: string } | null) => {
-  const imageName = board?.title && DIRECTORY_BOARD_IMAGE_BY_TITLE[board.title]
-  return imageName ? `/images/boards/${imageName}.svg` : ''
-}

@@ -1,3 +1,5 @@
+import { contentPath } from './contentPath.ts'
+
 // Keep the classification/variant rule used by the original directory table.
 export const getDirectoryPaperTitle = paper =>
   paper.variant && String(paper.variant) !== '0'
@@ -15,7 +17,7 @@ export const getDirectoryPaperCode = (paper, subjectTitle = '') => {
   return hasVariant ? paperCode : paperCode.replace(/\/(\d)$/, '/0$1')
 }
 
-export const getDirectoryPaperLink = paper => `/paper/${paper.id}/${paper.title_url || ''}`
+export const getDirectoryPaperLink = paper => contentPath('paper', paper.id, paper.title_url)
 
 export const getDirectoryExamIds = (value) => {
   try {

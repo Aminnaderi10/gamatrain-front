@@ -136,7 +136,7 @@ const props = withDefaults(defineProps<{
   subjectTitle?: string
   downloads: UnwrapRef<ReturnType<typeof useDirectoryPaperDownloads>>
 }>(), { subjectTitle: '' })
-const files = computed(() => [...getDirectoryPaperDownloads(props.paper)].reverse())
+const files = computed(() => getDirectoryPaperDownloads(props.paper))
 const examIds = computed(() => getDirectoryExamIds(props.paper.exam_id))
 const paperCode = computed(() => getDirectoryPaperCode(props.paper, props.subjectTitle))
 </script>

@@ -92,7 +92,7 @@
       </div>
     </div>
 
-    <CommonFilterSelectDialog
+    <SearchSelectDialog
       v-model:show-dialog="showPicker"
       :title-modal="activeFilter.title"
       :items="pickerItems"
@@ -100,7 +100,9 @@
       :is-loading="activeFilter.loading"
       :error-message="activeFilter.error"
       :has-search="!activeFilter.inline"
+      compact-result-count
       :inline-options="Boolean(activeFilter.inline)"
+      inline-allow-clear
       :inline-items-per-row="getDirectoryFilterColumns(activeFilter.key, boardId)"
       :item-title="item => getDirectoryFilterOptionTitle(activeFilter.key, item)"
       @retry="emit('retry', activeFilter.key)"
@@ -149,10 +151,14 @@ watch(() => props.contextKey, () => {
   flex: 0 1 auto;
   max-width: 100%;
 }
+.directory-filter-row :deep(.filter-control-group) {
+  --filter-control-padding: 8px;
+  --filter-control-chevron-size: 20px;
+  --filter-control-clear-size: 20px;
+}
 .directory-filter-row :deep(.filter-control) {
   min-width: 100px;
   height: 44px !important;
-  padding-inline: 8px;
 }
 .directory-filter-row :deep(.filter-control__icon) {
   width: 20px;

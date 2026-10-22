@@ -264,6 +264,24 @@
         </div>
       </v-card>
     </v-menu>
+    <v-alert
+      v-if="!state.selection && !state.open && !state.loading && (state.errorStage || !columns.at(-1)?.items.length)"
+      class="mt-2"
+      variant="tonal"
+      density="compact"
+      :type="state.errorStage ? 'error' : 'info'"
+      :color="state.errorStage ? 'errorStrong' : 'brandNavy'"
+    >
+      {{ state.errorStage ? 'Unable to load directory options. Please try again.' : 'No directory options are available for this selection.' }}
+      <v-btn
+        v-if="state.errorStage"
+        variant="text"
+        class="text-none"
+        @click="emit('retry')"
+      >
+        Retry
+      </v-btn>
+    </v-alert>
   </div>
 </template>
 

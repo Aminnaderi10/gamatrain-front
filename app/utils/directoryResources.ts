@@ -19,7 +19,7 @@ export const getDirectoryResourceCollections = (data: DirectoryResourceGroup[] =
 export const getDirectoryResourceSearchLink = (collection: { id: string | number }, context: DirectoryResourceContext) => ({
   path: '/search',
   query: {
-    type: 'paper',
+    type: 'study-materials',
     section: context.boardId || undefined,
     base: context.gradeId || undefined,
     lesson: context.subjectId || undefined,

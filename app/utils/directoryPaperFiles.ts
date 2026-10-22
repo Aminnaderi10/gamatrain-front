@@ -37,6 +37,17 @@ const extraFileOrder: Record<string, number> = {
 }
 
 const isAvailable = (value: DirectoryFileAvailability | undefined) => value === true || value === 1 || value === '1'
+const isStandardFileAvailable = (
+  availability: DirectoryFileAvailability | undefined,
+  legacyFile: DirectoryFileAvailability | undefined,
+) => {
+  // Modern flags are authoritative. Legacy Paper/MS fields can hold file paths
+  // instead of flags, but empty and explicit false values still mean no file.
+  if (availability != null) return isAvailable(availability)
+  if (typeof legacyFile !== 'string') return isAvailable(legacyFile)
+  return !['', '0', 'false'].includes(legacyFile.trim().toLowerCase())
+}
+
 const hasExtraId = (value: unknown) => /^[1-9]\d*$/.test(String(value))
 const getPrice = (value: number | string | null | undefined): number | null => {
   if (value == null || String(value).trim() === '') return null
@@ -89,20 +100,21 @@ export const getDirectoryPaperDownloads = (paper: DirectoryPaperFileSource): Dir
   const downloads: DirectoryPaperDownload[] = []
   const pdf = paper.files?.pdf
   const answer = paper.files?.answer
-  if (isAvailable(pdf?.exist ?? paper.q_file)) {
+  if (isStandardFileAvailable(pdf?.exist, paper.q_file)) {
     downloads.push({ type: 'pdf', title: 'Question Paper', shortTitle: 'Paper', icon: 'md:download', style: 'question', price: getPrice(pdf?.price) })
   }
-  if (isAvailable(answer?.exist ?? paper.a_file)) {
+  if (isStandardFileAvailable(answer?.exist, paper.a_file)) {
     downloads.push({ type: 'answer', title: 'Mark Scheme', shortTitle: 'MS', icon: 'md:check_box_outlined', style: 'answer', price: getPrice(answer?.price) })
   }
   downloads.push(...getExtraDownloads(paper))
-  // Keep the existing right-to-left visual order after the row reverses this list.
-  return downloads.reverse()
+  return downloads
 }
 
-export const getDirectoryDownloadParams = (type: string, paper: DirectoryPaperFileSource): DirectoryDownloadParams | undefined => {
-  const file = getDirectoryPaperDownloads(paper).find(item => item.type === type)
+export const getDirectoryFileDownloadParams = (file: DirectoryPaperDownload | undefined): DirectoryDownloadParams | undefined => {
   if (!file) return undefined
   if (file.extraId) return { type: 'extra', extraId: file.extraId }
   if (file.type === 'pdf' || file.type === 'answer') return { type: file.type }
 }
+
+export const getDirectoryDownloadParams = (type: string, paper: DirectoryPaperFileSource): DirectoryDownloadParams | undefined =>
+  getDirectoryFileDownloadParams(getDirectoryPaperDownloads(paper).find(file => file.type === type))

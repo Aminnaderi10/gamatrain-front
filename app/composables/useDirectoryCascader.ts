@@ -1,4 +1,4 @@
-import { computed, onScopeDispose, reactive, watch } from 'vue'
+import { computed, onMounted, onScopeDispose, reactive, watch } from 'vue'
 import { useAsyncData, useRoute, useRouter } from '#app'
 import { useDirectoryOptionsApi } from '~/composables/api/subject-directory/useDirectoryOptions.api'
 import { useDirectorySubjectSearch } from '~/composables/useDirectorySubjectSearch'
@@ -44,30 +44,6 @@ export const useDirectoryCascader = async () => {
     if (!open) searchState.query = ''
   })
 
-  // Resolve the entire dependent path before exposing a subject to result loaders.
-  const resolvePath = async (path: DirectorySelectorPath): Promise<DirectorySelectorSnapshot> => {
-    const snapshot: DirectorySelectorSnapshot = {
-      boards: [], grades: [], subjects: [], board: null, grade: null, subject: null, errorStage: null,
-    }
-    let stage: DirectorySelectorStage = 'board'
-    try {
-      snapshot.boards = await api.getBoards()
-      snapshot.board = snapshot.boards.find(board => String(board.code) === path.board) || null
-      if (!snapshot.board) return snapshot
-      stage = 'grade'
-      snapshot.grades = await api.getGrades(snapshot.board.code)
-      snapshot.grade = snapshot.grades.find(grade => String(grade.id) === path.grade) || null
-      if (!snapshot.grade) return snapshot
-      stage = 'subject'
-      snapshot.subjects = await api.getSubjects(snapshot.grade.id)
-      snapshot.subject = snapshot.subjects.find(subject => String(subject.id) === path.subject) || null
-    }
-    catch {
-      snapshot.errorStage = stage
-    }
-    return snapshot
-  }
-
   const applySnapshot = (snapshot: DirectorySelectorSnapshot) => {
     Object.assign(state, snapshot)
     state.stage = snapshot.grade ? 'subject' : snapshot.board ? 'grade' : 'board'
@@ -82,8 +58,12 @@ export const useDirectoryCascader = async () => {
     state.open = false
     state.loading = 'board'
     state.selection = null
-    const snapshot = await resolvePath(readPath())
-    if (currentRevision === revision) applySnapshot(snapshot)
+    const snapshot = await api.resolvePath(readPath())
+    if (currentRevision !== revision) return
+    applySnapshot(snapshot)
+    if (state.selection && pathKey(selectionPath(state.selection)) !== pathKey(readPath())) {
+      await commitSelection(state.selection)
+    }
   }
 
   watch(() => pathKey(readPath()), () => {
@@ -180,7 +160,7 @@ export const useDirectoryCascader = async () => {
       board: null, grade: null, subject: null, grades: [], subjects: [],
       stage: 'board', loading: 'board', errorStage: null, commitError: '',
     })
-    void resolvePath(state.selection ? selectionPath(state.selection) : readPath()).then((snapshot) => {
+    void api.resolvePath(state.selection ? selectionPath(state.selection) : readPath()).then((snapshot) => {
       if (currentRevision !== revision) return
       Object.assign(state, snapshot, {
         stage: snapshot.grade ? 'subject' : snapshot.board ? 'grade' : 'board', loading: null,
@@ -189,7 +169,8 @@ export const useDirectoryCascader = async () => {
   }
 
   const retry = () => {
-    if (state.errorStage === 'subject' && state.grade) void selectGrade(state.grade)
+    if (!state.open) void syncRoute()
+    else if (state.errorStage === 'subject' && state.grade) void selectGrade(state.grade)
     else if (state.errorStage === 'grade' && state.board) void selectBoard(state.board)
     else void syncRoute()
   }
@@ -230,7 +211,15 @@ export const useDirectoryCascader = async () => {
   }
 
   const initialPath = readPath()
-  const { data } = await useAsyncData(`directory-selector:${pathKey(initialPath)}`, () => resolvePath(initialPath))
+  // Render the resolved selection on the server and reuse it during hydration.
+  // Normalize the browser URL afterward without triggering a second result load.
+  onMounted(() => {
+    if (state.selection && pathKey(readPath()) === pathKey(initialPath)
+      && pathKey(selectionPath(state.selection)) !== pathKey(readPath())) {
+      void commitSelection(state.selection)
+    }
+  })
+  const { data } = await useAsyncData(`directory-selector:${pathKey(initialPath)}`, () => api.resolvePath(initialPath))
   if (data.value) applySnapshot(data.value)
   initialized = true
   if (pathKey(initialPath) !== pathKey(readPath())) await syncRoute()

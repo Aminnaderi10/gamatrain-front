@@ -15,7 +15,6 @@ export const useDirectoryResources = async (context) => {
 
   return {
     resourcesData: computed(() => Array.isArray(data.value?.data?.list) ? data.value.data.list : []),
-    titleLesson: computed(() => data.value?.data?.lesson_title || context.value.subjectTitle || ''),
     isLoadingResources: pending,
     resourceError: error,
     refreshResources: refresh,

@@ -44,6 +44,7 @@
       </aside>
       <div class="directory-paper-content">
         <paperTable
+          :selection="selectorState.selection"
           :subject-id="paperContext.subjectId"
           :grade-id="paperContext.gradeId"
           :board-id="paperContext.boardId"
@@ -61,6 +62,7 @@ import ResourceCollections from '~/components/subject-directory/ResourceCollecti
 import paperTable from '~/components/subject-directory/paper-table.vue'
 import SubjectCascader from '~/components/subject-directory/SubjectCascader.vue'
 import { useDirectoryCascader } from '~/composables/useDirectoryCascader'
+import { getDirectoryCanonicalUrl } from '~/utils/directoryCanonicalUrl'
 import { getDirectoryIntroduction } from '~/utils/directoryPresentation'
 import { getDirectoryResourceCollections } from '~/utils/directoryResources'
 
@@ -83,35 +85,39 @@ const hasResources = computed(() => Boolean(
 ))
 
 // SEO
+const siteConfig = useSiteConfig()
+const canonicalUrl = computed(() => getDirectoryCanonicalUrl(selectorState.selection, siteConfig.url))
+
 useHead(() => ({
   titleTemplate: '%s',
-  title: `${introduction.value.title} & Resources`,
+  title: introduction.value.seoTitle,
+  link: canonicalUrl.value ? [{ key: 'directory-canonical', rel: 'canonical', href: canonicalUrl.value }] : [],
 
   meta: [
+    ...(canonicalUrl.value ? [{ key: 'directory-og-url', property: 'og:url', content: canonicalUrl.value }] : []),
     {
-      hid: 'apple-mobile-web-app-title',
       name: 'apple-mobile-web-app-title',
-      content: `${introduction.value.title} & Resources`,
+      content: introduction.value.seoTitle,
     },
     {
-      hid: 'og:title',
-      name: 'og:title',
-      content: `${introduction.value.title} & Resources`,
+      property: 'og:title',
+      content: introduction.value.seoTitle,
     },
     {
-      hid: 'og:site_name',
-      name: 'og:site_name',
+      property: 'og:site_name',
       content: 'GamaTrain',
     },
     {
-      hid: 'description',
-      name: 'description',
-      content: introduction.value.description,
+      property: 'og:type',
+      content: 'website',
     },
     {
-      hid: 'og:description',
-      name: 'og:description',
-      content: introduction.value.description,
+      name: 'description',
+      content: introduction.value.metaDescription,
+    },
+    {
+      property: 'og:description',
+      content: introduction.value.metaDescription,
     },
   ],
 }))

@@ -39,15 +39,21 @@
         :value="year.id"
         elevation="0"
       >
-        <v-expansion-panel-title
-          class="directory-year-title font-weight-bold rounded-0 justify-start"
-          static
-          expand-icon="md:keyboard_arrow_right"
-          collapse-icon="md:keyboard_arrow_down"
+        <h3 class="directory-accordion-heading ma-0 pa-0">
+          <v-expansion-panel-title
+            :id="`${accordionId}-year-${year.id}-title`"
+            :aria-controls="`${accordionId}-year-${year.id}-panel`"
+            class="directory-year-title font-weight-bold rounded-0 justify-start"
+            static
+            expand-icon="md:keyboard_arrow_right"
+            collapse-icon="md:keyboard_arrow_down"
+          >
+            {{ year.title }}
+          </v-expansion-panel-title>
+        </h3>
+        <v-expansion-panel-text
+          :id="`${accordionId}-year-${year.id}-panel`"
         >
-          {{ year.title }}
-        </v-expansion-panel-title>
-        <v-expansion-panel-text>
           <div
             v-if="yearAvailabilityLoading(year.id)"
             class="d-flex align-center ga-3 py-4 text-grey600"
@@ -76,16 +82,22 @@
               class="rounded-0"
               elevation="0"
             >
-              <v-expansion-panel-title
-                class="directory-session-title text-brandNavy font-weight-bold rounded-0 justify-start"
-                color="surfaceTertiary"
-                static
-                expand-icon="md:keyboard_arrow_right"
-                collapse-icon="md:keyboard_arrow_down"
+              <h4 class="directory-accordion-heading ma-0 pa-0">
+                <v-expansion-panel-title
+                  :id="`${accordionId}-year-${year.id}-session-${session.id}-title`"
+                  :aria-controls="`${accordionId}-year-${year.id}-session-${session.id}-panel`"
+                  class="directory-session-title text-brandNavy font-weight-bold rounded-0 justify-start"
+                  color="surfaceTertiary"
+                  static
+                  expand-icon="md:keyboard_arrow_right"
+                  collapse-icon="md:keyboard_arrow_down"
+                >
+                  {{ session.title }}
+                </v-expansion-panel-title>
+              </h4>
+              <v-expansion-panel-text
+                :id="`${accordionId}-year-${year.id}-session-${session.id}-panel`"
               >
-                {{ session.title }}
-              </v-expansion-panel-title>
-              <v-expansion-panel-text>
                 <subject-directory-paper-session
                   :key="`${sessionKey(year.id, session.id)}:${filters.year}:${filters.series}`"
                   :state="sessionState(year.id, session.id)"
@@ -151,8 +163,15 @@
   </lazy-common-modal-base>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { reactive, useId } from 'vue'
+import type { PropType } from 'vue'
+import type { DirectorySelection } from '~/types/subject-directory/cascader'
+import { useDirectoryStructuredData } from '~/composables/useDirectoryStructuredData'
+
+const accordionId = useId()
 const props = defineProps({
+  selection: { type: Object as PropType<DirectorySelection | null>, default: null },
   subjectId: { type: [String, Number], default: '' },
   gradeId: { type: [String, Number], default: '' },
   boardId: { type: [String, Number], default: '' },
@@ -164,6 +183,10 @@ const {
   selectFilter, clearFilters, fetchOptions, expandYears, expandSessions, sessionKey, sessionState, loadSession, isSessionOpen,
   displayedSessions, yearAvailabilityLoading,
 } = await useDirectoryPapers(props)
+
+useDirectoryStructuredData(() => props.selection, {
+  visibleYears, displayedSessions, isSessionOpen, sessionState,
+})
 
 const downloadState = useDirectoryPaperDownloads()
 const downloads = reactive(downloadState)
@@ -207,6 +230,10 @@ const {
   width: var(--directory-chevron-size);
   height: var(--directory-chevron-size);
   font-size: var(--directory-chevron-size);
+}
+
+.directory-accordion-heading {
+  font: inherit;
 }
 
 .directory-year-title {

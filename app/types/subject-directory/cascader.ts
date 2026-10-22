@@ -39,6 +39,12 @@ export interface DirectorySelectorPath {
   subject: string
 }
 
+export interface DirectoryOptionSource {
+  getBoards: () => Promise<BoardDTO[]>
+  getGrades: (boardId: number | string) => Promise<GradeDTO[]>
+  getSubjects: (gradeId: string) => Promise<SubjectDTO[]>
+}
+
 export interface DirectorySelectorSnapshot {
   boards: BoardDTO[]
   grades: GradeDTO[]

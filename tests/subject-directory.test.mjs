@@ -160,7 +160,7 @@ test('deduplicates records across pages without requesting past the total', asyn
 
 test('renders only available files with usable IDs, in Figma order', () => {
   const paper = { sf_file: true, sf_file_id: '5', in_file: true, in_file_id: false, a_file: true, q_file: true }
-  assert.deepEqual(getDirectoryPaperDownloads(paper).map(file => file.type), ['sf_file', 'answer', 'pdf'])
+  assert.deepEqual(getDirectoryPaperDownloads(paper).map(file => file.type), ['pdf', 'answer', 'sf_file'])
   assert.deepEqual(getDirectoryDownloadParams('sf_file', paper), { type: 'extra', extraId: '5' })
   assert.deepEqual(getDirectoryDownloadParams('pdf', paper), { type: 'pdf' })
   assert.equal(getDirectoryPaperDownloads({ q_file: 'false', a_file: '0' }).length, 0)
