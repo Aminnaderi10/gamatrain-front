@@ -49,7 +49,6 @@ const { $cleanSubject } = useNuxtApp()
 const pageDescribe = ref('')
 const pageTitle = ref('')
 const isAdsLoad = ref(false)
-const requestURL = ref(useRequestURL().host)
 const route = useRoute()
 
 const { buildSchema } = useSeoSchema()
@@ -81,6 +80,11 @@ if (!contentData.value) {
     fatal: true,
   })
 }
+
+// The page also answers to the question's short code (/test/Las3zk); the numeric id is the one canonical URL.
+// Server-only: the "next question" button only gets a code from the API, and a client-side redirect there
+// would load the question twice.
+const { url: canonicalUrl } = await useCanonicalContentPath('test', contentData.value.id, null, { serverOnly: true })
 
 const stripHtmlTags = (input: string, length = 1200) => {
   if (!input) return ''
@@ -115,18 +119,11 @@ const normalizedDto = computed(() => {
 const schema = computed(() => {
   if (!normalizedDto.value) return null
 
-  const dto = contentData.value
-
-  const url = `https://${requestURL.value}/test/${dto?.id}`
-
-  const title = pageTitle.value
-  const description = pageDescribe.value
-
   return buildSchema({
     dto: normalizedDto.value,
-    url,
-    title,
-    description,
+    url: canonicalUrl,
+    title: pageTitle.value,
+    description: pageDescribe.value,
     types: ['quiz'],
   })
 })
@@ -194,7 +191,7 @@ const setMetaData = () => {
     link: [
       {
         rel: 'canonical',
-        href: `https://${requestURL.value}/test/${dto.id}`,
+        href: canonicalUrl,
       },
     ],
     script: schema.value

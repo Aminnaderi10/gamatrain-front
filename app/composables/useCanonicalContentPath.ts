@@ -5,7 +5,14 @@ import type { SlugContentType } from '@/utils/contentPath'
 // 200 and shows up in Search Console as an "Alternate page with proper canonical tag"; a permanent redirect
 // folds it, and its link signals, into the one URL instead.
 // Call it after the page's data is awaited and the not-found case has been thrown, with the API's own slug.
-export const useCanonicalContentPath = async (type: SlugContentType, id: string | number, slug?: string | null) => {
+// `serverOnly` limits the redirect to the first, server-rendered request (what crawlers get), for pages whose
+// in-app links can't point at the canonical path and would otherwise load their data twice.
+export const useCanonicalContentPath = async (
+  type: SlugContentType,
+  id: string | number,
+  slug?: string | null,
+  { serverOnly = false }: { serverOnly?: boolean } = {},
+) => {
   const route = useRoute()
   const path = contentPath(type, id, slug)
   const url = `https://${useRequestURL().host}${path}`
@@ -22,7 +29,7 @@ export const useCanonicalContentPath = async (type: SlugContentType, id: string 
 
   // The query is dropped: none of these pages read one, and leftovers like the legacy `?section=6627` would
   // otherwise travel along and keep the redirect target a duplicate of the canonical.
-  if (!isCanonical && isRedirectable) {
+  if (!isCanonical && isRedirectable && (!serverOnly || import.meta.server)) {
     await navigateTo({ path, hash: route.hash }, { redirectCode: 301, replace: true })
   }
 
