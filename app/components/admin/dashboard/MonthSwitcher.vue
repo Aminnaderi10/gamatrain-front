@@ -1,31 +1,34 @@
 <template>
-  <div class="month-switcher d-flex align-center ga-1 bg-white rounded-pill pa-1">
+  <v-card
+    border
+    flat
+    rounded="pill"
+    class="d-inline-flex align-center ga-1 pa-1"
+  >
     <v-btn
-      icon
+      icon="md:chevron_left"
       variant="text"
       size="small"
       aria-label="Previous month"
       @click="shift(-1)"
-    >
-      <v-icon size="20">
-        md:chevron_left
-      </v-icon>
-    </v-btn>
+    />
 
-    <span class="month-label text-h5 font-weight-bold text-grey700 text-center">{{ label }}</span>
+    <v-sheet
+      min-width="140"
+      color="transparent"
+      class="text-h5 font-weight-bold text-grey700 text-center"
+    >
+      {{ label }}
+    </v-sheet>
 
     <v-btn
-      icon
+      icon="md:chevron_right"
       variant="text"
       size="small"
       aria-label="Next month"
       :disabled="isCurrent"
       @click="shift(1)"
-    >
-      <v-icon size="20">
-        md:chevron_right
-      </v-icon>
-    </v-btn>
+    />
 
     <v-btn
       v-if="!isCurrent"
@@ -33,13 +36,13 @@
       variant="flat"
       rounded="pill"
       size="small"
-      class="text-h6 font-weight-bold text-grey900 ml-1"
+      class="text-h6 font-weight-bold ml-1"
       prepend-icon="md:today"
       @click="emit('update:modelValue', currentMonth)"
     >
       This month
     </v-btn>
-  </div>
+  </v-card>
 </template>
 
 <script setup lang="ts">
@@ -59,13 +62,3 @@ const shift = (months: number) => {
   emit('update:modelValue', next > currentMonth ? currentMonth : next)
 }
 </script>
-
-<style scoped>
-.month-switcher {
-  border: 1px solid rgb(var(--v-theme-borderSubtle));
-}
-
-.month-label {
-  min-width: 132px;
-}
-</style>

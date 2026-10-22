@@ -57,11 +57,10 @@
         :loading="loadingOverview"
       />
 
-      <v-row class="ma-0">
+      <v-row dense>
         <v-col
           cols="12"
           lg="8"
-          class="pa-0 pr-lg-2 pb-4 pb-lg-0"
         >
           <admin-dashboard-trend-chart
             :daily="overview?.daily ?? []"
@@ -71,7 +70,6 @@
         <v-col
           cols="12"
           lg="4"
-          class="pa-0 pl-lg-2"
         >
           <admin-dashboard-revenue-breakdown
             :overview="overview"
@@ -82,7 +80,13 @@
     </section>
 
     <!-- Payments -->
-    <section class="panel bg-white rounded-xl pa-4 pa-md-5 d-flex flex-column ga-3">
+    <v-card
+      tag="section"
+      border
+      flat
+      rounded="xl"
+      class="pa-4 pa-md-5 d-flex flex-column ga-3"
+    >
       <div class="w-100 d-flex align-center justify-space-between flex-wrap ga-2">
         <div class="d-flex flex-column">
           <h2 class="text-h4 font-weight-bold text-grey700">
@@ -121,7 +125,7 @@
       </div>
       <admin-dashboard-payment-chart @select-bar="selectBar" />
       <admin-dashboard-payment-table />
-    </section>
+    </v-card>
 
     <!-- Invite program -->
     <section class="d-flex flex-column ga-3">
@@ -292,9 +296,3 @@ onMounted(async () => {
 
 onBeforeUnmount(stopSummaryRefresh)
 </script>
-
-<style scoped>
-.panel {
-  border: 1px solid rgb(var(--v-theme-borderSubtle));
-}
-</style>

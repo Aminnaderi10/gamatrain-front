@@ -1,5 +1,10 @@
 <template>
-  <div class="panel bg-white rounded-xl pa-4 pa-md-5 d-flex flex-column ga-4 h-100">
+  <v-card
+    border
+    flat
+    rounded="xl"
+    class="h-100 pa-4 pa-md-5 d-flex flex-column ga-4"
+  >
     <span class="text-h5 font-weight-bold text-grey700">Revenue by type</span>
 
     <v-skeleton-loader
@@ -46,7 +51,7 @@
         {{ overview.paymentsWithoutUsd }} crypto payments without a USD value are counted but not in these totals.
       </span>
     </template>
-  </div>
+  </v-card>
 </template>
 
 <script setup lang="ts">
@@ -79,9 +84,3 @@ const rows = computed(() => {
   }))
 })
 </script>
-
-<style scoped>
-.panel {
-  border: 1px solid rgb(var(--v-theme-borderSubtle));
-}
-</style>

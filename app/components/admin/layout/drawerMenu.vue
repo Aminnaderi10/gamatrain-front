@@ -80,11 +80,16 @@
               </v-list-item-title>
 
               <template #append>
-                <span
+                <v-chip
                   v-if="!isOpen && groupCount(item)"
-                  class="menu-badge mr-1"
+                  color="error"
+                  variant="flat"
+                  size="small"
+                  class="text-h6 font-weight-bold mr-1"
                   :title="`${groupCount(item)} waiting`"
-                >{{ formatBadge(groupCount(item)) }}</span>
+                >
+                  {{ formatBadge(groupCount(item)) }}
+                </v-chip>
                 <v-icon
                   color="white"
                   size="20"
@@ -120,10 +125,15 @@
               v-if="subMenuItem.badgeKey && attentionCount(subMenuItem.badgeKey)"
               #append
             >
-              <span
-                class="menu-badge"
+              <v-chip
+                color="error"
+                variant="flat"
+                size="small"
+                class="text-h6 font-weight-bold"
                 :title="`${attentionCount(subMenuItem.badgeKey)} waiting`"
-              >{{ formatBadge(attentionCount(subMenuItem.badgeKey)) }}</span>
+              >
+                {{ formatBadge(attentionCount(subMenuItem.badgeKey)) }}
+              </v-chip>
             </template>
           </v-list-item>
         </v-list-group>
@@ -206,8 +216,8 @@ const auth = useAuth()
 
 // "Needs attention" counts on the menu (backend admin/dashboard/summary, shared with the dashboard page, refreshed every 2 minutes).
 const { attentionCount, startSummaryRefresh, stopSummaryRefresh } = useAdminDashboard()
-const groupCount = item => (item.subMenuList ?? []).reduce((sum, sub) => sum + (sub.badgeKey ? attentionCount(sub.badgeKey) : 0), 0)
 const formatBadge = count => (count > 99 ? '99+' : String(count))
+const groupCount = item => (item.subMenuList ?? []).reduce((sum, sub) => sum + (sub.badgeKey ? attentionCount(sub.badgeKey) : 0), 0)
 onMounted(startSummaryRefresh)
 onBeforeUnmount(stopSummaryRefresh)
 
@@ -410,18 +420,6 @@ const closeNavigation = () => {
 }
 .name-user-span{
   max-width : 150px;
-}
-.menu-badge {
-  min-width: 22px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: rgb(var(--v-theme-error));
-  color: #fff;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 20px;
-  text-align: center;
 }
 .border-image {
   border: 2px solid rgb(var(--v-theme-white));
