@@ -62,6 +62,7 @@ import ResourceCollections from '~/components/subject-directory/ResourceCollecti
 import paperTable from '~/components/subject-directory/paper-table.vue'
 import SubjectCascader from '~/components/subject-directory/SubjectCascader.vue'
 import { useDirectoryCascader } from '~/composables/useDirectoryCascader'
+import { useDirectoryInitialPapers } from '~/composables/useDirectoryInitialPapers'
 import { getDirectoryCanonicalUrl } from '~/utils/directoryCanonicalUrl'
 import { getDirectoryIntroduction } from '~/utils/directoryPresentation'
 import { getDirectoryResourceCollections } from '~/utils/directoryResources'
@@ -78,8 +79,11 @@ const paperContext = computed(() => ({
 }))
 
 const introduction = computed(() => getDirectoryIntroduction(selectorState.selection))
-const { resourcesData, isLoadingResources, resourceError, refreshResources }
-  = await useDirectoryResources(paperContext)
+const [resourceState] = await Promise.all([
+  useDirectoryResources(paperContext),
+  useDirectoryInitialPapers(paperContext.value),
+])
+const { resourcesData, isLoadingResources, resourceError, refreshResources } = resourceState
 const hasResources = computed(() => Boolean(
   isLoadingResources.value || resourceError.value || getDirectoryResourceCollections(resourcesData.value).length,
 ))

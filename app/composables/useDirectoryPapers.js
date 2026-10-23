@@ -1,5 +1,5 @@
 import { onMounted, onScopeDispose } from 'vue'
-import { useAsyncData } from '#app'
+import { useNuxtData } from '#app'
 import { useDirectoryPapersApi } from '~/composables/api/subject-directory/useDirectoryPapers.api'
 import { useDirectoryFilterOptions } from '~/composables/useDirectoryFilterOptions'
 import { DIRECTORY_FILTERS } from '~/constants/pastpaper/directory'
@@ -8,7 +8,8 @@ import { createDirectoryPaperLoader } from '~/utils/directoryPaperLoader'
 import { getDirectorySessionKey } from '~/utils/directoryPapers'
 import { createDirectorySessionAvailability } from '~/utils/directorySessionAvailability'
 import { createDirectoryLatestSessionExpansion } from '~/utils/directoryPaperExpansion'
-import { loadDirectoryInitialPapers } from '~/utils/directoryInitialPapers'
+import { getDirectoryInitialPapersKey } from '~/utils/directoryInitialPapers'
+import { useDirectoryInitialPapers } from '~/composables/useDirectoryInitialPapers'
 
 export const useDirectoryPapers = async (context) => {
   const filters = reactive({ year: '', series: '', paper: '', variant: '' })
@@ -165,11 +166,11 @@ export const useDirectoryPapers = async (context) => {
   if (context.subjectId) {
     const subjectId = context.subjectId
     const gradeId = context.gradeId
-    const initialSessions = sessions.value
-    const { data } = await useAsyncData(`directory-initial-papers:${JSON.stringify([subjectId, gradeId])}`, () =>
-      loadDirectoryInitialPapers({
-        subjectId, years: PAST_PAPER_YEAR_OPTIONS, sessions: initialSessions, fetchPapers,
-      }))
+    const initialContext = { subjectId, gradeId }
+    // The page starts this request alongside Resources. Consume its SSR payload
+    // directly; retain standalone loading for other paper-table consumers.
+    const cached = useNuxtData(getDirectoryInitialPapersKey(initialContext))
+    const { data } = cached.data.value ? cached : await useDirectoryInitialPapers(initialContext)
     if (data.value && context.subjectId === subjectId && context.gradeId === gradeId) {
       for (const session of data.value.sessions) {
         Object.assign(loader.getState(session.query), session.papers, { items: [...session.papers.items] })

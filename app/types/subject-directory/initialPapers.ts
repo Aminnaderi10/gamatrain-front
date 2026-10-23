@@ -1,5 +1,10 @@
 import type { DirectoryPaper } from './paperFiles'
 
+export interface DirectoryInitialPaperContext {
+  subjectId: string | number
+  gradeId: string | number
+}
+
 export interface DirectoryPaperQuery {
   lesson: string | number
   edu_year: number
