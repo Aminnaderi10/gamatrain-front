@@ -22,6 +22,11 @@ export const useExam = () => {
       if (response.status == 0) {
         handleApiResponseError(response)
       }
+      // gama-api sends `topics: ""` for an exam without topics, and the page maps over it: the server render threw
+      // and answered 500 for every such exam (about 4 in 10) since the 2026-10-19 redesign.
+      if (response.data && !Array.isArray(response.data.topics)) {
+        response.data.topics = []
+      }
 
       return response
     }
