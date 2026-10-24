@@ -90,7 +90,8 @@ export interface ExamSampleQuestionDTO {
   /** Sanitized HTML; may hold TeX for MathJax. */
   question: string | null
   image: string | null
-  options: { text: string | null, image: string | null }[]
+  /** `key` is the option's number (1-4) as the correct answer names it; empty options are left out. */
+  options: { key?: number, text: string | null, image: string | null }[]
 }
 
 // The past paper an exam was made from. `isPastPaper` is false for a topical question set.
