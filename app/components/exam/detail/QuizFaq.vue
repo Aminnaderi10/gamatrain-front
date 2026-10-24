@@ -56,20 +56,23 @@ const items = computed(() => {
     pdf && !pdf.purchased ? `It costs ${pdf.points} Gems, and you can download it again later for free.` : 'You can download it again later for free.',
   ].join(' ')
 
+  const minutes = Number(exam.azmoon_time) || 0
+  const level = ({ 1: 'easy', 2: 'medium', 3: 'hard' } as Record<number, string>)[Number(exam.level)]
+  const lengthAnswer = [
+    questions ? `${questions} questions` : 'A set of questions',
+    minutes ? `, with ${minutes} minutes to answer them online` : '',
+    level ? `. Its difficulty is ${level}` : '',
+    '.',
+  ].join('')
+
+  // Only questions this quiz answers in its own way: the same text on every exam page reads as boilerplate.
   const list = [
+    { question: 'How many questions are there, and how long does it take?', answer: lengthAnswer },
     { question: 'What do I get when I download the PDF?', answer: pdfAnswer },
-    {
-      question: 'Can I edit the questions?',
-      answer: 'Yes, with the Word or PowerPoint file. Change any question or add your school name; maths equations stay editable.',
-    },
-    {
-      question: 'Does my plan include downloads?',
-      answer: 'If your plan includes downloads, each file uses your plan\'s limit first. When the limit runs out, it uses your Gems.',
-    },
   ]
 
   if (exam.price?.participation) {
-    list.splice(2, 0, {
+    list.push({
       question: 'Is the online quiz free?',
       answer: onlinePrice
         ? `Taking this quiz online costs ${onlinePrice} Gems. Sign in to save your result.`

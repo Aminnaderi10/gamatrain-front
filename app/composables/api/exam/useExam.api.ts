@@ -1,65 +1,72 @@
 import type {
   ApiResult,
   ExamDetaiDTO,
-  ExamRelatedContentDTO,
-  RelatedContentDTO,
+  ExamPageDetailDTO,
+  ExamPageResponseDTO,
 } from '@/types'
 
 const loadingGetItemById = ref(false)
+
+// gama-api sends `topics: ""` for an exam without topics, and the page maps over it: the server render threw and
+// answered 500 for every such exam (about 4 in 10) since the 2026-10-19 redesign.
+const withTopicList = <T extends { topics: unknown }>(exam: T): T =>
+  Array.isArray(exam.topics) ? exam : { ...exam, topics: [] }
 // const NAME = 'Exam'
 
 export const useExam = () => {
   // const { $toast } = useNuxtApp()
   const { handleApiResponseError, handleApiCatchError, createApiFailure } = useApiErrorHandler()
+  // Requests after an `await` run outside the setup context, where useApiService's own composables throw.
+  const nuxtApp = useNuxtApp()
 
-  const getItemById = async (id: string | number) => {
+  // The exam page's data from gamatrain-back, which adds sample questions and the source paper to gama-api's exam
+  // in one call. If gamatrain-back can't answer, the page falls back to gama-api directly, without the extras.
+  const getItemById = async (id: string | number): Promise<ApiResult<ExamPageDetailDTO>> => {
     loadingGetItemById.value = true
 
     try {
-      const response = await useApiService.get<ApiResult<ExamDetaiDTO>>(
+      const page = await getExamPage(id)
+      if (page) return { status: 1, succeeded: true, data: withTopicList(page) }
+
+      const response = await nuxtApp.runWithContext(() => useApiService.get<ApiResult<ExamDetaiDTO>>(
         `/api/v1/exams/${id}`,
-      )
+      ))
       if (response.status == 0) {
         handleApiResponseError(response)
       }
-      // gama-api sends `topics: ""` for an exam without topics, and the page maps over it: the server render threw
-      // and answered 500 for every such exam (about 4 in 10) since the 2026-10-19 redesign.
-      if (response.data && !Array.isArray(response.data.topics)) {
-        response.data.topics = []
-      }
 
-      return response
+      return {
+        ...response,
+        data: response.data ? withTopicList({ ...response.data, sampleQuestions: [], paper: null }) : null,
+      }
     }
     catch (err: unknown) {
       handleApiCatchError(err)
 
-      return createApiFailure<ExamDetaiDTO>(err)
+      return createApiFailure<ExamPageDetailDTO>(err)
     }
     finally {
       loadingGetItemById.value = false
     }
   }
 
-  // Other quizzes for the same subject, for the "More ... quizzes" row. The recommendation already leaves the
-  // quiz itself out; a failed request just means no row, so it never reports an error.
-  const getRelatedExams = async (id: string | number): Promise<ExamRelatedContentDTO[]> => {
+  // Null for an unknown exam too: the gama-api fallback then answers it, as before.
+  const getExamPage = async (id: string | number): Promise<ExamPageDetailDTO | null> => {
     try {
-      const response = await useApiService.get<ApiResult<RelatedContentDTO>>(
-        '/api/v1/recommendations/related',
-        { source: 'exam', request: 'exam', id },
-        { public: true },
-      )
-
-      return (response.data?.exams ?? []).filter(exam => String(exam.id) !== String(id))
+      const response = await nuxtApp.runWithContext(() =>
+        useApiService.get<ApiResult<ExamPageResponseDTO>>(`/api/v2/exams/${id}`))
+      const page = response.succeeded ? response.data : null
+      return page?.exam
+        ? { ...page.exam, sampleQuestions: page.sampleQuestions ?? [], paper: page.paper ?? null }
+        : null
     }
     catch {
-      return []
+      return null
     }
   }
 
   return {
     getItemById,
-    getRelatedExams,
     loadingGetItemById,
   }
 }
