@@ -16,15 +16,11 @@
         </v-icon>
         <span class="text-h5 text-grey700 font-weight-bold">Result Summary</span>
       </div>
-
-      <span class="text-grey500 text-h6">
-        {{ totalStats.percent }}% score
-      </span>
     </div>
 
-    <div class="w-100 d-flex flex-wrap ga-3 mt-4">
+    <div class="w-100 d-flex flex-wrap flex-md-nowrap ga-3 mt-4">
       <v-card
-        class="pa-4 d-flex flex-column align-center justify-start ga-3 flex-grow-1"
+        class="w-100 w-md-50 pa-4 d-flex flex-column flex-sm-row align-center justify-center ga-6"
         color="grey100"
         flat
         rounded="lg"
@@ -44,74 +40,94 @@
 
         <div class="w-100 d-flex flex-column ga-2">
           <div
-            v-for="item in statItems"
+            v-for="(item, index) in statItems"
             :key="item.label"
-            class="w-100 d-flex align-center ga-2"
+            class="w-100 d-flex flex-wrap align-center ga-2"
           >
             <v-icon
               :color="item.color"
-              size="12"
+              size="14"
             >
               md:circle
             </v-icon>
-            <span class="text-grey600 text-h6">{{ item.label }}</span>
+            <span class="text-grey600 text-h6 ml-2">{{ item.label }}</span>
             <span class="text-grey800 text-h6 font-weight-bold ml-auto">
               {{ item.value }}
             </span>
+
+            <v-divider
+              v-if="index != statItems.length - 1"
+              color="grey500"
+            />
           </div>
         </div>
       </v-card>
 
       <v-card
-        class="pa-4 d-flex flex-column ga-4 flex-grow-1"
+        class="w-100 w-md-50 pa-4 d-flex flex-column ga-4"
         color="grey100"
         flat
         rounded="lg"
         border
         min-width="240"
       >
-        <div
-          v-for="lesson in lessonStats"
-          :key="lesson.title"
-          class="w-100 d-flex flex-column"
-        >
-          <div class="d-flex align-center justify-space-between ga-2">
-            <span class="text-grey800 text-h6 font-weight-bold">
-              {{ lesson.title }}
-            </span>
-            <span class="text-grey500 text-h6">
-              {{ lesson.percent }}%
-            </span>
-          </div>
-          <v-progress-linear
-            :model-value="lesson.percent"
-            color="success"
-            bg-color="grey200"
-            height="8"
-            rounded
-            class="mt-2"
-          />
-          <div class="d-flex align-center flex-wrap ga-2 mt-2 text-grey500 text-h6">
-            <span>{{ lesson.num }} Questions</span>
-            <span>{{ lesson.true }} Correct</span>
-            <span>{{ lesson.false }} Wrong</span>
-            <span>{{ getNoAnswerCount(lesson) }} No answer</span>
-          </div>
-        </div>
-
         <div class="w-100 d-flex flex-wrap ga-2">
           <v-card
             v-for="rankItem in rankItems"
             :key="rankItem.label"
-            class="pa-3 d-flex flex-column ga-1 flex-grow-1"
+            class="pa-2 d-flex flex-column ga-1 flex-grow-1"
             color="white"
             flat
             rounded="lg"
             border
             min-width="150"
           >
-            <span class="text-grey500 text-h6 font-weight-medium">{{ rankItem.label }}</span>
-            <span class="text-grey800 text-h5 font-weight-bold">{{ rankItem.value }}</span>
+            <span class="text-grey400 text-h6 font-weight-medium">
+              <v-icon class="mr-1">{{ rankItem.icon }}</v-icon>
+              {{ rankItem.label }}
+            </span>
+            <span class="text-grey800 text-h5 font-weight-bold pl-6">
+              {{ rankItem.value }}
+            </span>
+          </v-card>
+
+          <v-card
+            class="w-100 pa-3 d-flex ga-1 flex-grow-1 border-sm border-primary border-opacity-50"
+            color="primary50"
+            flat
+            rounded="lg"
+            min-width="150"
+          >
+            <div class="d-flex flex-column align-start justify-start ga-1">
+              <span class="text-grey800 text-h5 font-weight-bold">Get your personal exam analysis</span>
+              <span class="text-grey600 text-h6 font-weight-medium">Let alpha analyze your answers and reveal your strength and areas to improve.</span>
+              <v-btn
+                rounded="pill"
+                class="d-flex align-center justify-center mt-2"
+                color="primary"
+                flat
+                height="30"
+              >
+                <template #loader>
+                  <v-progress-circular
+                    color="grey700"
+                    size="24"
+                    width="3"
+                  />
+                </template>
+
+                <span class="text-grey700 text-h6 font-weight-bold mt-1 mx-2">Get my analysis</span>
+
+                <common-price-with-gem
+                  class="text-grey700 text-h6 font-weight-bold mt-1"
+                  :price="100"
+                  color="grey700"
+                />
+              </v-btn>
+              <span class="text-grey500 text-subtitle-1 font-weight-medium d-flex align-center ga-1">
+                <v-icon>md:lock</v-icon>
+                Available with membership</span>
+            </div>
           </v-card>
         </div>
       </v-card>
@@ -166,6 +182,7 @@ const statItems = computed(() => [
   { label: 'Correct answers', value: totalStats.value.true, color: 'success' },
   { label: 'Wrong answers', value: totalStats.value.false, color: 'lightError' },
   { label: 'No answer', value: totalStats.value.noAnswer, color: 'grey300' },
+  { label: 'Total questions', value: totalStats.value.num, color: 'grey600' },
 ])
 
 const chartData = computed<ChartData<'doughnut'>>(() => ({
@@ -208,19 +225,15 @@ const chartOptions = computed<ChartOptions<'doughnut'>>(() => ({
   },
 }))
 
-const lessonStats = computed(() => {
-  return Object.values(props.answerStats?.lessons || {})
-})
-
 const getNoAnswerCount = (lesson: { noanswer?: number, noAnswer?: number }) => {
   return lesson.noanswer ?? lesson.noAnswer ?? 0
 }
 
 const rankItems = computed(() => {
   return [
-    { label: 'Country rank', value: formatRank(props.rank?.total) },
-    { label: 'State rank', value: formatRank(props.rank?.state) },
-    { label: 'Area rank', value: formatRank(props.rank?.area) },
+    { label: 'Country rank', value: formatRank(props.rank?.total), icon: 'md:trophy' },
+    { label: 'State rank', value: formatRank(props.rank?.state), icon: 'md:leaderboard' },
+    // { label: 'Area rank', value: formatRank(props.rank?.area) },
   ]
 })
 
