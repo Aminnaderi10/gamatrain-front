@@ -3,7 +3,7 @@ import type {
   ExamResultDTO,
   GetDataParamsExamResult,
   ResponseListDTO,
-  ExamResultDetailDTO,
+  ExamResultResponseDTO,
 } from '@/types'
 
 export const useExamResult = () => {
@@ -61,10 +61,10 @@ export const useExamResult = () => {
     loadingGetItemById.value = true
 
     try {
-      const response = await useApiService.get<ApiResult<ExamResultDetailDTO>>(
-        `/api/v1/exams/result/${id}`,
+      const response = await useApiService.get<ApiResult<ExamResultResponseDTO>>(
+        `/api/v2/exams/${id}/result`,
       )
-      if (response.data == null || response.status != 1) {
+      if (response.data == null || !response.succeeded) {
         handleApiResponseError(response)
       }
 
@@ -73,7 +73,7 @@ export const useExamResult = () => {
     catch (err: unknown) {
       handleApiCatchError(err)
 
-      return createApiFailure<ExamResultDetailDTO>(err)
+      return createApiFailure<ExamResultResponseDTO>(err)
     }
     finally {
       loadingGetItemById.value = false

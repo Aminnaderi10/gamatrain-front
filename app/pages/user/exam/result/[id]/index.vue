@@ -53,8 +53,8 @@ const contentData = ref<ExamResultDetailDTO | null>(null)
 
 const fetchResult = async () => {
   const response = await getItemById(resultId.value)
-  if (response.status == 1 && response.data) {
-    contentData.value = response.data
+  if (response.succeeded && response.data) {
+    contentData.value = response.data.result
 
     const authToken = getUserToken() ?? ''
     try {

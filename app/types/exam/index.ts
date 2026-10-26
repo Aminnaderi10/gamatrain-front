@@ -285,6 +285,15 @@ export interface ExamResultDetailDTO {
   result: ExamResultQuestionDTO[]
   insightService: boolean
 }
+export interface ExamResultResponseDTO {
+  result: ExamResultDetailDTO
+  analysis: {
+    result: string
+    id: number
+    points: number
+    purchased: boolean
+  }
+}
 
 export interface ExamResultDownloadDTO {
   url: string
