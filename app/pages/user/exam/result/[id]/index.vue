@@ -18,6 +18,8 @@
       <user-exam-result-summary
         :answer-stats="contentData?.answerStats"
         :rank="contentData?.rank"
+        :result-analyze="analyzeData"
+        @update-result-analyze="updateResultAnalyze"
       />
 
       <user-exam-result-answers
@@ -30,6 +32,7 @@
 <script setup lang="ts">
 import type {
   ExamResultDetailDTO,
+  ExamResultAnalyzeResponseDTO,
 } from '@/types'
 
 definePageMeta({
@@ -41,7 +44,6 @@ useSeoMeta({
 })
 
 const route = useRoute()
-const { getUserToken } = useAuth()
 
 const {
   getItemById,
@@ -50,30 +52,24 @@ const {
 
 const resultId = computed(() => String(route.params.id))
 const contentData = ref<ExamResultDetailDTO | null>(null)
+const analyzeData = ref<ExamResultAnalyzeResponseDTO | undefined>()
 
 const fetchResult = async () => {
   const response = await getItemById(resultId.value)
   if (response.succeeded && response.data) {
     contentData.value = response.data.result
-
-    const authToken = getUserToken() ?? ''
-    try {
-      await useApiService.post('/api/v2/games/exams/points',
-        { id: resultId.value },
-        {
-          headers: {
-            SecretKey: authToken,
-          },
-        },
-      )
-    }
-    catch (error) {
-      console.warn('Fetch failed but continuing...', error)
-    }
+    analyzeData.value = response.data.analysis
   }
 }
 
 onMounted(() => {
   fetchResult()
 })
+
+const updateResultAnalyze = (result: string) => {
+  if (analyzeData.value) {
+    analyzeData.value.result = result
+    analyzeData.value.points = 0
+  }
+}
 </script>

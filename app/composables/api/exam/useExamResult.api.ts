@@ -4,6 +4,7 @@ import type {
   GetDataParamsExamResult,
   ResponseListDTO,
   ExamResultResponseDTO,
+  ExamAnalyzeDetailResponseDTO,
 } from '@/types'
 
 export const useExamResult = () => {
@@ -14,6 +15,7 @@ export const useExamResult = () => {
   const pageCount = ref(0)
   const loadingGetData = ref(true)
   const loadingGetItemById = ref(false)
+  const loadingGetAnalyzeResultExam = ref(false)
 
   const getData = async (params: GetDataParamsExamResult) => {
     const { page, pageSize, section, base, lesson } = params
@@ -80,6 +82,29 @@ export const useExamResult = () => {
     }
   }
 
+  const getAnalyzeResultExam = async (id: string | number) => {
+    loadingGetAnalyzeResultExam.value = true
+
+    try {
+      const response = await useApiService.post<ApiResult<ExamAnalyzeDetailResponseDTO>>(
+        `/api/v2/exams/${id}/analysis`,
+      )
+      if (response.data == null || !response.succeeded) {
+        handleApiResponseError(response)
+      }
+
+      return response
+    }
+    catch (err: unknown) {
+      handleApiCatchError(err)
+
+      return createApiFailure<ExamAnalyzeDetailResponseDTO>(err)
+    }
+    finally {
+      loadingGetAnalyzeResultExam.value = false
+    }
+  }
+
   return {
     loadingGetData,
     data,
@@ -88,5 +113,7 @@ export const useExamResult = () => {
     pageCount,
     getItemById,
     loadingGetItemById,
+    getAnalyzeResultExam,
+    loadingGetAnalyzeResultExam,
   }
 }

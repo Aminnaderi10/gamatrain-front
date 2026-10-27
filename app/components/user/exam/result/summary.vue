@@ -92,12 +92,18 @@
           </v-card>
 
           <v-card
-            class="w-100 pa-3 d-flex ga-1 flex-grow-1 border-sm border-primary border-opacity-50"
+            class="w-100 pa-3 d-flex flex-column flex-sm-row ga-2 flex-grow-1 border-sm border-primary border-opacity-50"
             color="primary50"
             flat
             rounded="lg"
             min-width="150"
           >
+            <img
+              :src="gamaRobot"
+              alt="Gama Robot"
+              width="80"
+              class="h-100 image-robot"
+            >
             <div class="d-flex flex-column align-start justify-start ga-1">
               <span class="text-grey800 text-h5 font-weight-bold">Get your personal exam analysis</span>
               <span class="text-grey600 text-h6 font-weight-medium">Let alpha analyze your answers and reveal your strength and areas to improve.</span>
@@ -107,22 +113,30 @@
                 color="primary"
                 flat
                 height="30"
+                :loading="loadingGetAnalyzeResultExam"
+                @click="handleResultAnalyze"
               >
                 <template #loader>
                   <v-progress-circular
                     color="grey700"
-                    size="24"
+                    size="20"
                     width="3"
+                    indeterminate
                   />
                 </template>
 
                 <span class="text-grey700 text-h6 font-weight-bold mt-1 mx-2">Get my analysis</span>
 
                 <common-price-with-gem
+                  v-if="resultAnalyze?.result == null"
                   class="text-grey700 text-h6 font-weight-bold mt-1"
-                  :price="100"
+                  :price="resultAnalyze?.points"
                   color="grey700"
                 />
+                <span
+                  v-else
+                  class="text-grey700 text-h6 font-weight-bold mt-1"
+                >(Owned)</span>
               </v-btn>
               <span class="text-grey500 text-subtitle-1 font-weight-medium d-flex align-center ga-1">
                 <v-icon>md:lock</v-icon>
@@ -132,12 +146,51 @@
         </div>
       </v-card>
     </div>
+
+    <!-- Coin Payment Modal -->
+    <lazy-common-modal-base
+      v-model:show-dialog="showCoinPaymentModal"
+      :max-width="900"
+      title="Get Membership. Unlock Premium Downloads."
+      subtitle="Join +50,000 Students"
+    >
+      <common-modal-payment
+        :plans="paymentPlans"
+        :billing-interval="billingInterval"
+        :current-plan-id="currentPlanId"
+        :current-plan-title="currentPlanTitle"
+        @dismiss="showCoinPaymentModal = false"
+        @switch-successfully="upgradePlanSuccessfully"
+      />
+    </lazy-common-modal-base>
+
+    <!-- Coin Consumption Animation -->
+    <lazy-common-coin-consumption-animation
+      v-model:is-visible="showCoinAnimation"
+      @animation-complete="handleAnimationComplete"
+    />
+
+    <lazy-test-counting-wallet-animation
+      :is-start-animation="isStartWalletAnimation"
+      :direction="-1"
+      :delta-price="priceFile"
+      @complete-animation="completeWalletAnimation"
+    />
+
+    <lazy-common-modal-base
+      v-model:show-dialog="showAnalyzeModal"
+      :max-width="600"
+      title="Analyze Result"
+    >
+      <span class="text-grey700 text-h6 font-weight-medium mt-4">{{ resultTextAnalyze }}</span>
+    </lazy-common-modal-base>
   </v-card>
 </template>
 
 <script setup lang="ts">
 import type { ChartData, ChartOptions } from 'chart.js'
-import type { ExamResultAnswerStatsDTO, ExamResultRankDTO } from '@/types'
+import type { ExamResultAnswerStatsDTO, ExamResultRankDTO, ExamResultAnalyzeResponseDTO, UpgradeSuggestionsDTO,
+  BillingInterval } from '@/types'
 import {
   ArcElement,
   Chart as ChartJS,
@@ -146,6 +199,7 @@ import {
 } from 'chart.js'
 import { Doughnut as DoughnutChart } from 'vue-chartjs'
 import { useTheme } from 'vuetify'
+import gamaRobot from '@/assets/images/gama-robot.png'
 
 ChartJS.register(
   ArcElement,
@@ -158,7 +212,9 @@ const theme = useTheme()
 const props = defineProps<{
   answerStats?: ExamResultAnswerStatsDTO
   rank?: ExamResultRankDTO
+  resultAnalyze?: ExamResultAnalyzeResponseDTO
 }>()
+const emit = defineEmits(['updateResultAnalyze'])
 
 const totalStats = computed(() => {
   const total = props.answerStats?.total
@@ -241,11 +297,74 @@ const formatRank = (rank?: { user: number, total: string }) => {
   if (!rank) return '-'
   return `${rank.user} of ${rank.total}`
 }
+
+const { getAnalyzeResultExam, loadingGetAnalyzeResultExam } = useExamResult()
+const route = useRoute()
+
+const showCoinPaymentModal = ref(false)
+const showCoinAnimation = ref(false)
+const isStartWalletAnimation = ref(false)
+const priceFile = ref(props.resultAnalyze?.points ?? 0)
+const paymentPlans = ref<UpgradeSuggestionsDTO[]>([])
+const billingInterval = ref<BillingInterval[]>([])
+const currentPlanTitle = ref<string | null>(null)
+const currentPlanId = ref<number | null>(null)
+const showAnalyzeModal = ref(false)
+const resultTextAnalyze = ref(props.resultAnalyze?.result ?? '')
+
+const handleAnimationComplete = async () => {
+  // Close everything immediately when animation completes
+  showCoinAnimation.value = false
+  isStartWalletAnimation.value = true
+}
+
+const completeWalletAnimation = () => {
+  showAnalyzeModal.value = true
+  isStartWalletAnimation.value = false
+}
+const upgradePlanSuccessfully = async () => {
+  showCoinPaymentModal.value = false
+  await handleResultAnalyze()
+}
+
+const handleResultAnalyze = async () => {
+  if (props.resultAnalyze?.result) {
+    resultTextAnalyze.value = props.resultAnalyze?.result
+    showAnalyzeModal.value = true
+  }
+  else {
+    const response = await getAnalyzeResultExam(route.params.id as string)
+    if (response.succeeded && response.data) {
+      if (response.data.result) {
+        resultTextAnalyze.value = response.data.result
+        showCoinAnimation.value = true
+        emit('updateResultAnalyze', response.data.result)
+      }
+      else {
+        paymentPlans.value = response.data.upgradeSuggestions || []
+        billingInterval.value = response.data.availableBillingIntervals || []
+        currentPlanTitle.value = response.data.currentPlanTitle
+        currentPlanId.value = response.data.currentPlanId
+        showCoinPaymentModal.value = true
+      }
+    }
+    else {
+      paymentPlans.value = response.data?.upgradeSuggestions || []
+      billingInterval.value = response.data?.availableBillingIntervals || []
+      currentPlanTitle.value = response.data!.currentPlanTitle
+      currentPlanId.value = response.data!.currentPlanId
+      showCoinPaymentModal.value = true
+    }
+  }
+}
 </script>
 
 <style scoped>
 .chart-container {
   width: 160px;
   height: 160px;
+}
+.image-robot{
+  object-fit : contain
 }
 </style>
