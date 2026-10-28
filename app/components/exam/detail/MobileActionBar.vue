@@ -44,8 +44,10 @@ const scrollToDownloads = () => {
 <style scoped>
 /* Sits on top of the site's bottom navigation, which the default layout shows on mobile. */
 .mobile-action-bar {
-  position: sticky;
-  bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+  position: fixed;
+  bottom: 60px;
+  width: 100%;
+  left: 0;
   z-index: 998;
   border-top: 1px solid rgb(var(--v-theme-grey200));
   box-shadow: 0 -8px 24px -12px rgba(var(--v-theme-brandNavy), 0.25);

@@ -23,9 +23,9 @@
         <h1 class="gama-text-h1 text-brandNavy mt-3 mb-3">
           {{ seo.heading }}
         </h1>
-        <p class="lede text-grey600">
+        <!-- <p class="lede text-grey600">
           {{ lede }}
-        </p>
+        </p> -->
 
         <v-row
           dense
@@ -141,11 +141,11 @@
         md="4"
         class="d-flex flex-column ga-4"
       >
-        <exam-detail-result-preview
+        <!-- <exam-detail-result-preview
           v-if="contentData.price?.participation"
           :question-count="Number(contentData.tests_num) || 0"
           :participants="Number(contentData.participants_num) || 0"
-        />
+        /> -->
         <exam-detail-about-card :exam="contentData" />
         <exam-detail-topics-card :topics="contentData.topics" />
       </v-col>
@@ -157,25 +157,25 @@
       class="mt-10"
     />
 
-    <exam-detail-file-comparison
+    <!-- <exam-detail-file-comparison
       :prices="exportPrices"
       class="mt-10"
-    />
+    /> -->
 
     <!-- Past Papers, Multimedia and Tutorials; quizzes already have their own row above. -->
     <div class="mt-6 mx-n4">
       <lazy-common-related-content
         :id="contentData.id"
         source="exam"
-        :request="[`test`, `file`, `tutorial`]"
+        :request="[`test`, `tutorial`]"
       />
     </div>
 
-    <lazy-exam-detail-quiz-faq
+    <!-- <lazy-exam-detail-quiz-faq
       :exam="contentData"
       :prices="exportPrices"
       class="mt-10"
-    />
+    /> -->
 
     <div class="d-flex justify-space-between align-center flex-wrap ga-2 text-h6 text-grey500 mt-10 mb-8">
       <span>
@@ -318,21 +318,21 @@ const kicker = computed(() => {
 })
 
 // The intro under the title, built from the quiz's own facts so every page has its own description.
-const lede = computed(() => {
-  const exam = contentData.value
-  if (!exam) return ''
-  const questions = Number(exam.tests_num) || 0
-  const minutes = Number(exam.azmoon_time) || 0
-  const subject = [exam.section_title, exam.base_title, exam.lesson_title].map(t => t?.trim()).filter(Boolean).join(' ')
-  const about = [
-    questions ? `${questions} questions` : 'Questions',
-    topicTitles.value.length ? ` on ${topicTitles.value.join(', ')}` : '',
-    subject ? ` for ${subject}` : '',
-  ].join('')
-  if (!exam.price?.participation) return `${about}. Download it as a PDF, Word or PowerPoint file for your class.`
-  return `${about}. Take it online${minutes ? ` with a ${minutes}-minute timer` : ''} and get your score, your rank and `
-    + 'the correct answers as soon as you finish, or download it as a PDF, Word or PowerPoint file for your class.'
-})
+// const lede = computed(() => {
+//   const exam = contentData.value
+//   if (!exam) return ''
+//   const questions = Number(exam.tests_num) || 0
+//   const minutes = Number(exam.azmoon_time) || 0
+//   const subject = [exam.section_title, exam.base_title, exam.lesson_title].map(t => t?.trim()).filter(Boolean).join(' ')
+//   const about = [
+//     questions ? `${questions} questions` : 'Questions',
+//     topicTitles.value.length ? ` on ${topicTitles.value.join(', ')}` : '',
+//     subject ? ` for ${subject}` : '',
+//   ].join('')
+//   if (!exam.price?.participation) return `${about}. Download it as a PDF, Word or PowerPoint file for your class.`
+//   return `${about}. Take it online${minutes ? ` with a ${minutes}-minute timer` : ''} and get your score, your rank and `
+//     + 'the correct answers as soon as you finish, or download it as a PDF, Word or PowerPoint file for your class.'
+// })
 
 const facts = computed(() => {
   const exam = contentData.value
