@@ -86,17 +86,20 @@
             v-if="getPhase(format.fileType) === 'cooking'"
             class="text-h6 text-grey600"
           >
-            Cooking for you
-            <v-icon
-              class="heart-blink"
-              color="lightError"
-              size="14"
-            >md:favorite</v-icon>
+            Preparing file...
           </span>
           <span
             v-else-if="getPhase(format.fileType) === 'downloading'"
             class="text-h6 text-grey600"
           >Downloading {{ getProgress(format.fileType) }}%</span>
+          <span
+            v-else-if="getPhase(format.fileType) === 'error'"
+            class="text-h6 text-lightError"
+          >Download Faild</span>
+          <span
+            v-else-if="getPhase(format.fileType) === 'retry'"
+            class="text-h6 text-grey600"
+          >Try Again</span>
           <span
             v-else
             class="text-h6 text-grey500"
@@ -125,12 +128,20 @@
           aria-hidden="true"
         >
           <v-progress-circular
-            v-if="getPhase(format.fileType)"
+            v-if="['cooking', 'downloading'].includes(getPhase(format.fileType) || '')"
             :indeterminate="getPhase(format.fileType) === 'cooking'"
             :model-value="getProgress(format.fileType)"
             size="18"
             width="2"
           />
+          <v-icon
+            v-else-if="getPhase(format.fileType) === 'error'"
+            size="18"
+          >md:priority_high</v-icon>
+          <v-icon
+            v-else-if="getPhase(format.fileType) === 'retry'"
+            size="18"
+          >md:autorenew</v-icon>
           <v-icon
             v-else
             size="18"
@@ -214,6 +225,7 @@ import type {
   ParticipationExamDetaiDTO,
   UpgradeSuggestionsDTO,
 } from '@/types'
+import { examExportFormats } from '@/utils/examExportFormats'
 
 interface IActionCard {
   id: string
@@ -354,19 +366,5 @@ watch(user, () => {
 }
 .format-row--owned .go-button {
   color: rgb(var(--v-theme-white));
-}
-/* "Cooking" phase: a blinking (pulsing) heart while the server generates the file. */
-.heart-blink {
-  animation: heart-blink 1s ease-in-out infinite;
-}
-@keyframes heart-blink {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.25;
-    transform: scale(0.8);
-  }
 }
 </style>

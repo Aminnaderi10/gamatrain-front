@@ -17,7 +17,7 @@ import type {
  * answers a refused charge with the same JSON as `POST downloads`, so the page's existing
  * insufficient-balance/upgrade modals are reused through the same callbacks.
  */
-export type ExamExportPhase = 'cooking' | 'downloading'
+export type ExamExportPhase = 'cooking' | 'downloading' | 'error' | 'retry'
 
 interface UseExamExportDownloadOptions {
   examId: string | number
@@ -82,6 +82,16 @@ export const useExamExportDownload = (options: UseExamExportDownloadOptions) => 
     Reflect.deleteProperty(progress.value, fileType)
   }
 
+  const markAsFailed = (fileType: ExamExportFileType) => {
+    phases.value[fileType] = 'error'
+    progress.value[fileType] = 0
+    setTimeout(() => {
+      if (phases.value[fileType] === 'error') {
+        phases.value[fileType] = 'retry'
+      }
+    }, 5000)
+  }
+
   // Open to guests (prices only); with a signed-in user it also says which formats they already bought.
   const fetchPrices = async () => {
     try {
@@ -128,24 +138,27 @@ export const useExamExportDownload = (options: UseExamExportDownloadOptions) => 
   }
 
   /** A refused charge (or any other error) comes back as JSON instead of the file. */
-  const handleJsonResponse = async (response: Response) => {
+  const handleJsonResponse = async (response: Response, fileType: ExamExportFileType) => {
     const result = await response.json() as ApiResult<DownloadResponseDTO>
     if (result.data?.upgradeSuggestions && result.data.upgradeSuggestions.length > 0) {
+      clear(fileType)
       options.onUpgradeSuggestions?.(result.data)
       return
     }
 
     const message = result.errors?.[0]?.message
     if (message === 'InsufficientBalance') {
+      clear(fileType)
       options.onInsufficientBalance?.()
       return
     }
 
+    markAsFailed(fileType)
     $toast.error(message || 'Download failed. Please try again.')
   }
 
   const startExport = async (fileType: ExamExportFileType) => {
-    if (phases.value[fileType]) {
+    if (phases.value[fileType] && phases.value[fileType] !== 'retry') {
       return
     }
 
@@ -172,14 +185,13 @@ export const useExamExportDownload = (options: UseExamExportDownloadOptions) => 
       }
 
       if (!response.ok) {
-        clear(fileType)
+        markAsFailed(fileType)
         $toast.error('Download failed. Please try again.')
         return
       }
 
       if (response.headers.get('Content-Type')?.includes('application/json')) {
-        clear(fileType)
-        await handleJsonResponse(response)
+        await handleJsonResponse(response, fileType)
         return
       }
 
@@ -194,7 +206,7 @@ export const useExamExportDownload = (options: UseExamExportDownloadOptions) => 
       setTimeout(() => clear(fileType), 800)
     }
     catch {
-      clear(fileType)
+      markAsFailed(fileType)
       $toast.error('Download failed. Please try again.')
     }
   }
