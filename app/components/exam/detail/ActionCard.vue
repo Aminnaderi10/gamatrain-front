@@ -80,46 +80,48 @@
         >{{ format.badge }}</span>
 
         <span class="flex-grow-1 d-flex flex-column overflow-hidden">
-          <span class="text-h5 font-weight-heavy text-brandNavy">{{ format.label }}</span>
+          <span class="text-h5 font-weight-heavy text-brandNavy">{{ format.label }}
+          </span>
+
+          <span
+            v-if="getPrice(format.fileType)?.purchased"
+            class="w-100 text-subtitle-1 font-weight-heavy text-success500"
+          >Owned</span>
+          <span
+            v-else-if="getPrice(format.fileType)"
+            class="w-100 d-flex align-center ga-1 text-subtitle-1 font-weight-heavy text-brandNavy text-no-wrap"
+          >
+            <v-icon
+              size="14"
+              color="generalSearchQuiz"
+              aria-hidden="true"
+            >md:diamond_outlined</v-icon>
+            {{ getPrice(format.fileType)?.points }} Gems
+          </span>
+
           <!-- The server is building the file (before any byte arrives). -->
           <span
             v-if="getPhase(format.fileType) === 'cooking'"
-            class="text-h6 text-grey600"
+            class="text-h6 text-grey600 text-no-wrap"
           >
             Preparing file...
           </span>
           <span
             v-else-if="getPhase(format.fileType) === 'downloading'"
-            class="text-h6 text-grey600"
+            class="text-h6 text-grey600 text-no-wrap"
           >Downloading {{ getProgress(format.fileType) }}%</span>
           <span
             v-else-if="getPhase(format.fileType) === 'error'"
-            class="text-h6 text-lightError"
+            class="text-h6 text-lightError text-no-wrap"
           >Download Faild</span>
           <span
             v-else-if="getPhase(format.fileType) === 'retry'"
-            class="text-h6 text-grey600"
+            class="text-h6 text-grey600 text-no-wrap"
           >Try Again</span>
           <span
             v-else
-            class="text-h6 text-grey500"
+            class="text-h6 text-grey500 text-no-wrap"
           >{{ format.summary }}</span>
-        </span>
-
-        <span
-          v-if="getPrice(format.fileType)?.purchased"
-          class="text-h6 font-weight-heavy text-success500"
-        >Owned</span>
-        <span
-          v-else-if="getPrice(format.fileType)"
-          class="d-flex align-center ga-1 text-h5 font-weight-heavy text-brandNavy text-no-wrap"
-        >
-          <v-icon
-            size="16"
-            color="generalSearchQuiz"
-            aria-hidden="true"
-          >md:diamond_outlined</v-icon>
-          {{ getPrice(format.fileType)?.points }} Gems
         </span>
 
         <span
