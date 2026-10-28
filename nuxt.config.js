@@ -238,7 +238,8 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/test-maker/**': { ssr: false, prerender: true },
+    // Rendered in the browser only, so a `noindex` meta tag never reaches a crawler: send it as a header.
+    '/test-maker/**': { ssr: false, prerender: true, headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
     '/user/**': { ssr: false },
     '/admin/**': { ssr: false },
     '/payments/**': { ssr: false },

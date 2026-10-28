@@ -441,8 +441,11 @@ const { lgAndUp, mdAndUp, xs, sm } = useDisplay()
 const { local, formatLocal } = useDateTime()
 
 // SEO
-useHead({
+// One canonical per category: the keyword and the page number don't change what the server renders.
+const postListHost = useRequestURL().host
+useHead(() => ({
   title: 'Exploring the Latest Insights in K12 Education | GamaTrain Post',
+  link: [{ rel: 'canonical', href: canonicalListUrl(postListHost, '/post', route.query, ['cat']) }],
   meta: [
     {
       name: 'apple-mobile-web-app-title',
@@ -469,7 +472,7 @@ useHead({
         'Stay informed and inspired with GamaTrain\'s insightful post, featuring thought-provoking articles on the latest trends and best practices in K12 education.',
     },
   ],
-})
+}))
 
 onMounted(() => {
   window.addEventListener('scroll', setupScrollListener)
