@@ -70,6 +70,7 @@ const updateResultAnalyze = (result: string) => {
   if (analyzeData.value) {
     analyzeData.value.result = result
     analyzeData.value.points = 0
+    analyzeData.value.purchased = true
   }
 }
 </script>

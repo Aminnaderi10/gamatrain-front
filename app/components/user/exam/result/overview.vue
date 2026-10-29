@@ -132,17 +132,21 @@ const formatSeconds = (value: number) => {
 }
 </script>
 
-<style scoped>
+<style scoped  lang="scss">
+@use 'sass:map';
+@use 'vuetify/settings' as vuetify;
+
 .width-item{
   width : 20%
 }
-@media (max-width: 960px) {
-  .width-item{
+
+@media #{map.get(vuetify.$display-breakpoints, 'sm')} {
+ .width-item{
     width : 33%
   }
 }
-@media (max-width: 600px) {
-  .width-item{
+@media #{map.get(vuetify.$display-breakpoints, 'xs')} {
+ .width-item{
     width : 100%
   }
 }

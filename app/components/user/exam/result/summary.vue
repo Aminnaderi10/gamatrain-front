@@ -128,7 +128,7 @@
                 <span class="text-grey700 text-h6 font-weight-bold mt-1 mx-2">Get my analysis</span>
 
                 <common-price-with-gem
-                  v-if="resultAnalyze?.result == null"
+                  v-if="!resultAnalyze?.purchased"
                   class="text-grey700 text-h6 font-weight-bold mt-1"
                   :price="resultAnalyze?.points"
                   color="grey700"
@@ -151,7 +151,7 @@
     <lazy-common-modal-base
       v-model:show-dialog="showCoinPaymentModal"
       :max-width="900"
-      title="Get Membership. Unlock Premium Downloads."
+      title="Get Membership. Unlock Premium Analysis."
       subtitle="Join +50,000 Students"
     >
       <common-modal-payment
@@ -182,7 +182,7 @@
       :max-width="600"
       title="Analyze Result"
     >
-      <span class="text-grey700 text-h6 font-weight-medium mt-4">{{ resultTextAnalyze }}</span>
+      <span class="text-grey700 text-h6 font-weight-medium mt-4 result-text">{{ resultTextAnalyze }}</span>
     </lazy-common-modal-base>
   </v-card>
 </template>
@@ -199,7 +199,7 @@ import {
 } from 'chart.js'
 import { Doughnut as DoughnutChart } from 'vue-chartjs'
 import { useTheme } from 'vuetify'
-import gamaRobot from '@/assets/images/gama-robot.png'
+import gamaRobot from '@/assets/images/gama-robot.webp'
 
 ChartJS.register(
   ArcElement,
@@ -335,24 +335,20 @@ const handleResultAnalyze = async () => {
   else {
     const response = await getAnalyzeResultExam(route.params.id as string)
     if (response.succeeded && response.data) {
-      if (response.data.result) {
-        resultTextAnalyze.value = response.data.result
+      resultTextAnalyze.value = response.data.result
+      emit('updateResultAnalyze', response.data.result)
+      if (response.data.paidBy === 'Points') {
         showCoinAnimation.value = true
-        emit('updateResultAnalyze', response.data.result)
       }
       else {
-        paymentPlans.value = response.data.upgradeSuggestions || []
-        billingInterval.value = response.data.availableBillingIntervals || []
-        currentPlanTitle.value = response.data.currentPlanTitle
-        currentPlanId.value = response.data.currentPlanId
-        showCoinPaymentModal.value = true
+        showAnalyzeModal.value = true
       }
     }
-    else {
-      paymentPlans.value = response.data?.upgradeSuggestions || []
-      billingInterval.value = response.data?.availableBillingIntervals || []
-      currentPlanTitle.value = response.data!.currentPlanTitle
-      currentPlanId.value = response.data!.currentPlanId
+    if (!response.succeeded && response.data && response.data.upgradeSuggestions && response.data.upgradeSuggestions.length > 0) {
+      paymentPlans.value = response.data.upgradeSuggestions || []
+      billingInterval.value = response.data.availableBillingIntervals || []
+      currentPlanTitle.value = response.data.currentPlanTitle
+      currentPlanId.value = response.data.currentPlanId
       showCoinPaymentModal.value = true
     }
   }
@@ -366,5 +362,8 @@ const handleResultAnalyze = async () => {
 }
 .image-robot{
   object-fit : contain
+}
+.result-text{
+  white-space: pre-line;
 }
 </style>
