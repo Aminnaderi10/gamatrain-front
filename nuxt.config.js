@@ -135,7 +135,8 @@ export default defineNuxtConfig({
   },
 
   // Global CSS
-  css: ['@/assets/scss/app.scss', '@/assets/css/gama6/styles.css'],
+  // Icon fonts: modules/iconSubset.ts cuts both icon sets down to the icons the code uses in production builds.
+  css: ['@/assets/scss/app.scss', '@/assets/css/gama6/styles.css', '@/assets/css/material-symbols-full.css'],
 
   experimental: {
     payloadExtraction: false,
