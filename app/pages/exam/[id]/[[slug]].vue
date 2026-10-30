@@ -147,7 +147,7 @@
           :participants="Number(contentData.participants_num) || 0"
         />
         <exam-detail-about-card :exam="contentData" />
-        <exam-detail-topics-card :topics="contentData.topics" />
+        <exam-detail-topics-card :exam="contentData" />
       </v-col>
     </v-row>
 
