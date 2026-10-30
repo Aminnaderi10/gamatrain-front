@@ -91,7 +91,7 @@
           @report="openCrashReport = true"
         />
         <exam-detail-about-card :exam="contentData" />
-        <exam-detail-topics-card :topics="contentData.topics" />
+        <exam-detail-topics-card :exam="contentData" />
       </div>
 
       <div class="exam-main d-flex flex-column ga-6">
