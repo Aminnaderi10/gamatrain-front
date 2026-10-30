@@ -12,6 +12,7 @@
               ref="form"
               v-model="isFormValid"
               class="form"
+              @focusin="initCaptcha"
             >
               <!-- Name Input -->
               <div>
@@ -168,17 +169,13 @@ const isFormValid = ref<boolean>(false)
 const formLoading = ref<boolean>(false)
 
 const form = ref<HTMLFormElement | null>(null)
-const { getToken, initCaptcha, isLoaded } = useRecaptcha()
+const { getToken, initCaptcha } = useRecaptcha()
 
 const submitForm = async () => {
   formLoading.value = true
 
   if (isFormValid.value) {
     try {
-      if (!isLoaded()) {
-        throw new Error('reCAPTCHA not loaded yet. Please try again.')
-      }
-
       const token = await getToken('submit')
 
       const formData = new FormData()
@@ -218,10 +215,6 @@ const submitForm = async () => {
     formLoading.value = false
   }
 }
-
-onMounted(() => {
-  initCaptcha()
-})
 </script>
 
 <style scoped>

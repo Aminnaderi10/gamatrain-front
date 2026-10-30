@@ -27,7 +27,7 @@
       <v-chip
         v-for="facility in selected"
         :key="facility.id"
-        :prepend-icon="`md:${facility.icon}`"
+        :prepend-icon="`mdfull:${facility.icon}`"
         color="grey800"
         variant="flat"
         label
@@ -98,7 +98,7 @@
                 height="56"
                 :variant="tag.selected ? 'flat' : 'tonal'"
                 :color="tag.selected ? 'grey800' : 'grey500'"
-                :prepend-icon="tag.selected ? 'mdi-check' : `md:${tag.icon}`"
+                :prepend-icon="tag.selected ? 'mdi-check' : `mdfull:${tag.icon}`"
                 :aria-pressed="tag.selected"
                 class="justify-start text-none font-weight-medium gtext-t4"
                 @click="tag.selected = !tag.selected"

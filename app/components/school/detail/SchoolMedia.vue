@@ -40,8 +40,8 @@
         Documented exception to "Vuetify first" (AGENTS.md): plain <img> tiles in one CSS layout that is a
         swipe row on phones and a grid on desktop. The first photo is in the server HTML and is the page's
         LCP; v-img/v-carousel only show their image after hydration, which would delay it by seconds.
-        Photos are drawn whole (contain) over a blurred copy, so any shape - including the old 400x150
-        banner uploads - looks right without being cut.
+        Each photo fills its tile (cover), trimming whatever doesn't fit around the centre; uploads are
+        cropped to 4:3, the tile's own shape, so new photos lose little or nothing.
       -->
       <div
         v-if="photos.length"
@@ -55,13 +55,6 @@
           :aria-label="`Open photo ${index + 1} of ${photos.length}`"
           @click="openGallery"
         >
-          <img
-            :src="photo.src"
-            alt=""
-            aria-hidden="true"
-            class="media-tile__backdrop"
-            :loading="index === 0 ? 'eager' : 'lazy'"
-          >
           <img
             :src="photo.src"
             :alt="index === 0 ? (content.name ?? '') : `${content.name ?? ''}, photo ${index + 1}`"
@@ -249,41 +242,44 @@ defineExpose({ startAddPhoto, startAddTour })
   flex-basis: 100%;
 }
 
-.media-tile__backdrop,
 .media-tile__img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-}
-
-.media-tile__backdrop {
   object-fit: cover;
-  filter: blur(24px) saturate(1.1);
-  transform: scale(1.15);
-  opacity: 0.55;
-}
-
-.media-tile__img {
-  object-fit: contain;
+  object-position: center;
 }
 
 .media-tile__more {
   display: none !important;
 }
 
-/* Desktop: one big photo and up to two beside it, at a fixed height so nothing moves. */
+/*
+  Desktop: one big photo and up to two beside it. The grid's shape is set so every tile comes out
+  4:3 - the shape uploads are cropped to - so new photos fill their tile without losing anything:
+  three photos at 2:1 (a 2/3-wide 4:3 tile beside two stacked 1/3-wide ones), two side by side at
+  8:3, one on its own at 16:10.
+*/
 @media (min-width: 960px) {
   .media-gallery {
     display: grid;
     grid-template-columns: 2fr 1fr;
     grid-template-rows: 1fr 1fr;
-    height: 420px;
+    aspect-ratio: 2 / 1;
     overflow: visible;
   }
 
   .media-gallery--1 {
     grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    aspect-ratio: 16 / 10;
+  }
+
+  .media-gallery--2 {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    aspect-ratio: 8 / 3;
   }
 
   .media-tile {
@@ -291,11 +287,7 @@ defineExpose({ startAddPhoto, startAddTour })
     height: 100%;
   }
 
-  .media-tile:first-child {
-    grid-row: span 2;
-  }
-
-  .media-gallery--2 .media-tile:nth-child(2) {
+  .media-gallery--3 .media-tile:first-child {
     grid-row: span 2;
   }
 

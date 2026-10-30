@@ -285,16 +285,12 @@ async function sendToAI() {
     console.error('AI Error:', err)
   }
 }
-const { getToken, initCaptcha, isLoaded } = useRecaptcha()
+const { getToken, initCaptcha } = useRecaptcha()
 initCaptcha()
 
 async function submitComment() {
   submitLoading.value = true
   try {
-    if (!isLoaded()) {
-      throw new Error('reCAPTCHA not loaded yet. Please try again.')
-    }
-
     const captcha = await getToken('submit')
 
     const response = await useApiService.post(
