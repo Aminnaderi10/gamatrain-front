@@ -3,6 +3,7 @@
     v-model="isFormValid"
     class="w-100 d-flex flex-column"
     @submit.prevent="submitTicket"
+    @focusin="initCaptcha"
   >
     <div
       v-if="!hasAccountEmail"
@@ -144,7 +145,7 @@ const emit = defineEmits<{
 const { $toast } = useNuxtApp()
 const { required, emailStrict, fileSize, fileType } = useValidationRules()
 const { createTicket } = useTicket()
-const { getToken, initCaptcha, isLoaded } = useRecaptcha()
+const { getToken, initCaptcha } = useRecaptcha()
 const { user } = useUser()
 
 // The backend uses the account email for signed-in users, so only ask for one when the account has none.
@@ -186,10 +187,6 @@ const submitTicket = async () => {
   if (!isFormValid.value || loading.value) return
 
   try {
-    if (!isLoaded()) {
-      throw new Error('reCAPTCHA not loaded yet. Please try again.')
-    }
-
     loading.value = true
     const captcha = await getToken('submit')
     const response = await createTicket({
@@ -216,8 +213,4 @@ const submitTicket = async () => {
     loading.value = false
   }
 }
-
-onMounted(() => {
-  initCaptcha()
-})
 </script>
