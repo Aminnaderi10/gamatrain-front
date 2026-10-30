@@ -297,7 +297,7 @@ export interface ExamResultAnalyzeResponseDTO {
 
 export interface ExamResultResponseDTO {
   result: ExamResultDetailDTO
-  analysis: ExamResultAnalyzeResponseDTO
+  analysis: ExamResultAnalyzeResponseDTO | null
 }
 
 export interface ExamResultDownloadDTO {

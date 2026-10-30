@@ -90,7 +90,10 @@ export const useExamResult = () => {
         `/api/v2/exams/${id}/analysis`,
       )
       if (response.data == null || !response.succeeded) {
-        handleApiResponseError(response)
+        // A refused charge is answered with the payment modal, not an error toast.
+        const isPaymentRefusal = !!response.data?.upgradeSuggestions?.length
+          || response.errors?.[0]?.message === 'InsufficientBalance'
+        handleApiResponseError(response, undefined, !isPaymentRefusal)
       }
 
       return response

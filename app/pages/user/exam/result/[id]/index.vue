@@ -33,6 +33,7 @@
 import type {
   ExamResultDetailDTO,
   ExamResultAnalyzeResponseDTO,
+  ExamAnalyzeDetailResponseDTO,
 } from '@/types'
 
 definePageMeta({
@@ -58,7 +59,7 @@ const fetchResult = async () => {
   const response = await getItemById(resultId.value)
   if (response.succeeded && response.data) {
     contentData.value = response.data.result
-    analyzeData.value = response.data.analysis
+    analyzeData.value = response.data.analysis ?? undefined
   }
 }
 
@@ -66,11 +67,13 @@ onMounted(() => {
   fetchResult()
 })
 
-const updateResultAnalyze = (result: string) => {
-  if (analyzeData.value) {
-    analyzeData.value.result = result
-    analyzeData.value.points = 0
-    analyzeData.value.purchased = true
+// The analysis was just bought: keep its text so the next click opens it without charging again.
+const updateResultAnalyze = (analysis: ExamAnalyzeDetailResponseDTO) => {
+  analyzeData.value = {
+    id: analysis.id,
+    result: analysis.result,
+    points: 0,
+    purchased: true,
   }
 }
 </script>

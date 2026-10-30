@@ -25,9 +25,15 @@
       </v-chip>
     </div>
 
-    <div class="w-100 d-flex flex-wrap mt-4 bg-grey100 rounded-lg border-grey300 border-sm border-opacity-100">
-      <div
-        class="d-flex pa-3 d-flex align-center ga-3 width-item"
+    <v-row
+      no-gutters
+      class="w-100 flex-grow-0 mt-4 bg-grey100 rounded-lg border-grey300 border-sm border-opacity-100"
+    >
+      <v-col
+        cols="12"
+        sm="4"
+        md
+        class="pa-3 d-flex align-center ga-3 min-w-0"
       >
         <v-avatar
           size="64"
@@ -55,19 +61,22 @@
             Code: {{ contentData?.exam.code }}
           </span>
         </div>
-      </div>
+      </v-col>
 
-      <div
+      <v-col
         v-for="item in overviewItems"
         :key="item.label"
-        class="pa-3 d-flex flex-column align-start justify-center ga-1 width-item"
+        cols="12"
+        sm="4"
+        md
+        class="pa-3 d-flex flex-column align-start justify-center ga-1"
       >
         <span class="text-grey500 text-h6 font-weight-medium">
           <v-icon class="mr-2">{{ item.icon }}</v-icon>
           {{ item.label }}</span>
         <span class="text-grey800 text-h5 font-weight-bold pl-8">{{ item.value }}</span>
-      </div>
-    </div>
+      </v-col>
+    </v-row>
   </v-card>
 </template>
 
@@ -131,23 +140,3 @@ const formatSeconds = (value: number) => {
   return `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}`
 }
 </script>
-
-<style scoped  lang="scss">
-@use 'sass:map';
-@use 'vuetify/settings' as vuetify;
-
-.width-item{
-  width : 20%
-}
-
-@media #{map.get(vuetify.$display-breakpoints, 'sm')} {
- .width-item{
-    width : 33%
-  }
-}
-@media #{map.get(vuetify.$display-breakpoints, 'xs')} {
- .width-item{
-    width : 100%
-  }
-}
-</style>

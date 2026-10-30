@@ -25,8 +25,16 @@
       />
     </div>
 
-    <div class="w-100 d-flex flex-wrap mt-4 bg-grey100 rounded-lg border-grey300 border-sm border-opacity-100">
-      <div class="pa-3 d-flex align-center ga-3 width-item">
+    <v-row
+      no-gutters
+      class="w-100 flex-grow-0 mt-4 bg-grey100 rounded-lg border-grey300 border-sm border-opacity-100"
+    >
+      <v-col
+        cols="12"
+        sm="4"
+        md
+        class="pa-3 d-flex align-center ga-3 min-w-0"
+      >
         <v-skeleton-loader
           height="64"
           min-width="64"
@@ -42,12 +50,15 @@
             width="110"
           />
         </div>
-      </div>
+      </v-col>
 
-      <div
+      <v-col
         v-for="item in 4"
         :key="item"
-        class="pa-3 d-flex flex-column align-start justify-center ga-1 width-item"
+        cols="12"
+        sm="4"
+        md
+        class="pa-3 d-flex flex-column align-start justify-center ga-1"
       >
         <div class="d-flex align-center ga-2">
           <v-skeleton-loader
@@ -65,25 +76,7 @@
           width="110"
           class="ml-8"
         />
-      </div>
-    </div>
+      </v-col>
+    </v-row>
   </v-card>
 </template>
-
-<style scoped>
-.width-item {
-  width: 20%;
-}
-
-@media (max-width: 960px) {
-  .width-item {
-    width: 33%;
-  }
-}
-
-@media (max-width: 600px) {
-  .width-item {
-    width: 100%;
-  }
-}
-</style>

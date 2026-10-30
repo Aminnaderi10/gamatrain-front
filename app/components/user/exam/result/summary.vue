@@ -92,6 +92,7 @@
           </v-card>
 
           <v-card
+            v-if="!analysisText"
             class="w-100 pa-3 d-flex flex-column flex-sm-row ga-2 flex-grow-1 border-sm border-primary border-opacity-50"
             color="primary50"
             flat
@@ -100,52 +101,90 @@
           >
             <img
               :src="gamaRobot"
-              alt="Gama Robot"
+              alt=""
               width="80"
               class="h-100 image-robot"
             >
-            <div class="d-flex flex-column align-start justify-start ga-1">
+            <div class="w-100 d-flex flex-column align-start justify-start ga-1">
               <span class="text-grey800 text-h5 font-weight-bold">Get your personal exam analysis</span>
-              <span class="text-grey600 text-h6 font-weight-medium">Let alpha analyze your answers and reveal your strength and areas to improve.</span>
-              <v-btn
-                rounded="pill"
-                class="d-flex align-center justify-center mt-2"
-                color="primary"
-                flat
-                height="30"
-                :loading="loadingGetAnalyzeResultExam"
-                @click="handleResultAnalyze"
-              >
-                <template #loader>
-                  <v-progress-circular
-                    color="grey700"
-                    size="20"
-                    width="3"
-                    indeterminate
-                  />
-                </template>
-
-                <span class="text-grey700 text-h6 font-weight-bold mt-1 mx-2">Get my analysis</span>
-
-                <common-price-with-gem
-                  v-if="!resultAnalyze?.purchased"
-                  class="text-grey700 text-h6 font-weight-bold mt-1"
-                  :price="resultAnalyze?.points"
-                  color="grey700"
+              <template v-if="loadingGetAnalyzeResultExam">
+                <span class="text-grey600 text-h5 font-weight-medium">
+                  Analyzing your answers… this can take a few seconds.
+                </span>
+                <v-progress-linear
+                  color="primary"
+                  bg-color="grey200"
+                  height="6"
+                  rounded
+                  indeterminate
+                  class="mt-2"
                 />
+              </template>
+              <template v-else>
+                <span class="text-grey600 text-h5 font-weight-medium">Let alpha analyze your answers and reveal your strengths and areas to improve.</span>
+                <v-btn
+                  rounded="pill"
+                  class="d-flex align-center justify-center mt-2"
+                  color="primary"
+                  flat
+                  height="30"
+                  @click="handleResultAnalyze"
+                >
+                  <span class="text-grey700 text-h6 font-weight-bold mt-1 mx-2">Get my analysis</span>
+
+                  <common-price-with-gem
+                    v-if="!resultAnalyze?.purchased"
+                    class="text-grey700 text-h6 font-weight-bold mt-1"
+                    :price="resultAnalyze?.points"
+                    color="grey700"
+                  />
+                  <span
+                    v-else
+                    class="text-grey700 text-h6 font-weight-bold mt-1"
+                  >(Owned)</span>
+                </v-btn>
                 <span
-                  v-else
-                  class="text-grey700 text-h6 font-weight-bold mt-1"
-                >(Owned)</span>
-              </v-btn>
-              <span class="text-grey500 text-subtitle-1 font-weight-medium d-flex align-center ga-1">
-                <v-icon>md:lock</v-icon>
-                Available with membership</span>
+                  v-if="!resultAnalyze?.purchased"
+                  class="text-grey500 text-h5 font-weight-medium d-flex align-center ga-1"
+                >
+                  <v-icon>md:lock</v-icon>
+                  Free with membership</span>
+              </template>
             </div>
           </v-card>
         </div>
       </v-card>
     </div>
+
+    <!-- Personal analysis: shown on load once bought, and revealed right after buying -->
+    <v-expand-transition>
+      <v-card
+        v-if="analysisText"
+        ref="analysisCardRef"
+        class="w-100 mt-3 pa-4 border-sm border-primary border-opacity-50"
+        color="primary50"
+        flat
+        rounded="lg"
+      >
+        <div class="d-flex align-center ga-3">
+          <img
+            :src="gamaRobot"
+            alt=""
+            width="48"
+            height="48"
+            class="image-robot flex-shrink-0"
+          >
+          <div class="d-flex flex-column">
+            <span class="text-grey800 text-h5 font-weight-bold">Your personal exam analysis</span>
+            <span class="text-grey500 text-h6">Based on your answers in this exam</span>
+          </div>
+        </div>
+        <v-divider class="my-3" />
+        <p class="text-grey700 text-h5 font-weight-regular text-pre-line">
+          {{ analysisText }}
+        </p>
+      </v-card>
+    </v-expand-transition>
 
     <!-- Coin Payment Modal -->
     <lazy-common-modal-base
@@ -176,21 +215,13 @@
       :delta-price="priceFile"
       @complete-animation="completeWalletAnimation"
     />
-
-    <lazy-common-modal-base
-      v-model:show-dialog="showAnalyzeModal"
-      :max-width="600"
-      title="Analyze Result"
-    >
-      <span class="text-grey700 text-h6 font-weight-medium mt-4 result-text">{{ resultTextAnalyze }}</span>
-    </lazy-common-modal-base>
   </v-card>
 </template>
 
 <script setup lang="ts">
 import type { ChartData, ChartOptions } from 'chart.js'
 import type { ExamResultAnswerStatsDTO, ExamResultRankDTO, ExamResultAnalyzeResponseDTO, UpgradeSuggestionsDTO,
-  BillingInterval } from '@/types'
+  BillingInterval, ExamAnalyzeDetailResponseDTO } from '@/types'
 import {
   ArcElement,
   Chart as ChartJS,
@@ -198,7 +229,7 @@ import {
   Tooltip,
 } from 'chart.js'
 import { Doughnut as DoughnutChart } from 'vue-chartjs'
-import { useTheme } from 'vuetify'
+import { useGoTo, useTheme } from 'vuetify'
 import gamaRobot from '@/assets/images/gama-robot.webp'
 
 ChartJS.register(
@@ -214,7 +245,9 @@ const props = defineProps<{
   rank?: ExamResultRankDTO
   resultAnalyze?: ExamResultAnalyzeResponseDTO
 }>()
-const emit = defineEmits(['updateResultAnalyze'])
+const emit = defineEmits<{
+  updateResultAnalyze: [analysis: ExamAnalyzeDetailResponseDTO]
+}>()
 
 const totalStats = computed(() => {
   const total = props.answerStats?.total
@@ -281,15 +314,14 @@ const chartOptions = computed<ChartOptions<'doughnut'>>(() => ({
   },
 }))
 
-const getNoAnswerCount = (lesson: { noanswer?: number, noAnswer?: number }) => {
-  return lesson.noanswer ?? lesson.noAnswer ?? 0
+const getNoAnswerCount = (stats: { noanswer?: number, noAnswer?: number }) => {
+  return stats.noanswer ?? stats.noAnswer ?? 0
 }
 
 const rankItems = computed(() => {
   return [
     { label: 'Country rank', value: formatRank(props.rank?.total), icon: 'md:trophy' },
     { label: 'State rank', value: formatRank(props.rank?.state), icon: 'md:leaderboard' },
-    // { label: 'Area rank', value: formatRank(props.rank?.area) },
   ]
 })
 
@@ -304,13 +336,24 @@ const route = useRoute()
 const showCoinPaymentModal = ref(false)
 const showCoinAnimation = ref(false)
 const isStartWalletAnimation = ref(false)
-const priceFile = ref(props.resultAnalyze?.points ?? 0)
+const priceFile = ref(0)
 const paymentPlans = ref<UpgradeSuggestionsDTO[]>([])
 const billingInterval = ref<BillingInterval[]>([])
 const currentPlanTitle = ref<string | null>(null)
 const currentPlanId = ref<number | null>(null)
-const showAnalyzeModal = ref(false)
-const resultTextAnalyze = ref(props.resultAnalyze?.result ?? '')
+const goTo = useGoTo()
+const analysisCardRef = ref<{ $el: HTMLElement } | null>(null)
+// What the analysis card shows; a just-bought analysis waits here until the wallet animation ends.
+const analysisText = ref(props.resultAnalyze?.result ?? '')
+const pendingAnalysisText = ref('')
+
+const revealAnalysis = async (text: string) => {
+  analysisText.value = text
+  await nextTick()
+  if (analysisCardRef.value?.$el) {
+    goTo(analysisCardRef.value.$el, { offset: -80 })
+  }
+}
 
 const handleAnimationComplete = async () => {
   // Close everything immediately when animation completes
@@ -319,8 +362,8 @@ const handleAnimationComplete = async () => {
 }
 
 const completeWalletAnimation = () => {
-  showAnalyzeModal.value = true
   isStartWalletAnimation.value = false
+  revealAnalysis(pendingAnalysisText.value)
 }
 const upgradePlanSuccessfully = async () => {
   showCoinPaymentModal.value = false
@@ -328,29 +371,32 @@ const upgradePlanSuccessfully = async () => {
 }
 
 const handleResultAnalyze = async () => {
-  if (props.resultAnalyze?.result) {
-    resultTextAnalyze.value = props.resultAnalyze?.result
-    showAnalyzeModal.value = true
+  if (loadingGetAnalyzeResultExam.value) return
+
+  const response = await getAnalyzeResultExam(route.params.id as string)
+  if (response.succeeded && response.data) {
+    emit('updateResultAnalyze', response.data)
+    if (response.data.paidBy === 'Points') {
+      // Animate the amount actually charged, not the price shown before buying.
+      priceFile.value = response.data.points
+      pendingAnalysisText.value = response.data.result
+      showCoinAnimation.value = true
+    }
+    else {
+      revealAnalysis(response.data.result)
+    }
+    return
   }
-  else {
-    const response = await getAnalyzeResultExam(route.params.id as string)
-    if (response.succeeded && response.data) {
-      resultTextAnalyze.value = response.data.result
-      emit('updateResultAnalyze', response.data.result)
-      if (response.data.paidBy === 'Points') {
-        showCoinAnimation.value = true
-      }
-      else {
-        showAnalyzeModal.value = true
-      }
-    }
-    if (!response.succeeded && response.data && response.data.upgradeSuggestions && response.data.upgradeSuggestions.length > 0) {
-      paymentPlans.value = response.data.upgradeSuggestions || []
-      billingInterval.value = response.data.availableBillingIntervals || []
-      currentPlanTitle.value = response.data.currentPlanTitle
-      currentPlanId.value = response.data.currentPlanId
-      showCoinPaymentModal.value = true
-    }
+
+  if (response.data?.upgradeSuggestions?.length) {
+    paymentPlans.value = response.data.upgradeSuggestions
+    billingInterval.value = response.data.availableBillingIntervals || []
+    currentPlanTitle.value = response.data.currentPlanTitle
+    currentPlanId.value = response.data.currentPlanId
+    showCoinPaymentModal.value = true
+  }
+  else if (response.errors?.[0]?.message === 'InsufficientBalance') {
+    showCoinPaymentModal.value = true
   }
 }
 </script>
@@ -362,8 +408,5 @@ const handleResultAnalyze = async () => {
 }
 .image-robot{
   object-fit : contain
-}
-.result-text{
-  white-space: pre-line;
 }
 </style>
