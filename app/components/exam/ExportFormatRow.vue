@@ -34,8 +34,9 @@
       </span>
 
       <span
-        class="text-h6 text-no-wrap"
+        class="text-h6"
         :class="status.color"
+        aria-live="polite"
       >{{ status.text }}</span>
     </span>
 
@@ -51,6 +52,15 @@
         size="18"
         width="2"
       />
+      <!-- Counts down to the next automatic retry. -->
+      <v-progress-circular
+        v-else-if="phase === 'waiting' && retry"
+        :model-value="(retry.secondsLeft / retry.delay) * 100"
+        size="26"
+        width="2"
+      >
+        <span class="text-subtitle-1 font-weight-heavy">{{ retry.secondsLeft }}</span>
+      </v-progress-circular>
       <v-icon
         v-else
         size="18"
@@ -62,32 +72,38 @@
 <script setup lang="ts">
 import type { ExamExportPriceDTO } from '@/types'
 import type { ExamExportFormat } from '@/utils/examExportFormats'
-import type { ExamExportPhase } from '@/composables/useExamExportDownload'
+import { EXAM_EXPORT_AUTO_RETRY_DELAYS } from '@/composables/useExamExportDownload'
+import type { ExamExportPhase, ExamExportRetry } from '@/composables/useExamExportDownload'
 
 const props = defineProps<{
   format: ExamExportFormat
   price?: ExamExportPriceDTO
   phase?: ExamExportPhase
   progress: number
+  retry?: ExamExportRetry
 }>()
+
+const maxRetries = EXAM_EXPORT_AUTO_RETRY_DELAYS.length
 
 const isBusy = computed(() => props.phase === 'cooking' || props.phase === 'downloading')
 
 const status = computed(() => {
   switch (props.phase) {
-    case 'cooking': return { text: 'Preparing file...', color: 'text-grey600' }
+    case 'cooking': return {
+      text: props.retry ? `Retry ${props.retry.attempt} of ${maxRetries} · preparing file...` : 'Preparing file...',
+      color: 'text-grey600',
+    }
     case 'downloading': return { text: `Downloading ${props.progress}%`, color: 'text-grey600' }
-    case 'error': return { text: 'Download failed', color: 'text-lightError' }
-    case 'retry': return { text: 'Try again', color: 'text-grey600' }
+    case 'waiting': return {
+      text: `Failed · retrying in ${props.retry?.secondsLeft ?? 0}s (${props.retry?.attempt ?? 1}/${maxRetries})`,
+      color: 'text-lightError',
+    }
+    case 'failed': return { text: 'Download failed · tap to retry', color: 'text-lightError' }
     default: return { text: props.format.summary, color: 'text-grey500' }
   }
 })
 
-const goIcon = computed(() => {
-  if (props.phase === 'error') return 'md:priority_high'
-  if (props.phase === 'retry') return 'md:autorenew'
-  return 'md:download'
-})
+const goIcon = computed(() => props.phase === 'failed' ? 'md:autorenew' : 'md:download')
 </script>
 
 <style scoped>

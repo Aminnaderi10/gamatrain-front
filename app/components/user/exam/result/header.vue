@@ -21,6 +21,7 @@
         :price="getPrice(format.fileType)"
         :phase="getPhase(format.fileType)"
         :progress="getProgress(format.fileType)"
+        :retry="getRetry(format.fileType)"
         @click="handleExportClick(format.fileType)"
       />
     </div>
@@ -84,6 +85,7 @@ const {
   getPrice,
   getPhase,
   getProgress,
+  getRetry,
   startExport,
 } = useExamExportDownload({
   examId: props.contentData.exam.id,
