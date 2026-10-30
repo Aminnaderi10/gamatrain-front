@@ -12,6 +12,7 @@ import type {
  * One request both builds and returns the file, so the button shows two phases:
  * - 'cooking': the server is generating the file (everything before the response headers arrive);
  * - 'downloading': the file is streaming in, with real progress from Content-Length.
+ * A failed export shows 'error' for a few seconds, then 'retry'; both can be clicked to try again.
  *
  * The backend charges on the first export of each exam + format (ExamDownload quota, then points) and
  * answers a refused charge with the same JSON as `POST downloads`, so the page's existing
@@ -77,20 +78,34 @@ export const useExamExportDownload = (options: UseExamExportDownloadOptions) => 
   const getPhase = (fileType: ExamExportFileType) => phases.value[fileType]
   const getProgress = (fileType: ExamExportFileType) => progress.value[fileType] ?? 0
 
+  // Timers that turn a failed row from 'error' into 'retry'.
+  const retryTimers = new Map<ExamExportFileType, ReturnType<typeof setTimeout>>()
+
+  const cancelRetryTimer = (fileType: ExamExportFileType) => {
+    clearTimeout(retryTimers.get(fileType))
+    retryTimers.delete(fileType)
+  }
+
   const clear = (fileType: ExamExportFileType) => {
+    cancelRetryTimer(fileType)
     Reflect.deleteProperty(phases.value, fileType)
     Reflect.deleteProperty(progress.value, fileType)
   }
 
   const markAsFailed = (fileType: ExamExportFileType) => {
+    cancelRetryTimer(fileType)
     phases.value[fileType] = 'error'
     progress.value[fileType] = 0
-    setTimeout(() => {
-      if (phases.value[fileType] === 'error') {
-        phases.value[fileType] = 'retry'
-      }
-    }, 5000)
+    retryTimers.set(fileType, setTimeout(() => {
+      retryTimers.delete(fileType)
+      phases.value[fileType] = 'retry'
+    }, 5000))
   }
+
+  onScopeDispose(() => {
+    retryTimers.forEach(timer => clearTimeout(timer))
+    retryTimers.clear()
+  })
 
   // Open to guests (prices only); with a signed-in user it also says which formats they already bought.
   const fetchPrices = async () => {
@@ -158,7 +173,9 @@ export const useExamExportDownload = (options: UseExamExportDownloadOptions) => 
   }
 
   const startExport = async (fileType: ExamExportFileType) => {
-    if (phases.value[fileType] && phases.value[fileType] !== 'retry') {
+    // Only an export in progress blocks a click; a failed one can be retried straight away.
+    const phase = phases.value[fileType]
+    if (phase === 'cooking' || phase === 'downloading') {
       return
     }
 
@@ -168,6 +185,7 @@ export const useExamExportDownload = (options: UseExamExportDownloadOptions) => 
     }
 
     trackFileDownload({ file_type: 'exam', file_name: options.title, file_url: options.titleUrl })
+    cancelRetryTimer(fileType)
     phases.value[fileType] = 'cooking'
     progress.value[fileType] = 0
 
