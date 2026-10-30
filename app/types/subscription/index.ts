@@ -65,6 +65,13 @@ export interface EditAdminSubscriptionPlanFeaturesDTO {
   }[]
 }
 
+/** POST admin/subscriptions/plans/{id}/sync-features: what syncing the plan's features to its active subscribers changed. */
+export interface SyncAdminSubscriptionPlanFeaturesDTO {
+  subscriptionCount: number
+  featureCount: number
+  quotaCount: number
+}
+
 export interface AdminSubscriptionFeatureDTO {
   id: number
   code: string
