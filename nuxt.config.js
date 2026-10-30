@@ -273,8 +273,9 @@ export default defineNuxtConfig({
               return 'charts'
             if (normalizedId.includes('/node_modules/@ckeditor/ckeditor5-vue/'))
               return 'ckeditor'
-            if (normalizedId.includes('/node_modules/pdfjs-dist/'))
-              return 'pdfjs'
+            // No manual chunk for pdfjs-dist: it's only imported by the lazy PdfPreviewDialog, so Rollup
+            // already keeps it out of the shared bundle. A 'pdfjs' manual chunk pulled shared helpers
+            // (ufo) into it, which made every page download the whole PDF library and its worker.
           },
         },
       },

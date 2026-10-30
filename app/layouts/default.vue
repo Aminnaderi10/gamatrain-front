@@ -51,8 +51,10 @@ const { isOnline } = useNetwork()
 const excludedPaths = ['/', '/school', 'unsubscribe', '/teacher']
 const excludedNames = ['exam-start-id', 'school-add', 'subject-directory', 'governance', 'donate', 'payments-id-verify', 'teacher-id', 'unsubscribe', 'teacher']
 
+// A page can also opt out with definePageMeta({ hidePostSlider: true }), e.g. pages with dynamic paths.
 const showPostSlider = computed(() => {
-  return !isSearchExperience.value
+  return route.meta.hidePostSlider !== true
+    && !isSearchExperience.value
     && !excludedPaths.includes(route.path)
     && !excludedNames.includes(route.name)
 })
