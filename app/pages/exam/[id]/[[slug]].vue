@@ -8,11 +8,10 @@
       :breads="breads"
     />
 
-    <v-row class="mt-1">
-      <v-col
-        cols="12"
-        md="8"
-      >
+    <!-- One grid so the side column runs the full height on desktop (no gap under the title), while a phone
+         still reads: title, download card, sample questions, about. -->
+    <div class="exam-layout mt-4">
+      <div class="exam-head">
         <v-chip
           color="generalSearchQuiz"
           variant="tonal"
@@ -77,33 +76,25 @@
           </div>
           <common-follow-button :user-id="contentData.user_" />
         </div>
-      </v-col>
+      </div>
 
-      <v-col
-        cols="12"
-        md="4"
-      >
-        <div class="action-column">
-          <exam-detail-action-card
-            :id="contentData.id"
-            :title="contentData.title"
-            :title-url="contentData.title_url"
-            :question-count="Number(contentData.tests_num) || 0"
-            :participation="contentData.price?.participation"
-            :exam-user-data="contentData.examUserData"
-            @share="openShare = true"
-            @report="openCrashReport = true"
-          />
-        </div>
-      </v-col>
-    </v-row>
+      <div class="exam-side d-md-flex flex-column ga-4">
+        <exam-detail-action-card
+          :id="contentData.id"
+          class="exam-side__action"
+          :title="contentData.title"
+          :title-url="contentData.title_url"
+          :question-count="Number(contentData.tests_num) || 0"
+          :participation="contentData.price?.participation"
+          :exam-user-data="contentData.examUserData"
+          @share="openShare = true"
+          @report="openCrashReport = true"
+        />
+        <exam-detail-about-card :exam="contentData" />
+        <exam-detail-topics-card :topics="contentData.topics" />
+      </div>
 
-    <v-row class="mt-8">
-      <v-col
-        cols="12"
-        md="8"
-        class="d-flex flex-column ga-6"
-      >
+      <div class="exam-main d-flex flex-column ga-6">
         <exam-detail-sample-questions
           :exam-id="contentData.id"
           :questions="contentData.sampleQuestions"
@@ -131,16 +122,8 @@
             {{ contentData.paper.isPastPaper ? '(question paper and mark scheme)' : '' }}
           </span>
         </v-card>
-      </v-col>
-      <v-col
-        cols="12"
-        md="4"
-        class="d-flex flex-column ga-4"
-      >
-        <exam-detail-about-card :exam="contentData" />
-        <exam-detail-topics-card :topics="contentData.topics" />
-      </v-col>
-    </v-row>
+      </div>
+    </div>
 
     <lazy-exam-detail-related-quizzes
       :id="contentData.id"
@@ -148,12 +131,12 @@
       class="mt-10"
     />
 
-    <!-- Past Papers, Multimedia and Tutorials; quizzes already have their own row above. -->
+    <!-- Past papers (`test`) and tutorials; quizzes already have their own row above. -->
     <div class="mt-6 mx-n4">
       <lazy-common-related-content
         :id="contentData.id"
         source="exam"
-        :request="[`test`, `file`, `tutorial`]"
+        :request="[`test`, `tutorial`]"
       />
     </div>
 
@@ -363,7 +346,10 @@ useHead(() => ({
 }))
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use 'sass:map';
+@use 'vuetify/settings' as vuetify;
+
 .exam-details {
   max-width: 1232px;
 }
@@ -377,10 +363,46 @@ useHead(() => ({
 .tag-chip {
   background-color: rgb(var(--v-theme-white));
 }
-@media (min-width: 960px) {
-  .action-column {
-    position: sticky;
-    top: 88px;
+.exam-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+/* On a phone the side column's cards slot in around the main content; d-md-flex takes over from md up. */
+.exam-side {
+  display: contents;
+}
+.exam-head {
+  order: 1;
+}
+.exam-side__action {
+  order: 2;
+}
+.exam-main {
+  order: 3;
+}
+.exam-side > :not(.exam-side__action) {
+  order: 4;
+}
+@media #{map.get(vuetify.$display-breakpoints, 'md-and-up')} {
+  .exam-layout {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "head side"
+      "main side";
+    column-gap: 24px;
+    row-gap: 32px;
+  }
+  .exam-side {
+    grid-area: side;
+    align-self: start;
+  }
+  .exam-head {
+    grid-area: head;
+  }
+  .exam-main {
+    grid-area: main;
   }
 }
 </style>
