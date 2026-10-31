@@ -83,6 +83,7 @@
         :allow-clear="inlineAllowClear"
         :items-per-row="inlineItemsPerRow"
         :item-title="itemTitle"
+        grouped
         @select="changeSelectedItem"
       />
 
@@ -215,7 +216,7 @@
 
 <script setup>
 import { useDisplay } from 'vuetify'
-import { ref, computed, watch, defineComponent, h } from 'vue'
+import { ref, computed, defineComponent, h } from 'vue'
 
 const escapeRegExp = text => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
@@ -251,7 +252,9 @@ const HighlightedText = defineComponent({
           h(
             'span',
             {
-              class: part.highlight ? 'bg-softGold text-brandNavy' : '',
+              style: part.highlight
+                ? 'background-color: rgb(var(--v-theme-softGold)); color: rgb(var(--v-theme-brandNavy));'
+                : '',
             },
             part.text,
           ),
