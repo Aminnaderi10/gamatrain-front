@@ -1,16 +1,15 @@
 import { useNuxtApp } from '#app'
 import { useApiService } from '~/composables/useApiService'
 import { DIRECTORY_BOARD_ORDER } from '~/constants/pastpaper/directory'
-import { resolveDirectorySelection } from '~/utils/directorySelection'
 import type { ApiResult } from '~/types/api'
 import type { BoardDTO, GradeDTO, SubjectDTO } from '~/types/board'
-import type { DirectorySelection, DirectorySelectorPath } from '~/types/subject-directory/cascader'
 
 // Board, grade and subject lists for the directory picker. Each list is requested
-// once per picker (pending requests are shared) and dropped again if it fails.
+// once per app instance (one per server request, one in the browser), shared by
+// the URL resolver and the picker, and dropped again if it fails.
 export const useDirectoryOptionsApi = () => {
-  const nuxtApp = useNuxtApp()
-  const lists = new Map<string, Promise<unknown[]>>()
+  const nuxtApp = useNuxtApp() as ReturnType<typeof useNuxtApp> & { _directoryOptionLists?: Map<string, Promise<unknown[]>> }
+  const lists = nuxtApp._directoryOptionLists ??= new Map<string, Promise<unknown[]>>()
 
   const getList = <T>(key: string, request: () => Promise<ApiResult<T[]>>): Promise<T[]> => {
     const cached = lists.get(key)
@@ -40,13 +39,5 @@ export const useDirectoryOptionsApi = () => {
   const getSubjects = (gradeId: string) => getList<SubjectDTO>(`subjects:${gradeId}`, () =>
     useApiService.get<ApiResult<SubjectDTO[]>>('/api/v1/types/list/', { type: 'lesson', base_id: gradeId }, { public: true }))
 
-  const getBoardSubjectPaths = async (board: BoardDTO): Promise<DirectorySelection[]> => {
-    const grades = await getGrades(board.code)
-    const subjectLists = await Promise.all(grades.map(grade => getSubjects(grade.id)))
-    return grades.flatMap((grade, index) => (subjectLists[index] ?? []).map(subject => ({ board, grade, subject })))
-  }
-
-  const resolvePath = (path: DirectorySelectorPath) => resolveDirectorySelection({ getBoards, getGrades, getSubjects }, path)
-
-  return { getBoards, getGrades, getSubjects, getBoardSubjectPaths, resolvePath }
+  return { getBoards, getGrades, getSubjects }
 }
