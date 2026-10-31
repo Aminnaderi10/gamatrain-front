@@ -387,7 +387,10 @@ const emit = defineEmits<{
 }>()
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use 'sass:map';
+@use 'vuetify/settings' as vuetify;
+
 .directory-cascader-trigger {
   font-size: 14px;
   font-weight: 500;
@@ -412,7 +415,7 @@ const emit = defineEmits<{
 }
 
 .directory-cascader-trigger:focus-visible {
-  box-shadow: 0 0 0 3px rgb(var(--v-theme-primary) / 28%);
+  box-shadow: 0 0 0 3px rgba(var(--v-theme-primary), 0.28);
 }
 
 .directory-cascader-trigger :deep(.v-btn__content) {
@@ -434,7 +437,7 @@ const emit = defineEmits<{
   color: rgb(var(--v-theme-brandNavy));
   border: 1px solid rgb(var(--v-theme-borderSubtle));
   border-radius: 16px;
-  box-shadow: 0 20px 48px rgb(var(--v-theme-brandNavy) / 16%);
+  box-shadow: 0 20px 48px rgba(var(--v-theme-brandNavy), 0.16);
 }
 
 .directory-cascader-search {
@@ -551,11 +554,11 @@ const emit = defineEmits<{
   color: rgb(var(--v-theme-brandNavy)) !important;
   background: rgb(var(--v-theme-surfaceTertiary)) !important;
   border-color: rgb(var(--v-theme-borderSubtle));
-  box-shadow: 0 1px 2px rgb(var(--v-theme-brandNavy) / 8%);
+  box-shadow: 0 1px 2px rgba(var(--v-theme-brandNavy), 0.08);
 }
 
 .directory-cascader-option:focus-visible {
-  outline: 2px solid rgb(var(--v-theme-primary) / 28%);
+  outline: 2px solid rgba(var(--v-theme-primary), 0.28);
   outline-offset: -2px;
 }
 
@@ -574,7 +577,7 @@ const emit = defineEmits<{
   }
 }
 
-@media (max-width: 599px) {
+@media #{map.get(vuetify.$display-breakpoints, 'xs')} {
   .directory-cascader-menu {
     width: calc(100vw - 32px);
   }

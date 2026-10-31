@@ -127,7 +127,10 @@ useHead(() => ({
 }))
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use 'sass:map';
+@use 'vuetify/settings' as vuetify;
+
 .margin-top-handle {
   margin-top: 64px;
   min-height: calc(100vh - 64px);
@@ -160,13 +163,13 @@ useHead(() => ({
   font-size: 14px;
   line-height: 1.5;
 }
-@media (min-width: 960px) {
+@media #{map.get(vuetify.$display-breakpoints, 'md-and-up')} {
   .margin-top-handle {
     margin-top: 6.4rem;
     min-height: calc(100vh - 6.4rem);
   }
 }
-@media (max-width: 959px) {
+@media #{map.get(vuetify.$display-breakpoints, 'sm-and-down')} {
   .directory-layout {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: 'introduction' 'selector' 'papers' 'resources';

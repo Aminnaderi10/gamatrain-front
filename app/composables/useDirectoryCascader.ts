@@ -1,5 +1,5 @@
 import { computed, onMounted, onScopeDispose, reactive, watch } from 'vue'
-import { useAsyncData, useRoute, useRouter } from '#app'
+import { createError, navigateTo, useAsyncData, useNuxtApp, useRoute, useRouter } from '#app'
 import { useDirectoryOptionsApi } from '~/composables/api/subject-directory/useDirectoryOptions.api'
 import { useDirectorySubjectSearch } from '~/composables/useDirectorySubjectSearch'
 import type { BoardDTO, GradeDTO, SubjectDTO } from '~/types/board'
@@ -13,6 +13,7 @@ import type {
 } from '~/types/subject-directory/cascader'
 
 export const useDirectoryCascader = async () => {
+  const nuxtApp = useNuxtApp()
   const route = useRoute()
   const router = useRouter()
   const api = useDirectoryOptionsApi()
@@ -56,8 +57,9 @@ export const useDirectoryCascader = async () => {
   const syncRoute = async () => {
     const currentRevision = ++revision
     state.open = false
+    // Keep the current selection on screen until the new path resolves, so papers,
+    // resources and SEO tags don't blank out between two subjects.
     state.loading = 'board'
-    state.selection = null
     const snapshot = await api.resolvePath(readPath())
     if (currentRevision !== revision) return
     applySnapshot(snapshot)
@@ -118,9 +120,10 @@ export const useDirectoryCascader = async () => {
     state.commitError = ''
     committingPath = pathKey(nextPath)
     try {
-      const failure = await router.replace({ query: { ...route.query, ...nextPath }, hash: route.hash })
+      await router.replace({ query: { ...route.query, ...nextPath }, hash: route.hash })
+      // A failed, aborted or redirected navigation all leave a different path.
       if (pathKey(readPath()) !== pathKey(nextPath)) {
-        if (failure) state.commitError = 'Unable to apply this selection. Please try again.'
+        state.commitError = 'Unable to apply this selection. Please try again.'
         return
       }
       // Commit all three levels together after navigation succeeds.
@@ -221,6 +224,16 @@ export const useDirectoryCascader = async () => {
   })
   const { data } = await useAsyncData(`directory-selector:${pathKey(initialPath)}`, () => api.resolvePath(initialPath))
   if (data.value) applySnapshot(data.value)
+
+  // One URL per subject: a bare, subject-only or outdated query answers with a 301 to the
+  // full board/grade/subject path instead of a 200 duplicate (same rule as useCanonicalContentPath).
+  if (import.meta.server && state.selection && pathKey(selectionPath(state.selection)) !== pathKey(initialPath)) {
+    const query = selectionPath(state.selection)
+    // The Nuxt context is lost after this composable's awaits, so restore it for navigateTo.
+    await nuxtApp.runWithContext(() => navigateTo({ path: route.path, query }, { redirectCode: 301, replace: true }))
+    // Stop rendering the throwaway page; Nuxt sends the recorded redirect ahead of the error.
+    throw createError({ statusCode: 301, statusMessage: 'Redirecting to canonical URL' })
+  }
   initialized = true
   if (pathKey(initialPath) !== pathKey(readPath())) await syncRoute()
 

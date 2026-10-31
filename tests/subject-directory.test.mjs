@@ -4,9 +4,9 @@ import { getDirectoryVariantOptions } from '../app/utils/directoryFilterOptions.
 import { createDirectoryPaperLoader } from '../app/utils/directoryPaperLoader.js'
 import { createDirectorySessionAvailability } from '../app/utils/directorySessionAvailability.js'
 import {
-  getDirectoryDownloadParams, getDirectoryExamIds, getDirectoryPaperCode,
-  getDirectoryPaperDownloads, getDirectoryPaperLink, getDirectoryPaperTitle,
+  getDirectoryExamIds, getDirectoryPaperCode, getDirectoryPaperLink, getDirectoryPaperTitle,
 } from '../app/utils/directoryPapers.js'
+import { getDirectoryDownloadParams, getDirectoryPaperDownloads } from '../app/utils/directoryPaperFiles.ts'
 
 const query = { lesson: '2194', edu_year: 2026, edu_month: 6, test_type: '6320', variant: '7814' }
 const result = (ids, total = ids.length) => ({ status: 1, data: { num: String(total), list: ids.map(id => ({ id })) } })

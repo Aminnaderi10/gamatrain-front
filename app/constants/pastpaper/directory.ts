@@ -1,5 +1,8 @@
 export const DIRECTORY_DEFAULT_BOARD_CODE = 6659
 
+// How many years the first render checks at once while finding the newest available session.
+export const DIRECTORY_INITIAL_YEAR_BATCH = 3
+
 export const DIRECTORY_FILTERS = [
   { key: 'year', title: 'Year', icon: 'md:calendar_today_outlined' },
   { key: 'series', title: 'Session' },

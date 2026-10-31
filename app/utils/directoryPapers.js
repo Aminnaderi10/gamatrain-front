@@ -31,8 +31,6 @@ export const getDirectoryExamIds = (value) => {
   }
 }
 
-export { getDirectoryPaperDownloads, getDirectoryDownloadParams } from './directoryPaperFiles.ts'
-
 export const getDirectorySessionKey = query => JSON.stringify([
   String(query.lesson), String(query.edu_year), String(query.edu_month),
   String(query.test_type || ''), String(query.variant || ''),

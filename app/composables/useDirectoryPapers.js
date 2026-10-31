@@ -15,7 +15,7 @@ export const useDirectoryPapers = async (context) => {
   const filters = reactive({ year: '', series: '', paper: '', variant: '' })
   const expandedYears = ref([])
   const expandedSessions = reactive({})
-  const { optionLists, optionLoading, optionErrors, fetchOptions } = useDirectoryFilterOptions(context)
+  const { optionLists, optionLoading, optionErrors, fetchOptions, ready: optionsReady } = useDirectoryFilterOptions(context)
 
   const { fetchPapers } = useDirectoryPapersApi()
   const loader = createDirectoryPaperLoader(fetchPapers, { makeState: reactive })
@@ -137,8 +137,12 @@ export const useDirectoryPapers = async (context) => {
     }
     resettingSubjectFilters = false
     automaticExpansion.cancel()
-    loader.cancelPending()
-    availability.cancelPending()
+    // Year and Session only change what is shown; Paper and Variant change the
+    // session queries, so only those make in-flight requests obsolete.
+    if (values[2] !== previous[2] || values[3] !== previous[3]) {
+      loader.cancelPending()
+      availability.cancelPending()
+    }
     if (values[0] !== previous[0]) {
       for (const year of Object.keys(expandedSessions)) expandedSessions[year] = []
     }
@@ -155,6 +159,12 @@ export const useDirectoryPapers = async (context) => {
 
   onMounted(() => {
     availabilityReady = true
+    if (!context.subjectId) return
+    // Finish what the first render skipped: older years beyond its limit, or
+    // everything when its payload is missing. Checked sessions are cached.
+    const hasOpenSession = expandedYears.value.some(year => expandedSessions[year]?.length)
+    if (hasOpenSession) expandedYears.value.forEach(year => ensureYearAvailability(year))
+    else automaticExpansion.openLatest()
   })
 
   onScopeDispose(() => {
@@ -183,6 +193,10 @@ export const useDirectoryPapers = async (context) => {
       }
     }
   }
+
+  // Awaited last: an await inside a composable drops the component and Nuxt
+  // context that the hooks and data composables above rely on.
+  await optionsReady
 
   return {
     filters, filterButtons, visibleYears, visibleSessions, expandedYears, expandedSessions,

@@ -4,7 +4,7 @@ import type { DirectoryResourceContext, DirectoryResourceGroup } from '~/types/s
 export const getDirectoryResourceCollections = (data: DirectoryResourceGroup[] = []) => data
   .filter(resource => Array.isArray(resource.items) && resource.items.length > 0)
   .map((resource) => {
-    const title = resource.title.trim()
+    const title = String(resource.title ?? '').trim()
     const presentation = DIRECTORY_RESOURCE_PRESENTATION[title.toLowerCase()]
     return {
       id: resource.type_id,

@@ -1,5 +1,6 @@
 import { DIRECTORY_DEFAULT_BOARD_CODE } from '../constants/pastpaper/directory'
 import type { BoardDTO, GradeDTO } from '../types/board'
+import { mapWithLimit } from './mapWithLimit'
 import type { DirectoryOptionSource, DirectorySelectorPath, DirectorySelectorSnapshot, DirectorySelectorStage } from '../types/subject-directory/cascader'
 
 // Resolve URL selections independently of in-progress browsing in the cascader.
@@ -46,16 +47,23 @@ export const resolveDirectorySelection = async (
     }
 
     // A subject-only link must keep its subject rather than use an unrelated default.
+    // Search the default board first, then the rest, loading grades and subjects in
+    // parallel so server rendering doesn't wait on one request at a time.
     if (path.subject) {
-      for (const board of candidates) {
-        const grades = await loadGrades(board)
-        for (const grade of grades) {
-          const subjects = await loadSubjects(grade)
-          const subject = subjects.find(item => String(item.id) === path.subject)
-          if (subject) {
-            snapshot.subject = subject
-            return snapshot
-          }
+      stage = 'subject'
+      const findInBoard = async (board: BoardDTO) => {
+        const grades = await source.getGrades(board.code)
+        const subjectLists = await mapWithLimit(grades, 4, grade => source.getSubjects(grade.id))
+        const index = subjectLists.findIndex(list => list.some(item => String(item.id) === path.subject))
+        return index < 0 ? null : { board, grades, grade: grades[index]!, subjects: subjectLists[index]! }
+      }
+      for (const boards of [candidates.slice(0, 1), candidates.slice(1)]) {
+        const match = (await mapWithLimit(boards, 4, findInBoard)).find(Boolean)
+        if (match) {
+          Object.assign(snapshot, match, {
+            subject: match.subjects.find(item => String(item.id) === path.subject)!,
+          })
+          return snapshot
         }
       }
     }

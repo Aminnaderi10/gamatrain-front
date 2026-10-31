@@ -33,16 +33,17 @@
         Retry
       </v-btn>
     </v-alert>
-    <CommonFilterOptions
+    <CommonFilterOptionChips
       v-else
-      :label="filter.title"
+      role="group"
+      :aria-label="filter.title"
       :items="filter.items"
-      :selected-id="filter.selectedItem?.id"
-      :columns="getDirectoryFilterColumns(filter.key, boardId)"
+      :selected-item="filter.selectedItem"
+      allow-clear
+      :items-per-row="getDirectoryFilterColumns(filter.key, boardId)"
       :item-title="item => getDirectoryFilterOptionTitle(filter.key, item)"
       :disabled="filter.disabled"
       compact
-      :single-line="compactRow"
       @select="emit('select', $event)"
     />
   </div>
@@ -94,17 +95,19 @@ const emit = defineEmits(['select', 'retry'])
   margin-bottom: 0;
   font-size: 14px;
 }
-.directory-option-row--compact :deep(.filter-options) {
+/* The compact bar lets options flow on one wrapping line instead of the chips' column grid */
+.directory-option-row--compact :deep(.filter-option-chips) {
+  --filter-option-gap: 4px;
+
   min-width: 0;
   flex-wrap: wrap;
-  gap: 4px;
 }
-.directory-option-row--compact :deep(.filter-options__items) {
+.directory-option-row--compact :deep(.filter-option-chips__items) {
+  display: flex;
   flex-wrap: wrap;
-  gap: 4px;
 }
-.directory-option-row--compact :deep(.filter-option) {
-  padding: 3px 6px !important;
+.directory-option-row--compact :deep(.inline-filter-option) {
+  padding-inline: 6px !important;
   font-size: 13px;
 }
 </style>

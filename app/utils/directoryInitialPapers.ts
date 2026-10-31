@@ -1,6 +1,7 @@
 import { createDirectoryPaperLoader } from './directoryPaperLoader'
 import { createDirectorySessionAvailability } from './directorySessionAvailability'
 import { createDirectoryLatestSessionExpansion } from './directoryPaperExpansion'
+import { DIRECTORY_INITIAL_YEAR_BATCH } from '../constants/pastpaper/directory'
 import type { DirectoryInitialPaperContext, DirectoryInitialPapers, DirectoryInitialPapersOptions, DirectoryPaperQuery } from '~/types/subject-directory/initialPapers'
 
 export const getDirectoryInitialPapersKey = ({ subjectId, gradeId }: DirectoryInitialPaperContext) =>
@@ -15,24 +16,28 @@ export const loadDirectoryInitialPapers = async (options: DirectoryInitialPapers
   if (!options.subjectId || !firstYear || !firstSession) return result
 
   const loader = createDirectoryPaperLoader(options.fetchPapers)
-  const availability = createDirectorySessionAvailability(options.fetchPapers)
+  // The server checks several years at once (see batchSize), so allow more
+  // one-row count requests in flight than the browser's default of 2.
+  const availability = createDirectorySessionAvailability(options.fetchPapers, { concurrency: 6 })
   const queries: DirectoryPaperQuery[] = []
   const queryFor = (year: number, month: number): DirectoryPaperQuery => ({
     lesson: options.subjectId, edu_year: year, edu_month: month,
   })
   let selectedPapers: Promise<unknown> | undefined
-  const startSelectedPapers = (year: number) => {
+  const startSelectedPapers = () => {
     if (selectedPapers) return
-    // Start the selected page as soon as all newer sessions are confirmed empty.
-    // Slower checks for older sessions still finish before we serialize the year.
-    for (const session of options.sessions) {
-      const query = queryFor(year, session.id)
-      const status = availability.getState(query).status
-      if (status === 'available') {
-        selectedPapers = loader.getState(query).loaded ? Promise.resolve() : loader.load(query)
-        return
+    // Start the selected page as soon as every newer session, in every newer year,
+    // is confirmed empty. Slower checks still finish before we serialize.
+    for (const year of options.years) {
+      for (const session of options.sessions) {
+        const query = queryFor(year.id, session.id)
+        const status = availability.getState(query).status
+        if (status === 'available') {
+          selectedPapers = loader.getState(query).loaded ? Promise.resolve() : loader.load(query)
+          return
+        }
+        if (status !== 'empty') return
       }
-      if (status !== 'empty') return
     }
   }
   const expansion = createDirectoryLatestSessionExpansion({
@@ -48,11 +53,12 @@ export const loadDirectoryInitialPapers = async (options: DirectoryInitialPapers
         const state = loader.getState(query)
         if (state.loaded) availability.seed(query, state.total > 0 || state.items.length > 0)
         else await availability.check(query)
-        startSelectedPapers(year)
+        startSelectedPapers()
       }))
     },
     status: (year, month) => availability.getState(queryFor(year, month)).status,
     open: (year, month) => { result.selected = { year, month } },
+    batchSize: DIRECTORY_INITIAL_YEAR_BATCH,
   })
 
   try {

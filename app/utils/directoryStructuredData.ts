@@ -37,6 +37,15 @@ export const getDirectoryStructuredData = (
     }
   })
 
+  // Same trail as the cascader (Board / Grade / Subject), linking each level to its
+  // past-paper search like the old page's breadcrumb, and shaped like useSeoEngine's.
+  const crumbs = [
+    { name: 'Past Papers', item: new URL('/search?type=paper', siteUrl).href },
+    { name: selection.board.title, item: new URL(`/search?type=paper&section=${selection.board.code}`, siteUrl).href },
+    { name: selection.grade.title, item: new URL(`/search?type=paper&base=${selection.grade.id}`, siteUrl).href },
+    { name: selection.subject.title, item: url },
+  ]
+
   return {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
@@ -45,6 +54,16 @@ export const getDirectoryStructuredData = (
     'name': introduction.title,
     'description': introduction.description,
     'about': { '@type': 'Thing', 'name': selection.subject.title },
+    'breadcrumb': {
+      '@type': 'BreadcrumbList',
+      'itemListElement': crumbs.map((crumb, index) => ({
+        '@type': 'ListItem',
+        'position': index + 1,
+        // Board/grade titles come from the API with stray spaces.
+        'name': String(crumb.name).trim(),
+        'item': crumb.item,
+      })),
+    },
     // This is the rendered subset, not a claim about the entire archive size.
     ...(items.length
       ? {

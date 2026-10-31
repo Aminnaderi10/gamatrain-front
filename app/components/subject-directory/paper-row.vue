@@ -127,9 +127,9 @@ import type { UnwrapRef } from 'vue'
 import type { DirectoryPaper } from '~/types/subject-directory/paperFiles'
 import type { useDirectoryPaperDownloads } from '~/composables/useDirectoryPaperDownloads'
 import {
-  getDirectoryExamIds, getDirectoryPaperCode, getDirectoryPaperDownloads,
-  getDirectoryPaperLink, getDirectoryPaperTitle,
+  getDirectoryExamIds, getDirectoryPaperCode, getDirectoryPaperLink, getDirectoryPaperTitle,
 } from '~/utils/directoryPapers'
+import { getDirectoryPaperDownloads } from '~/utils/directoryPaperFiles'
 
 const props = withDefaults(defineProps<{
   paper: DirectoryPaper
@@ -141,7 +141,10 @@ const examIds = computed(() => getDirectoryExamIds(props.paper.exam_id))
 const paperCode = computed(() => getDirectoryPaperCode(props.paper, props.subjectTitle))
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use 'sass:map';
+@use 'vuetify/settings' as vuetify;
+
 .directory-paper-row {
   display: flex;
   flex-wrap: wrap;
@@ -169,7 +172,7 @@ const paperCode = computed(() => getDirectoryPaperCode(props.paper, props.subjec
 }
 
 .directory-paper-link:focus-visible::after {
-  outline: 3px solid rgb(var(--v-theme-primary) / 28%);
+  outline: 3px solid rgba(var(--v-theme-primary), 0.28);
   outline-offset: -3px;
 }
 
@@ -281,14 +284,14 @@ const paperCode = computed(() => getDirectoryPaperCode(props.paper, props.subjec
 .directory-exam-menu {
   border: 1px solid rgb(var(--v-theme-borderSubtle));
   border-radius: 12px !important;
-  box-shadow: 0 20px 48px rgb(var(--v-theme-brandNavy) / 16%);
+  box-shadow: 0 20px 48px rgba(var(--v-theme-brandNavy), 0.16);
 }
 
 .directory-insert-icon {
   transform: rotate(45deg);
 }
 
-@media (max-width: 959px) {
+@media #{map.get(vuetify.$display-breakpoints, 'sm-and-down')} {
   .directory-exam-button {
     height: 32px;
     padding-inline: 4px;

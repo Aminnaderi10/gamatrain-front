@@ -1,3 +1,4 @@
+import { useAsyncData } from '#app'
 import { getDirectoryPaperSessions, PAST_PAPER_YEAR_OPTIONS } from '~/constants/pastpaper/sessions'
 import { useApiService } from '~/composables/useApiService'
 import { getDirectoryVariantOptions } from '~/utils/directoryFilterOptions'
@@ -67,5 +68,19 @@ export const useDirectoryFilterOptions = (context) => {
     if (mounted) preloadOptions()
   })
 
-  return { optionLists, optionLoading, optionErrors, fetchOptions }
+  // Load the inline Paper/Variant options during server rendering, so their rows
+  // render at full size instead of growing (and shifting the page) after hydration.
+  // The caller awaits `ready` after registering its own lifecycle hooks.
+  const paperKey = catalogueKey('paper')
+  const ready = context.subjectId
+    ? useAsyncData(`directory-filter-options:${paperKey}`, async () => {
+        await preloadOptions()
+        return { [paperKey]: catalogues[paperKey] || null, variants: catalogues.variants || null }
+      }).then(({ data }) => {
+        // A failed list stays missing here and is retried by the mounted preload.
+        for (const [key, items] of Object.entries(data.value || {})) if (items) catalogues[key] = items
+      })
+    : Promise.resolve()
+
+  return { optionLists, optionLoading, optionErrors, fetchOptions, ready }
 }

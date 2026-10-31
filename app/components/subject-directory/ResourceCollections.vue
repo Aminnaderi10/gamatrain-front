@@ -116,7 +116,7 @@ const collections = computed(() => getDirectoryResourceCollections(props.data))
   opacity: 0 !important;
 }
 .resource-collection:focus-visible {
-  outline: 3px solid rgb(var(--v-theme-primary) / 28%);
+  outline: 3px solid rgba(var(--v-theme-primary), 0.28);
   outline-offset: -3px;
 }
 .resource-collection :deep(.v-list-item__prepend > .v-list-item__spacer) {
