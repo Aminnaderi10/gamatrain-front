@@ -9,116 +9,67 @@ export interface DirectoryStructuredDataPaper {
   session: string
 }
 
+const subjectPath = ({ board, grade, subject }: DirectorySelection) => `${board.title} ${grade.title} ${subject.title}`
+
 export const getDirectoryIntroduction = (selection: DirectorySelection | null) => {
-  if (!selection) {
-    const description = 'Select a board, grade and subject to browse question papers, mark schemes and additional study resources.'
-    return {
-      title: 'Past Papers',
-      description,
-      seoTitle: 'Past Papers | GamaTrain',
-      metaDescription: description,
-    }
-  }
-
-  const selectedPath = [selection.board.title, selection.grade.title, selection.subject.title].join(' ')
-
+  const title = selection ? `${subjectPath(selection)} Past Papers` : 'Past Papers'
   return {
-    title: `${selectedPath} Past Papers`,
-    description: `Browse ${selectedPath} question papers and mark schemes, organised by year, session, paper and variant. Find additional study materials in the Resources section.`,
-    seoTitle: `${selectedPath} Past Papers | GamaTrain`,
-    metaDescription: `Browse ${selectedPath} question papers and mark schemes by year, session, paper and variant. Explore additional study resources.`,
+    title,
+    seoTitle: `${title} | GamaTrain`,
+    description: selection
+      ? `Browse ${subjectPath(selection)} question papers and mark schemes, organised by year, session, paper and variant. Find additional study materials in the Resources section.`
+      : 'Select a board, grade and subject to browse question papers, mark schemes and additional study resources.',
   }
 }
 
-export const getDirectoryCanonicalUrl = (selection: DirectorySelection | null, siteUrl: string): string | null => {
-  if (!selection) return null
+// Only board, grade and subject identify the page; other query values stay out.
+export const getDirectoryCanonicalUrl = (selection: DirectorySelection | null, siteUrl: string) => selection
+  ? `${new URL('/subject-directory', siteUrl).href}?${new URLSearchParams({
+    board: String(selection.board.code), grade: String(selection.grade.id), subject: String(selection.subject.id),
+  })}`
+  : null
 
-  const board = String(selection.board?.code ?? '').trim()
-  const grade = String(selection.grade?.id ?? '').trim()
-  const subject = String(selection.subject?.id ?? '').trim()
-  if (!board || !grade || !subject) return null
-
-  // Only the committed subject path identifies this collection. Request query
-  // parameters, tracking values and fragments must not enter its canonical URL.
-  const url = new URL('/subject-directory', siteUrl)
-  url.search = new URLSearchParams({ board, grade, subject }).toString()
-  return url.href
-}
-
-export const getDirectoryStructuredData = (
-  selection: DirectorySelection | null,
-  papers: DirectoryStructuredDataPaper[],
-  siteUrl: string,
-) => {
+// CollectionPage with a Board / Grade / Subject breadcrumb (each level links to its
+// past-paper search) and the papers currently shown.
+export const getDirectoryStructuredData = (selection: DirectorySelection | null, papers: DirectoryStructuredDataPaper[], siteUrl: string) => {
   const url = getDirectoryCanonicalUrl(selection, siteUrl)
   if (!selection || !url) return null
-
-  const introduction = getDirectoryIntroduction(selection)
-  const subjectPath = [selection.board.title, selection.grade.title, selection.subject.title].join(' ')
-  const seen = new Set<string>()
-  const items = papers.filter(({ paper }) => {
-    const id = String(paper.id ?? '').trim()
-    if (!id || seen.has(id)) return false
-    seen.add(id)
-    return true
-  }).map(({ paper, year, session }, index) => {
-    const paperUrl = new URL(getDirectoryPaperLink(paper), siteUrl).href
-    return {
-      '@type': 'ListItem',
-      'position': index + 1,
-      'item': {
-        '@type': 'LearningResource',
-        '@id': `${paperUrl}#learning-resource`,
-        'url': paperUrl,
-        'name': `${subjectPath} — ${session} ${year} — ${getDirectoryPaperTitle(paper)}`,
-        'learningResourceType': 'Past paper',
-        'educationalLevel': selection.grade.title,
-        'about': { '@type': 'Thing', 'name': selection.subject.title },
-      },
-    }
-  })
-
-  // Same trail as the cascader (Board / Grade / Subject), linking each level to its
-  // past-paper search like the old page's breadcrumb, and shaped like useSeoEngine's.
-  const crumbs = [
-    { name: 'Past Papers', item: new URL('/search?type=paper', siteUrl).href },
-    { name: selection.board.title, item: new URL(`/search?type=paper&section=${selection.board.code}`, siteUrl).href },
-    { name: selection.grade.title, item: new URL(`/search?type=paper&base=${selection.grade.id}`, siteUrl).href },
-    { name: selection.subject.title, item: url },
-  ]
+  const { title, description } = getDirectoryIntroduction(selection)
+  const link = (path: string) => new URL(path, siteUrl).href
+  const list = (items: object[]) => items.map((item, index) => ({ '@type': 'ListItem', 'position': index + 1, ...item }))
 
   return {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    '@id': `${url}#webpage`,
-    'url': url,
-    'name': introduction.title,
-    'description': introduction.description,
+    url,
+    'name': title,
+    description,
     'about': { '@type': 'Thing', 'name': selection.subject.title },
     'breadcrumb': {
       '@type': 'BreadcrumbList',
-      'itemListElement': crumbs.map((crumb, index) => ({
-        '@type': 'ListItem',
-        'position': index + 1,
-        // Board/grade titles come from the API with stray spaces.
-        'name': String(crumb.name).trim(),
-        'item': crumb.item,
-      })),
+      'itemListElement': list([
+        { name: 'Past Papers', item: link('/search?type=paper') },
+        { name: selection.board.title.trim(), item: link(`/search?type=paper&section=${selection.board.code}`) },
+        { name: selection.grade.title.trim(), item: link(`/search?type=paper&base=${selection.grade.id}`) },
+        { name: selection.subject.title.trim(), item: url },
+      ]),
     },
-    // This is the rendered subset, not a claim about the entire archive size.
-    ...(items.length
-      ? {
-          mainEntity: {
-            '@type': 'ItemList',
-            '@id': `${url}#papers`,
-            'name': introduction.title,
-            'itemListElement': items,
+    ...(papers.length && {
+      mainEntity: {
+        '@type': 'ItemList',
+        'itemListElement': list(papers.map(({ paper, year, session }) => ({
+          item: {
+            '@type': 'LearningResource',
+            'url': link(getDirectoryPaperLink(paper)),
+            'name': `${subjectPath(selection)} — ${session} ${year} — ${getDirectoryPaperTitle(paper)}`,
+            'learningResourceType': 'Past paper',
+            'educationalLevel': selection.grade.title,
           },
-        }
-      : {}),
+        }))),
+      },
+    }),
   }
 }
 
 // Keep API-supplied titles safe inside an HTML script element.
-export const serializeDirectoryStructuredData = (schema: NonNullable<ReturnType<typeof getDirectoryStructuredData>>) =>
-  JSON.stringify(schema, null, 2).replace(/</g, '\\u003c')
+export const serializeDirectoryStructuredData = (schema: object) => JSON.stringify(schema).replace(/</g, '\\u003c')

@@ -27,6 +27,7 @@
         class="directory-cascader-menu border border-borderSubtle border-opacity-100"
         color="grey25"
         rounded="xl"
+        :loading="picker.loading.value"
         aria-label="Board, Grade and Subject options"
       >
         <div class="pa-2 border-b border-borderSubtle border-opacity-100">
@@ -42,7 +43,7 @@
             color="primary"
             bg-color="surface"
             rounded="lg"
-            :disabled="!picker.grade.value"
+            :disabled="!picker.draft.value?.grade"
             clearable
             hide-details
             single-line
@@ -66,35 +67,7 @@
               />
               <span class="font-weight-medium">{{ column.title }}</span>
             </div>
-            <div
-              v-if="picker.loading.value === column.stage"
-              class="d-flex justify-center pa-4"
-              role="status"
-            >
-              <v-progress-circular
-                indeterminate
-                size="20"
-                width="2"
-                color="primary"
-              />
-            </div>
-            <div
-              v-else-if="picker.error.value === column.stage"
-              class="pa-4 text-grey600"
-              role="alert"
-            >
-              Unable to load {{ column.title.toLowerCase() }} options.
-              <v-btn
-                variant="text"
-                color="brandNavy"
-                class="text-none"
-                @click="picker.retry()"
-              >
-                Retry
-              </v-btn>
-            </div>
             <v-list
-              v-else
               class="directory-cascader-options bg-transparent py-1"
               density="compact"
               :aria-label="column.title"
@@ -112,10 +85,10 @@
                 @click="option.select()"
               />
               <p
-                v-if="!column.items.length"
+                v-if="!column.items.length && !picker.loading.value"
                 class="pa-3 ma-0 text-grey600"
               >
-                No {{ column.title.toLowerCase() }} options.
+                {{ picker.draft.value?.error ? 'Unable to load options.' : `No ${column.title.toLowerCase()} options.` }}
               </p>
             </v-list>
           </div>
@@ -123,7 +96,7 @@
       </v-card>
     </v-menu>
     <v-alert
-      v-if="snapshot?.errorStage"
+      v-if="snapshot?.error"
       class="mt-2"
       variant="tonal"
       density="compact"
@@ -164,30 +137,23 @@ const displayPath = computed(() => {
     : 'Select Board / Grade / Subject'
 })
 
-// Board, Grade and Subject columns; the next column appears once its parent is chosen.
+// Board, Grade and Subject columns; a column appears once its parent is chosen.
+function toColumn<T extends { title: string }>(stage: DirectorySelectorStage, items: T[], id: (item: T) => unknown, selected: unknown, select: (item: T) => void) {
+  return {
+    stage,
+    title: stage[0]!.toUpperCase() + stage.slice(1),
+    back: ({ grade: 'board', subject: 'grade' } as Record<string, DirectorySelectorStage>)[stage],
+    selectedId: String(selected ?? ''),
+    items: items.map(item => ({ id: String(id(item)), title: item.title, select: () => select(item) })),
+  }
+}
 const columns = computed(() => {
-  const { board, grade } = picker
-  const list: { stage: DirectorySelectorStage, title: string, back?: DirectorySelectorStage, selectedId: string, items: { id: string, title: string, select: () => void }[] }[] = [{
-    stage: 'board',
-    title: 'Board',
-    selectedId: String(board.value?.code ?? ''),
-    items: (props.snapshot?.boards ?? []).map(item => ({ id: String(item.code), title: item.title, select: () => picker.selectBoard(item) })),
-  }]
-  if (board.value) list.push({
-    stage: 'grade',
-    title: 'Grade',
-    back: 'board',
-    selectedId: String(grade.value?.id ?? ''),
-    items: picker.grades.value.map(item => ({ id: String(item.id), title: item.title, select: () => picker.selectGrade(item) })),
-  })
-  if (grade.value) list.push({
-    stage: 'subject',
-    title: 'Subject',
-    back: 'grade',
-    selectedId: String(props.snapshot?.grade?.id === grade.value.id ? props.snapshot?.subject?.id ?? '' : ''),
-    items: picker.visibleSubjects.value.map(item => ({ id: String(item.id), title: item.title, select: () => picker.selectSubject(item) })),
-  })
-  return list
+  const draft = picker.draft.value
+  return [
+    toColumn('board', draft?.boards ?? props.snapshot?.boards ?? [], board => board.code, draft?.board?.code, picker.selectBoard),
+    ...draft?.board ? [toColumn('grade', draft.grades, grade => grade.id, draft.grade?.id, picker.selectGrade)] : [],
+    ...draft?.grade ? [toColumn('subject', picker.visibleSubjects.value, subject => subject.id, props.snapshot?.subject?.id, picker.selectSubject)] : [],
+  ]
 })
 </script>
 

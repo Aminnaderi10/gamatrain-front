@@ -77,9 +77,9 @@ const canonicalUrl = computed(() => getDirectoryCanonicalUrl(selection.value, si
 useSeoMeta({
   titleTemplate: '%s',
   title: () => introduction.value.seoTitle,
-  description: () => introduction.value.metaDescription,
+  description: () => introduction.value.description,
   ogTitle: () => introduction.value.seoTitle,
-  ogDescription: () => introduction.value.metaDescription,
+  ogDescription: () => introduction.value.description,
   ogUrl: () => canonicalUrl.value ?? undefined,
   ogType: 'website',
   ogSiteName: 'GamaTrain',

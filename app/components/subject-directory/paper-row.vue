@@ -65,11 +65,11 @@
           :color="file.style === 'question' ? 'brandNavy' : 'surfaceTertiary'"
           variant="flat"
           min-height="40"
-          :loading="downloads.isDownloading(paper, file.type)"
-          :disabled="downloads.isBusy && !downloads.isDownloading(paper, file.type)"
+          :loading="downloads.isActive(paper, file)"
+          :disabled="Boolean(downloads.active) && !downloads.isActive(paper, file)"
           :title="file.title"
           :aria-label="`${file.title} — ${getDirectoryPaperTitle(paper)}${file.price ? ` — ${file.price} gems` : ''}`"
-          @click="downloads.handleDownload(file.type, paper)"
+          @click="downloads.download(paper, file)"
         >
           <v-icon
             :icon="file.icon"
@@ -85,7 +85,7 @@
           />
           <template #loader>
             <v-progress-circular
-              :model-value="downloads.getDownloadProgress(paper, file.type)"
+              :model-value="downloads.progress(paper, file)"
               size="20"
               width="2"
             />

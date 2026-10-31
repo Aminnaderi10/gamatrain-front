@@ -1,10 +1,9 @@
 import { useNuxtApp } from '#app'
-import { useBoardApi } from '~/composables/api/board/useBoard.api'
 import { useApiService } from '~/composables/useApiService'
-import { DIRECTORY_BOARD_ORDER } from '~/constants/pastpaper/directory'
+import { useBoardApi } from '~/composables/api/board/useBoard.api'
 import type { ApiResult } from '~/types/api'
 import type { BoardDTO, GradeDTO, SubjectDTO } from '~/types/board'
-import type { DirectoryFetchPapers, DirectoryPaperResponse, DirectoryResourceGroup } from '~/types/subject-directory'
+import type { DirectoryPaperQuery, DirectoryPaperResponse, DirectoryResourceGroup } from '~/types/subject-directory'
 
 // Requests for the subject directory. Board, grade and subject lists are cached
 // once per app instance (one per server request, one in the browser), so the URL
@@ -27,12 +26,8 @@ export const useSubjectDirectoryApi = () => {
     return pending
   }
 
-  const getBoards = async () => {
-    const boards = await getList<BoardDTO>('boards', useBoardApi().getBoards)
-    const order = new Map(DIRECTORY_BOARD_ORDER.map((title, index) => [title, index]))
-    return [...boards].sort((first, second) =>
-      (order.get(first.title) ?? Number.MAX_SAFE_INTEGER) - (order.get(second.title) ?? Number.MAX_SAFE_INTEGER))
-  }
+  // The same board list as Search's Board filter (v2 boards, in API order).
+  const getBoards = () => getList<BoardDTO>('boards', useBoardApi().getBoards)
 
   const getGrades = (boardId: number | string) => getList<GradeDTO>(`grades:${boardId}`, () =>
     useApiService.get<ApiResult<GradeDTO[]>>('/api/v1/types/list/', { type: 'base', section_id: boardId }, { public: true }))
@@ -40,8 +35,8 @@ export const useSubjectDirectoryApi = () => {
   const getSubjects = (gradeId: string) => getList<SubjectDTO>(`subjects:${gradeId}`, () =>
     useApiService.get<ApiResult<SubjectDTO[]>>('/api/v1/types/list/', { type: 'lesson', base_id: gradeId }, { public: true }))
 
-  const fetchPapers: DirectoryFetchPapers = params => nuxtApp.runWithContext(() =>
-    useApiService.get<DirectoryPaperResponse>('/api/v1/tests/search', { ...params }, { public: true }))
+  const fetchPapers = (params: DirectoryPaperQuery & { page: number, perpage: number }) => nuxtApp.runWithContext(() =>
+    useApiService.get<DirectoryPaperResponse>('/api/v1/tests/search', { ...params, is_paper: true, directory: true }, { public: true }))
 
   const fetchResources = (subjectId: string | number) =>
     useApiService.get<{ data?: { list?: DirectoryResourceGroup[] } }>('/api/v1/tests/search', {

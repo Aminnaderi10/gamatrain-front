@@ -148,43 +148,40 @@
     </template>
   </section>
 
-  <!-- Coin Payment Modal -->
+  <!-- Membership, gem-spend and download dialogs for the paper downloads -->
   <lazy-common-modal-base
-    v-model:show-dialog="showCoinPaymentModal"
+    v-model:show-dialog="downloads.showPayment"
     :max-width="900"
     title="Get Membership. Unlock Premium Downloads."
     subtitle="Join +50,000 Students"
   >
     <common-modal-payment
-      :plans="paymentPlans"
-      :billing-interval="billingInterval"
-      :current-plan-id="currentPlanId"
-      :current-plan-title="currentPlanTitle"
-      @dismiss="showCoinPaymentModal = false"
-      @switch-successfully="upgradePlanSuccessfully"
+      :plans="downloads.upgrade?.upgradeSuggestions ?? []"
+      :billing-interval="downloads.upgrade?.availableBillingIntervals ?? []"
+      :current-plan-id="downloads.upgrade?.currentPlanId ?? null"
+      :current-plan-title="downloads.upgrade?.currentPlanTitle ?? null"
+      @dismiss="downloads.showPayment = false"
+      @switch-successfully="downloads.retryAfterUpgrade"
     />
   </lazy-common-modal-base>
-
-  <!-- Coin Consumption Animation -->
   <lazy-common-coin-consumption-animation
-    v-model:is-visible="showCoinAnimation"
-    @animation-complete="handleAnimationComplete"
+    v-model:is-visible="downloads.showCoinAnimation"
+    @animation-complete="downloads.onCoinAnimationDone"
   />
-
   <lazy-test-counting-wallet-animation
-    :is-start-animation="isStartWalletAnimation"
+    :is-start-animation="downloads.isStartWalletAnimation"
     :direction="-1"
-    :delta-price="priceFile"
-    @complete-animation="completeWalletAnimation"
+    :delta-price="downloads.price"
+    @complete-animation="downloads.onWalletAnimationDone"
   />
   <lazy-common-modal-base
-    v-model:show-dialog="downloadIssue"
+    v-model:show-dialog="downloads.showDownload"
     :max-width="600"
     title="Download"
   >
     <lazy-common-modal-download-file
-      :link="downloadIssueLink"
-      @close="downloadIssue = false"
+      :link="downloads.downloadLink"
+      @close="downloads.showDownload = false"
     />
   </lazy-common-modal-base>
 </template>
@@ -208,14 +205,7 @@ const {
   selectFilter, clearFilters, refreshPaperTypes, expandSessions, loadMore, reload,
 } = await useDirectoryPapers(props)
 
-const downloadState = useDirectoryPaperDownloads()
-const downloads = reactive(downloadState)
-const {
-  showCoinPaymentModal, showCoinAnimation, isStartWalletAnimation,
-  downloadIssue, downloadIssueLink, paymentPlans, billingInterval,
-  currentPlanTitle, currentPlanId, handleAnimationComplete, completeWalletAnimation,
-  upgradePlanSuccessfully, priceFile,
-} = downloadState
+const downloads = reactive(useDirectoryPaperDownloads())
 </script>
 
 <style scoped>

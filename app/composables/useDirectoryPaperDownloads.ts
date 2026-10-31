@@ -1,140 +1,81 @@
-import { ref } from 'vue'
-import type { BillingInterval, UpgradeSuggestionsDTO } from '~/types'
-import type { DirectoryDownloadParams, DirectoryPaper } from '~/types/subject-directory'
-import { getDirectoryFileDownloadParams, getDirectoryPaperDownloads } from '~/utils/directoryPapers'
+import { computed, ref } from 'vue'
+import type { DownloadResponseDTO } from '~/types'
+import type { DirectoryPaper, DirectoryPaperDownload } from '~/types/subject-directory'
 import { useDownloadWithProgress } from '~/composables/useDownloadWithProgress'
 import { contentPath } from '~/utils/contentPath'
 
-// Reuses the original table's download, membership and wallet flow.
+type PaperFile = { paper: DirectoryPaper, file: DirectoryPaperDownload }
+
+// The original table's download flow: progress, the gem-spend animation, and the
+// membership dialog when the user's plan doesn't cover the file.
 export const useDirectoryPaperDownloads = () => {
-  const isBusy = ref(false)
-  const showCoinPaymentModal = ref(false)
+  const active = ref<PaperFile | null>(null)
+  const last = ref<PaperFile | null>(null)
+  const upgrade = ref<DownloadResponseDTO | null>(null)
+  const showPayment = ref(false)
   const showCoinAnimation = ref(false)
   const isStartWalletAnimation = ref(false)
-  const downloadIssue = ref(false)
-  const downloadIssueLink = ref('')
-  const paymentPlans = ref<UpgradeSuggestionsDTO[]>([])
-  const billingInterval = ref<BillingInterval[]>([])
-  const currentDownloadPaper = ref<DirectoryPaper | null>(null)
-  const activeDownloadKey = ref('')
-  const activeDownloadParams = ref<DirectoryDownloadParams | null>(null)
-  const priceFile = ref(0)
-  const pendingDownload = ref<string | null>(null)
-  const currentPlanTitle = ref<string | null>(null)
-  const currentPlanId = ref<number | null>(null)
+  const showDownload = ref(false)
+  const downloadLink = ref('')
 
-  const handleAnimationComplete = async () => {
-    // Close everything immediately when animation completes
-    showCoinAnimation.value = false
-    isStartWalletAnimation.value = true
-  }
+  const params = (file: DirectoryPaperDownload) => file.extraId
+    ? { type: 'extra' as const, extraId: file.extraId }
+    : { type: file.type as 'pdf' | 'answer' }
 
-  const completeWalletAnimation = () => {
-    downloadIssue.value = true
-    isStartWalletAnimation.value = false
-  }
-
-  const {
-    getDownloadProgress: getDownloadProgressByType,
-    isDownloading: isDownloadingByType,
-    startDownload,
-  } = useDownloadWithProgress({
+  const { getDownloadProgress, startDownload } = useDownloadWithProgress({
     contentType: 'PastPaper',
-    get id() { return currentDownloadPaper.value?.id || 0 },
+    get id() { return active.value?.paper.id || 0 },
     trackPayload: () => ({
       file_type: 'past_paper',
-      file_name: currentDownloadPaper.value?.test_type_title || currentDownloadPaper.value?.title || '',
-      file_url: currentDownloadPaper.value
-        ? contentPath('paper', currentDownloadPaper.value.id, currentDownloadPaper.value.title_url)
-        : '',
+      file_name: active.value?.paper.test_type_title || active.value?.paper.title || '',
+      file_url: active.value ? contentPath('paper', active.value.paper.id, active.value.paper.title_url) : '',
     }),
     onDownloaded: (data) => {
-      downloadIssueLink.value = data.url || ''
-      activeDownloadKey.value = ''
-      if (data.spent) {
-        showCoinAnimation.value = true
-      }
-      else {
-        downloadIssue.value = true
-      }
-      pendingDownload.value = null
+      downloadLink.value = data.url || ''
+      if (data.spent) showCoinAnimation.value = true
+      else showDownload.value = true
     },
     onInsufficientBalance: () => {
-      activeDownloadKey.value = ''
-      showCoinPaymentModal.value = true
+      showPayment.value = true
     },
     onUpgradeSuggestions: (data) => {
-      activeDownloadKey.value = ''
-      paymentPlans.value = data.upgradeSuggestions || []
-      billingInterval.value = data.availableBillingIntervals || []
-      currentPlanTitle.value = data.currentPlanTitle
-      currentPlanId.value = data.currentPlanId
-      showCoinPaymentModal.value = true
+      upgrade.value = data
+      showPayment.value = true
     },
   })
 
-  const handleDownload = async (type: string, item: DirectoryPaper) => {
-    if (isBusy.value) return
-    const file = getDirectoryPaperDownloads(item).find(file => file.type === type)
-    const downloadParams = getDirectoryFileDownloadParams(file)
-    if (!downloadParams) return
-    isBusy.value = true
-    currentDownloadPaper.value = item
-    priceFile.value = file?.price ?? 0
-    activeDownloadParams.value = downloadParams
-    activeDownloadKey.value = getTableDownloadKey(item, type)
-    pendingDownload.value = type
-
+  const download = async (paper: DirectoryPaper, file: DirectoryPaperDownload) => {
+    if (active.value) return
+    active.value = last.value = { paper, file }
     try {
-      await startDownload(downloadParams)
+      await startDownload(params(file))
     }
     finally {
-      activeDownloadKey.value = ''
-      activeDownloadParams.value = null
-      isBusy.value = false
+      active.value = null
     }
   }
 
-  const upgradePlanSuccessfully = async () => {
-    showCoinPaymentModal.value = false
-    if (pendingDownload.value && currentDownloadPaper.value) {
-      await handleDownload(pendingDownload.value, currentDownloadPaper.value)
-    }
-  }
-
-  const getTableDownloadKey = (item: DirectoryPaper, type: string) => `${item.id}-${type}`
-
-  const isDownloading = (item: DirectoryPaper, type: string) => {
-    if (activeDownloadKey.value !== getTableDownloadKey(item, type)) return false
-    const downloadParams = activeDownloadParams.value
-    if (!downloadParams) return false
-    return isDownloadingByType(downloadParams.type, downloadParams.extraId)
-  }
-
-  const getDownloadProgress = (item: DirectoryPaper, type: string) => {
-    if (activeDownloadKey.value !== getTableDownloadKey(item, type)) return 0
-    const downloadParams = activeDownloadParams.value
-    if (!downloadParams) return 0
-    return getDownloadProgressByType(downloadParams.type, downloadParams.extraId)
-  }
+  const isActive = (paper: DirectoryPaper, file: DirectoryPaperDownload) =>
+    active.value?.paper.id === paper.id && active.value.file.type === file.type
+  const progress = (paper: DirectoryPaper, file: DirectoryPaperDownload) =>
+    isActive(paper, file) ? getDownloadProgress(params(file).type, file.extraId) : 0
 
   return {
-    isBusy,
-    priceFile,
-    showCoinPaymentModal,
-    showCoinAnimation,
-    isStartWalletAnimation,
-    downloadIssue,
-    downloadIssueLink,
-    paymentPlans,
-    billingInterval,
-    currentPlanTitle,
-    currentPlanId,
-    handleAnimationComplete,
-    completeWalletAnimation,
-    handleDownload,
-    upgradePlanSuccessfully,
-    isDownloading,
-    getDownloadProgress,
+    active, isActive, progress, download, upgrade, showPayment, showCoinAnimation, isStartWalletAnimation,
+    showDownload, downloadLink,
+    price: computed(() => last.value?.file.price ?? 0),
+    // After a plan upgrade, retry the file that needed it.
+    retryAfterUpgrade: () => {
+      showPayment.value = false
+      if (last.value) download(last.value.paper, last.value.file)
+    },
+    onCoinAnimationDone: () => {
+      showCoinAnimation.value = false
+      isStartWalletAnimation.value = true
+    },
+    onWalletAnimationDone: () => {
+      showDownload.value = true
+      isStartWalletAnimation.value = false
+    },
   }
 }

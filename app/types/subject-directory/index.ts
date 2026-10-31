@@ -9,16 +9,10 @@ export interface DirectorySelection {
 }
 
 // The board, grade and subject ids in the URL query.
-export interface DirectorySelectorPath {
+export type DirectorySelectorPath = {
   board: string
   grade: string
   subject: string
-}
-
-export interface DirectoryOptionSource {
-  getBoards: () => Promise<BoardDTO[]>
-  getGrades: (boardId: number | string) => Promise<GradeDTO[]>
-  getSubjects: (gradeId: string) => Promise<SubjectDTO[]>
 }
 
 // A resolved URL: the chosen board, grade and subject plus the option lists
@@ -30,29 +24,17 @@ export interface DirectorySelectorSnapshot {
   board: BoardDTO | null
   grade: GradeDTO | null
   subject: SubjectDTO | null
-  errorStage: DirectorySelectorStage | null
+  error: boolean
 }
 
-export interface DirectoryFileInfo {
-  exist?: boolean
-  price?: number | string | null
-}
+type DirectoryFile = { exist?: boolean, price?: number | string | null }
 
-export interface DirectoryExtraFile extends DirectoryFileInfo {
-  id: string | number
-  type?: string | number | null
-  type_title?: string | null
-}
-
-export interface DirectoryPaperFileSource {
+export interface DirectoryPaper {
   files?: {
-    pdf?: DirectoryFileInfo
-    answer?: DirectoryFileInfo
-    extra?: DirectoryExtraFile[] | null
+    pdf?: DirectoryFile
+    answer?: DirectoryFile
+    extra?: (DirectoryFile & { id: string | number, type?: string | number | null, type_title?: string | null })[] | null
   } | null
-}
-
-export interface DirectoryPaper extends DirectoryPaperFileSource {
   id: string | number
   title?: string
   title_url?: string
@@ -75,11 +57,6 @@ export interface DirectoryPaperDownload {
   extraId?: string
 }
 
-export interface DirectoryDownloadParams {
-  type: 'pdf' | 'answer' | 'extra'
-  extraId?: string
-}
-
 // Filters for the directory's paper search. Year and Session are sent as
 // edu_year/edu_month; Paper and Variant as test_type/variant.
 export interface DirectoryPaperQuery {
@@ -95,13 +72,6 @@ export interface DirectoryPaperResponse {
   data: { list: DirectoryPaper[], num?: number | string | null }
 }
 
-export type DirectoryFetchPapers = (params: DirectoryPaperQuery & {
-  is_paper: boolean
-  directory: boolean
-  page: number
-  perpage: number
-}) => Promise<DirectoryPaperResponse>
-
 // The papers loaded so far for the current subject and filters, newest first.
 export interface DirectoryPaperList {
   items: DirectoryPaper[]
@@ -113,16 +83,10 @@ export interface DirectoryPaperList {
   error: boolean
 }
 
-export interface DirectorySessionGroup {
-  id: number
-  title: string
-  papers: DirectoryPaper[]
-}
-
 export interface DirectoryYearGroup {
   id: number
   title: string
-  sessions: DirectorySessionGroup[]
+  sessions: { id: number, title: string, papers: DirectoryPaper[] }[]
 }
 
 export interface DirectoryFilterOption {
@@ -140,21 +104,8 @@ export interface DirectoryPaperContext {
   boardId: string | number
 }
 
-export interface DirectoryResourceItem {
-  id: string | number
-  title: string
-  title_url: string
-}
-
 export interface DirectoryResourceGroup {
   type_id: string | number
   title: string
-  items: DirectoryResourceItem[]
-}
-
-export interface DirectoryResourceContext {
-  boardId: string | number
-  gradeId: string | number
-  subjectId: string | number
-  subjectTitle?: string
+  items: unknown[]
 }

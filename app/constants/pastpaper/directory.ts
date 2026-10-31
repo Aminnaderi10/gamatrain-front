@@ -19,17 +19,6 @@ export const DIRECTORY_FILTERS = [
   { key: 'variant', title: 'Variant', inline: true },
 ]
 
-export const DIRECTORY_BOARD_ORDER = [
-  'Cambridge',
-  'Edexcel',
-  'AQA',
-  'OCR',
-  'GAMA',
-  'CXC',
-  'Nigerian',
-  'Olympiad',
-]
-
 // Design labels and icons for the Resources sidebar, by collection title.
 export const DIRECTORY_RESOURCE_PRESENTATION: Record<string, { label: string, title?: string, icon: string }> = {
   'predicted papers': { label: 'Predicted Papers', icon: 'md:auto_awesome_outlined' },

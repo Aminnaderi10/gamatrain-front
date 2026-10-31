@@ -23,7 +23,7 @@ const getDirectoryInitialPapersKey = (subjectId: string | number) => `directory-
 export const useDirectoryInitialPapers = ({ subjectId }: { subjectId: string | number }) => {
   const { fetchPapers } = useSubjectDirectoryApi()
   return useAsyncData(getDirectoryInitialPapersKey(subjectId), () => subjectId
-    ? fetchPapers({ lesson: subjectId, is_paper: true, directory: true, page: 1, perpage: DIRECTORY_PAGE_SIZE })
+    ? fetchPapers({ lesson: subjectId, page: 1, perpage: DIRECTORY_PAGE_SIZE })
     : Promise.resolve(null))
 }
 
@@ -108,7 +108,7 @@ export const useDirectoryPapers = async (context: DirectoryPaperContext & { sele
     list.error = false
     try {
       const response = await fetchPapers({
-        ...query(), is_paper: true, directory: true, page: list.page + 1, perpage: DIRECTORY_PAGE_SIZE,
+        ...query(), page: list.page + 1, perpage: DIRECTORY_PAGE_SIZE,
       })
       if (current === request) addPage(response)
     }

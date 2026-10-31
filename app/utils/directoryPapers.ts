@@ -1,9 +1,7 @@
 import { contentPath } from './contentPath'
 import type {
-  DirectoryDownloadParams,
   DirectoryPaper,
   DirectoryPaperDownload,
-  DirectoryPaperFileSource,
   DirectoryPaperList,
   DirectoryPaperResponse,
   DirectoryYearGroup,
@@ -126,7 +124,7 @@ const extraFileOrder: Record<string, number> = {
 const toPrice = (value: number | string | null | undefined): number | null =>
   value == null || value === '' ? null : Number(value)
 
-export const getDirectoryPaperDownloads = (paper: DirectoryPaperFileSource): DirectoryPaperDownload[] => {
+export const getDirectoryPaperDownloads = (paper: DirectoryPaper): DirectoryPaperDownload[] => {
   const { pdf, answer, extra } = paper.files ?? {}
   const downloads: DirectoryPaperDownload[] = []
   if (pdf?.exist) {
@@ -150,10 +148,4 @@ export const getDirectoryPaperDownloads = (paper: DirectoryPaperFileSource): Dir
     })
   }
   return downloads
-}
-
-export const getDirectoryFileDownloadParams = (file: DirectoryPaperDownload | undefined): DirectoryDownloadParams | undefined => {
-  if (!file) return undefined
-  if (file.extraId) return { type: 'extra', extraId: file.extraId }
-  if (file.type === 'pdf' || file.type === 'answer') return { type: file.type }
 }

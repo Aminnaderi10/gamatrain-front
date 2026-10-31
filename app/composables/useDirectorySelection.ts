@@ -4,54 +4,36 @@ import { createError, navigateTo, useAsyncData, useNuxtApp, useRoute } from '#ap
 import { useSubjectDirectoryApi } from '~/composables/api/subject-directory/useSubjectDirectory.api'
 import { DIRECTORY_DEFAULT_BOARD_CODE } from '~/constants/pastpaper/directory'
 import type { BoardDTO, GradeDTO, SubjectDTO } from '~/types/board'
-import type { DirectoryOptionSource, DirectorySelection, DirectorySelectorPath, DirectorySelectorSnapshot, DirectorySelectorStage } from '~/types/subject-directory'
+import type { DirectorySelection, DirectorySelectorPath, DirectorySelectorSnapshot, DirectorySelectorStage } from '~/types/subject-directory'
 
-// Resolve a URL's board, grade and subject. Each missing or unknown level falls
-// back to the first option (the default board for boards); the page then 301s
-// to the resolved URL.
-const resolveDirectorySelection = async (
-  source: DirectoryOptionSource,
-  path: DirectorySelectorPath,
-): Promise<DirectorySelectorSnapshot> => {
-  const snapshot: DirectorySelectorSnapshot = {
-    boards: [], grades: [], subjects: [], board: null, grade: null, subject: null, errorStage: null,
-  }
-  let stage: DirectorySelectorStage = 'board'
-  const byId = (value: string | number) => String(value) === path.subject
-
+// Find the URL's board, grade and subject. A missing or unknown id falls back to
+// the first option (the default board for boards); the URL is then corrected.
+const resolve = async (api: ReturnType<typeof useSubjectDirectoryApi>, path: DirectorySelectorPath) => {
+  const snapshot: DirectorySelectorSnapshot = { boards: [], grades: [], subjects: [], board: null, grade: null, subject: null, error: false }
+  const pick = <T>(items: T[], id: string, key: (item: T) => unknown, fallback?: T) =>
+    items.find(item => String(key(item)) === id) ?? fallback ?? items[0] ?? null
   try {
-    snapshot.boards = await source.getBoards()
-    snapshot.board = snapshot.boards.find(board => String(board.code) === path.board)
-      || snapshot.boards.find(board => board.code === DIRECTORY_DEFAULT_BOARD_CODE)
-      || snapshot.boards[0]
-      || null
+    snapshot.boards = await api.getBoards()
+    snapshot.board = pick(snapshot.boards, path.board, board => board.code, snapshot.boards.find(board => board.code === DIRECTORY_DEFAULT_BOARD_CODE))
     if (!snapshot.board) return snapshot
-
-    stage = 'grade'
-    snapshot.grades = await source.getGrades(snapshot.board.code)
-    snapshot.grade = snapshot.grades.find(grade => String(grade.id) === path.grade) || snapshot.grades[0] || null
+    snapshot.grades = await api.getGrades(snapshot.board.code)
+    snapshot.grade = pick(snapshot.grades, path.grade, grade => grade.id)
     if (!snapshot.grade) return snapshot
-
-    stage = 'subject'
-    snapshot.subjects = await source.getSubjects(snapshot.grade.id)
-    snapshot.subject = snapshot.subjects.find(subject => byId(subject.id)) || snapshot.subjects[0] || null
-    return snapshot
+    snapshot.subjects = await api.getSubjects(snapshot.grade.id)
+    snapshot.subject = pick(snapshot.subjects, path.subject, subject => subject.id)
   }
   catch {
-    // Failed lookups are retryable; never treat a network error as an invalid ID.
-    snapshot.errorStage = stage
-    return snapshot
+    snapshot.error = true
   }
+  return snapshot
 }
 
 const readQuery = (value: unknown) => String((Array.isArray(value) ? value[0] : value) ?? '')
+const toQuery = ({ board, grade, subject }: DirectorySelection): DirectorySelectorPath =>
+  ({ board: String(board.code), grade: String(grade.id), subject: String(subject.id) })
 
-export const getDirectorySelectionQuery = ({ board, grade, subject }: DirectorySelection): DirectorySelectorPath => ({
-  board: String(board.code), grade: String(grade.id), subject: String(subject.id),
-})
-
-// The URL (?board&grade&subject) is the selection. It is resolved on the server
-// and again whenever the query changes; choosing a subject just navigates.
+// The URL (?board&grade&subject) is the selection: it is resolved on the server and
+// again whenever the query changes, and choosing a subject just navigates.
 export const useDirectorySelection = async () => {
   const nuxtApp = useNuxtApp()
   const route = useRoute()
@@ -62,43 +44,38 @@ export const useDirectorySelection = async () => {
     subject: readQuery(route.query.subject),
   }))
 
-  const request = useAsyncData('directory-selection', () => resolveDirectorySelection(api, path.value), { watch: [path] })
+  const request = useAsyncData('directory-selection', () => resolve(api, path.value), { watch: [path] })
   const { data: snapshot, refresh } = request
-
   const selection = computed<DirectorySelection | null>(() => {
     const { board, grade, subject } = snapshot.value ?? {}
     return board && grade && subject ? { board, grade, subject } : null
   })
-  const canonicalQuery = () => selection.value ? getDirectorySelectionQuery(selection.value) : null
-  const isCanonical = () => {
-    const query = canonicalQuery()
-    return !query || JSON.stringify(query) === JSON.stringify(path.value)
+  // The resolved query when it differs from the URL's, so the URL can be corrected.
+  const correctedQuery = () => {
+    const query = selection.value && toQuery(selection.value)
+    return query && JSON.stringify(query) !== JSON.stringify(path.value) ? query : null
   }
 
-  const select = (next: DirectorySelection) => navigateTo({ query: { ...getDirectorySelectionQuery(next) } })
-
-  // In the browser, a bare or partial URL is replaced by the resolved one.
   watch(selection, () => {
-    const query = canonicalQuery()
-    if (query && !isCanonical()) navigateTo({ query: { ...query } }, { replace: true })
+    const query = correctedQuery()
+    if (query) navigateTo({ query }, { replace: true })
   })
-
   await request
 
-  // One URL per subject: a bare, subject-only or unknown query gets a 301 to the
-  // full board/grade/subject URL instead of a 200 duplicate.
-  const query = canonicalQuery()
-  if (import.meta.server && query && !isCanonical()) {
-    await nuxtApp.runWithContext(() => navigateTo({ path: route.path, query: { ...query } }, { redirectCode: 301 }))
+  // One URL per subject: a bare, partial or unknown query gets a 301 to the full one.
+  const query = correctedQuery()
+  if (import.meta.server && query) {
+    await nuxtApp.runWithContext(() => navigateTo({ path: route.path, query }, { redirectCode: 301 }))
     // Stop rendering the throwaway page; Nuxt sends the recorded redirect ahead of the error.
     throw createError({ statusCode: 301, statusMessage: 'Redirecting to canonical URL' })
   }
 
-  return { snapshot, selection, select, refresh }
+  return { snapshot, selection, refresh, select: (next: DirectorySelection) => navigateTo({ query: toQuery(next) }) }
 }
 
-// Browsing state for the Board / Grade / Subject menu. Each time it opens it
-// starts from the current selection; picking a subject hands the full path back.
+// Browsing state for the Board / Grade / Subject menu. It browses with the same
+// resolver as the URL, starting from the current selection each time it opens;
+// picking a subject hands the full path back.
 export const useDirectoryPicker = (
   snapshot: Ref<DirectorySelectorSnapshot | null | undefined>,
   onSelect: (selection: DirectorySelection) => void,
@@ -106,80 +83,45 @@ export const useDirectoryPicker = (
   const api = useSubjectDirectoryApi()
   const open = ref(false)
   const stage = ref<DirectorySelectorStage>('subject')
-  const board = ref<BoardDTO | null>(null)
-  const grade = ref<GradeDTO | null>(null)
-  const grades = ref<GradeDTO[]>([])
-  const subjects = ref<SubjectDTO[]>([])
-  const loading = ref<DirectorySelectorStage | null>(null)
-  const error = ref<DirectorySelectorStage | null>(null)
+  const draft = ref<DirectorySelectorSnapshot | null>(null)
+  const loading = ref(false)
   const search = ref('')
+  let request = 0
 
   watch(open, (isOpen) => {
     if (!isOpen) return
-    const current = snapshot.value
-    board.value = current?.board ?? null
-    grade.value = current?.grade ?? null
-    grades.value = current?.grades ?? []
-    subjects.value = current?.subjects ?? []
-    stage.value = grade.value ? 'subject' : board.value ? 'grade' : 'board'
-    error.value = null
+    draft.value = snapshot.value ?? null
+    stage.value = 'subject'
     search.value = ''
   })
 
-  // Load a column; a newer click on the same column wins over a slower response.
-  const load = async <T>(column: DirectorySelectorStage, target: Ref<T[]>, request: () => Promise<T[]>) => {
-    loading.value = column
-    error.value = null
-    target.value = []
-    const owner = column === 'grade' ? board.value : grade.value
-    try {
-      const items = await request()
-      if (owner === (column === 'grade' ? board.value : grade.value)) target.value = items
-    }
-    catch {
-      error.value = column
-    }
-    finally {
-      if (loading.value === column) loading.value = null
-    }
-  }
-
-  const selectBoard = (item: BoardDTO) => {
-    board.value = item
-    grade.value = null
-    subjects.value = []
-    stage.value = 'grade'
-    return load('grade', grades, () => api.getGrades(item.code))
-  }
-
-  const selectGrade = (item: GradeDTO) => {
-    grade.value = item
+  // Show a board (its first grade) or a grade; a newer click wins over a slower response.
+  const browse = async (path: Partial<DirectorySelectorPath>, next: DirectorySelectorStage) => {
+    const current = ++request
+    loading.value = true
+    stage.value = next
     search.value = ''
-    stage.value = 'subject'
-    return load('subject', subjects, () => api.getSubjects(item.id))
+    const result = await resolve(api, { board: '', grade: '', subject: '', ...path })
+    if (current !== request) return
+    draft.value = result
+    loading.value = false
   }
 
-  const selectSubject = (item: SubjectDTO) => {
-    if (!board.value || !grade.value) return
-    open.value = false
-    onSelect({ board: board.value, grade: grade.value, subject: item })
-  }
-
-  const retry = () => {
-    if (error.value === 'subject' && grade.value) return selectGrade(grade.value)
-    if (board.value) return selectBoard(board.value)
-  }
-
-  // Search filters the chosen grade's subjects by name or syllabus code.
+  // Search filters the shown grade's subjects by name or syllabus code.
   const visibleSubjects = computed(() => {
     const terms = search.value.trim().toLowerCase().split(/\s+/).filter(Boolean)
-    return terms.length
-      ? subjects.value.filter(subject => terms.every(term => subject.title.toLowerCase().includes(term)))
-      : subjects.value
+    return (draft.value?.subjects ?? []).filter(subject => terms.every(term => subject.title.toLowerCase().includes(term)))
   })
 
   return {
-    open, stage, board, grade, grades, visibleSubjects, loading, error, search,
-    selectBoard, selectGrade, selectSubject, retry,
+    open, stage, draft, loading, search, visibleSubjects,
+    selectBoard: (board: BoardDTO) => browse({ board: String(board.code) }, 'grade'),
+    selectGrade: (grade: GradeDTO) => browse({ board: String(draft.value?.board?.code ?? ''), grade: String(grade.id) }, 'subject'),
+    selectSubject: (subject: SubjectDTO) => {
+      const { board, grade } = draft.value ?? {}
+      if (!board || !grade) return
+      open.value = false
+      onSelect({ board, grade, subject })
+    },
   }
 }
