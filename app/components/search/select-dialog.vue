@@ -76,7 +76,7 @@
         </v-text-field>
       </v-row>
       <CommonFilterOptionChips
-        v-if="!isLoading && !errorMessage && inlineOptions"
+        v-if="!isLoading && inlineOptions"
         class="select-dialog-inline-options"
         :items="filteredItems"
         :selected-item="selectedItem"
@@ -88,7 +88,7 @@
       />
 
       <v-list
-        v-else-if="!isLoading && !errorMessage"
+        v-else-if="!isLoading"
         class="select-dialog-list"
         max-height="320"
       >
@@ -172,23 +172,7 @@
       </div>
 
       <v-alert
-        v-if="errorMessage && !isLoading"
-        type="error"
-        variant="tonal"
-        class="select-dialog-empty"
-      >
-        {{ errorMessage }}
-        <v-btn
-          variant="text"
-          class="text-none"
-          @click="emit('retry')"
-        >
-          Retry
-        </v-btn>
-      </v-alert>
-
-      <v-alert
-        v-if="searchText && filteredItems.length === 0 && !isLoading && !errorMessage"
+        v-if="searchText && filteredItems.length === 0 && !isLoading"
         type="info"
         color="brandNavy"
         density="compact"
@@ -200,7 +184,7 @@
       </v-alert>
       <v-alert
         v-if="
-          searchText.length == 0 && filteredItems.length === 0 && !isLoading && !errorMessage
+          searchText.length == 0 && filteredItems.length === 0 && !isLoading
         "
         type="info"
         color="brandNavy"
@@ -285,10 +269,6 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  errorMessage: {
-    type: String,
-    default: '',
-  },
   hasSearch: {
     type: Boolean,
     default: true,
@@ -327,7 +307,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:showDialog', 'changeSelectedItem', 'retry'])
+const emit = defineEmits(['update:showDialog', 'changeSelectedItem'])
 
 // Start Section Search Item In List
 const searchText = ref('')

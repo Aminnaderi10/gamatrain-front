@@ -3,7 +3,9 @@ import { useBoardApi } from '@/composables/api/board/useBoard.api'
 import {
   ALL_SEARCH_MONTHS,
   DEFAULT_SEARCH_SERVICE,
-  EDEXCEL_BOARD_CODE,
+  getPaperOptionsPerRow,
+  getPaperOptionTitle,
+  PAPER_VARIANT_OPTIONS,
   SEARCH_BOARD_ICON_BY_TITLE,
   SEARCH_MONTHS_BY_LEVEL,
   SEARCH_SERVICE_OPTIONS,
@@ -171,22 +173,12 @@ export const useSearchFilters = ({
         queryKey: 'test_type',
         inlineOptions: true,
         inlineAllowClear: true,
-        inlineItemsPerRow: filterState =>
-          Number(filterState[index.board]?.selectedItem?.code) === EDEXCEL_BOARD_CODE
-            ? 2
-            : 4,
-        itemTitle: (item) => {
-          const match = item.title?.match(/^\s*paper\s+(\d+)\s*$/i)
-          return match?.[1] ?? item.title
-        },
+        inlineItemsPerRow: filterState => getPaperOptionsPerRow(filterState[index.board]?.selectedItem?.code),
+        itemTitle: getPaperOptionTitle,
       }),
       'variant': () => makeFilter({
         title: 'Variant',
-        staticList: [
-          { id: '7814', title: '1' },
-          { id: '7815', title: '2' },
-          { id: '7816', title: '3' },
-        ],
+        staticList: PAPER_VARIANT_OPTIONS,
         queryKey: 'variant',
         inlineOptions: true,
         inlineAllowClear: true,

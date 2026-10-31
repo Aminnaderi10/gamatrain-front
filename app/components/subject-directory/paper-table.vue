@@ -16,7 +16,7 @@
       :context-key="`${subjectId}:${gradeId}:${boardId}`"
       @select="selectFilter"
       @clear="clearFilters"
-      @retry="fetchOptions"
+      @retry="refreshPaperTypes()"
     />
 
     <p
@@ -192,7 +192,7 @@
 <script setup lang="ts">
 import { reactive, useId } from 'vue'
 import type { PropType } from 'vue'
-import type { DirectorySelection } from '~/types/subject-directory/cascader'
+import type { DirectorySelection } from '~/types/subject-directory'
 import { useDirectoryStructuredData } from '~/composables/useDirectoryStructuredData'
 
 const accordionId = useId()
@@ -206,7 +206,7 @@ const props = defineProps({
 
 const {
   filterButtons, years, list, expandedYears, expandedSessions, openPapers,
-  selectFilter, clearFilters, fetchOptions, expandSessions, loadMore, reload,
+  selectFilter, clearFilters, refreshPaperTypes, expandSessions, loadMore, reload,
 } = await useDirectoryPapers(props)
 
 useDirectoryStructuredData(() => props.selection, openPapers)

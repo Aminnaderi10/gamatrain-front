@@ -1,25 +1,51 @@
 import { computed, onMounted, onScopeDispose, reactive, ref, watch } from 'vue'
-import { useNuxtData } from '#app'
+import { useAsyncData, useNuxtData } from '#app'
 import { useDirectoryPapersApi } from '~/composables/api/subject-directory/useDirectoryPapers.api'
-import { useDirectoryFilterOptions } from '~/composables/useDirectoryFilterOptions'
-import { getDirectoryInitialPapersKey, useDirectoryInitialPapers } from '~/composables/useDirectoryInitialPapers'
-import { DIRECTORY_FILTERS, DIRECTORY_PAGE_SIZE, getDirectorySessions } from '~/constants/pastpaper/directory'
+import { useApiService } from '~/composables/useApiService'
+import { DIRECTORY_FILTERS, DIRECTORY_PAGE_SIZE, DIRECTORY_YEAR_OPTIONS, getDirectorySessions } from '~/constants/pastpaper/directory'
+import { PAPER_VARIANT_OPTIONS } from '~/constants/search'
 import { appendDirectoryPapers, createDirectoryPaperList, groupDirectoryPapers } from '~/utils/directoryPapers'
-import type { DirectoryStructuredDataPaper } from '~/types/subject-directory/structuredData'
+import type { DirectoryStructuredDataPaper } from '~/utils/directorySeo'
 import type {
   DirectoryFilterKey,
+  DirectoryFilterOption,
   DirectoryPaperContext,
   DirectoryPaperQuery,
   DirectoryPaperResponse,
-} from '~/types/subject-directory/papers'
+} from '~/types/subject-directory'
 
 type LoadStatus = 'ok' | 'empty' | 'error'
+
+const getDirectoryInitialPapersKey = (subjectId: string | number) => `directory-papers:${subjectId}`
+
+// The subject's newest page of papers, rendered on the server. The page starts it
+// alongside Resources; useDirectoryPapers reads the same payload.
+export const useDirectoryInitialPapers = ({ subjectId }: { subjectId: string | number }) => {
+  const { fetchPapers } = useDirectoryPapersApi()
+  return useAsyncData(getDirectoryInitialPapersKey(subjectId), () => subjectId
+    ? fetchPapers({ lesson: subjectId, is_paper: true, directory: true, page: 1, perpage: DIRECTORY_PAGE_SIZE })
+    : Promise.resolve(null))
+}
 
 // One paginated, newest-first paper search per subject and filter set, grouped
 // into years and sessions in the browser. Only the newest session opens by itself.
 export const useDirectoryPapers = async (context: DirectoryPaperContext) => {
   const filters = reactive<Record<DirectoryFilterKey, string>>({ year: '', series: '', paper: '', variant: '' })
-  const { optionLists, optionLoading, optionErrors, fetchOptions, ready: optionsReady } = useDirectoryFilterOptions(context)
+  // Paper types depend on the board and are loaded on the server, so the inline
+  // Paper row renders at full size; Year, Session and Variant are fixed lists.
+  const paperTypes = useAsyncData(
+    () => `directory-paper-types:${context.boardId}`,
+    () => context.boardId
+      ? useApiService.get<{ data: DirectoryFilterOption[] }>('/api/v1/types/list', { type: 'test_type', section_id: context.boardId }, { public: true })
+          .then(response => response.data.filter(item => item.is_paper === true))
+      : Promise.resolve([]),
+  )
+  const optionLists = computed<Record<DirectoryFilterKey, readonly { id: string | number, title: string }[]>>(() => ({
+    year: DIRECTORY_YEAR_OPTIONS,
+    series: getDirectorySessions(context.gradeId),
+    paper: paperTypes.data.value ?? [],
+    variant: PAPER_VARIANT_OPTIONS,
+  }))
   const { fetchPapers } = useDirectoryPapersApi()
 
   const list = reactive(createDirectoryPaperList())
@@ -36,8 +62,8 @@ export const useDirectoryPapers = async (context: DirectoryPaperContext) => {
       selectedItem: optionLists.value[key].find(item => String(item.id) === filters[key]) || null,
       items: optionLists.value[key],
       disabled: !context.subjectId || (key === 'paper' && !context.boardId),
-      loading: Boolean(optionLoading.value[key]),
-      error: optionErrors.value[key] || '',
+      loading: key === 'paper' && paperTypes.status.value === 'pending',
+      error: key === 'paper' && paperTypes.error.value ? 'Unable to load options. Please try again.' : '',
     }
   }))
 
@@ -140,10 +166,10 @@ export const useDirectoryPapers = async (context: DirectoryPaperContext) => {
 
   // Awaited last: an await inside a composable drops the component and Nuxt
   // context that the hooks and data composables above rely on.
-  await optionsReady
+  await paperTypes
 
   return {
     filters, filterButtons, years, list, expandedYears, expandedSessions, openPapers,
-    selectFilter, clearFilters, fetchOptions, expandSessions, loadMore, reload,
+    selectFilter, clearFilters, refreshPaperTypes: paperTypes.refresh, expandSessions, loadMore, reload,
   }
 }
