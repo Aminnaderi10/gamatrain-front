@@ -50,7 +50,7 @@
               size="20"
               color="white"
             >
-              md:{{ tag.icon }}
+              mdfull:{{ tag.icon }}
             </v-icon>
           </div>
         </div>
@@ -178,7 +178,7 @@
               size="20"
               color="white"
             >
-              md:{{ tag.icon }}
+              mdfull:{{ tag.icon }}
             </v-icon>
           </div>
         </div>

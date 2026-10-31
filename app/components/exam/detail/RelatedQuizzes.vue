@@ -63,23 +63,19 @@
 </template>
 
 <script setup lang="ts">
-import type { ExamRelatedContentDTO } from '@/types'
-
 const props = defineProps<{
   id: string
   /** The subject's name for the heading, e.g. "Mathematics 5". */
   subject?: string
 }>()
 
-const { getRelatedExams } = useExam()
-
-const quizzes = ref<ExamRelatedContentDTO[]>([])
-const loading = ref(true)
-
-onMounted(async () => {
-  quizzes.value = (await getRelatedExams(props.id)).slice(0, 8)
-  loading.value = false
-})
+// The same request as the page's other related rows (one call, server-rendered so the links reach crawlers).
+// The recommendation already leaves the quiz itself out; the filter is a safety net.
+const { data: related, status } = useRelatedContent('exam', () => props.id)
+const quizzes = computed(() =>
+  (related.value?.exams ?? []).filter(exam => String(exam.id) !== String(props.id)).slice(0, 8),
+)
+const loading = computed(() => status.value === 'pending' || status.value === 'idle')
 </script>
 
 <style scoped>

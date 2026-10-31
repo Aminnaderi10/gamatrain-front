@@ -1,6 +1,8 @@
 <template>
   <div
     class="w-100 d-flex align-center justify-start flex-column margin-top-handle"
+    @focusin="initCaptcha"
+    @pointerdown.once="initCaptcha"
   >
     <school-add-stepper
       :steps="steps"
@@ -68,7 +70,7 @@
 <script setup>
 const nuxtApp = useNuxtApp()
 const router = useRouter()
-const { getToken, initCaptcha, isLoaded } = useRecaptcha()
+const { getToken, initCaptcha } = useRecaptcha()
 
 useHead({
   title: 'Add School',
@@ -238,11 +240,6 @@ const backStep = () => {
 }
 const submitSchool = async (data) => {
   loadingSubmitSchool.value = true
-  if (!isLoaded()) {
-    loadingSubmitSchool.value = false
-    throw new Error('reCAPTCHA not loaded yet. Please try again.')
-  }
-
   const token = await getToken('submit')
 
   schoolInformation.value = {
@@ -305,10 +302,6 @@ const buildFormDataFromObject = (
 
   return form
 }
-
-onMounted(() => {
-  initCaptcha()
-})
 </script>
 
 <style scoped>

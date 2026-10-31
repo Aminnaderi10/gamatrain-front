@@ -30,6 +30,8 @@ export default defineNuxtConfig({
       BaseUrl2: process.env.NUXT_BASE_URL2,
       gamaedtechWalletAddress: process.env.NUXT_GAMAEDTECH_WALLET_ADDRESS,
       aiModelName: process.env.NUXT_PUBLIC_AI_MODEL_NAME,
+      // Shows the light/dark switch in the header (always on in development).
+      themeSwitch: process.env.NUXT_PUBLIC_THEME_SWITCH === 'true',
     },
   },
 
@@ -135,7 +137,8 @@ export default defineNuxtConfig({
   },
 
   // Global CSS
-  css: ['@/assets/scss/app.scss', '@/assets/css/gama6/styles.css'],
+  // Icon fonts: modules/iconSubset.ts cuts both icon sets down to the icons the code uses in production builds.
+  css: ['@/assets/scss/app.scss', '@/assets/css/gama6/styles.css', '@/assets/css/material-symbols-full.css'],
 
   experimental: {
     payloadExtraction: false,
@@ -238,7 +241,8 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/test-maker/**': { ssr: false, prerender: true },
+    // Rendered in the browser only, so a `noindex` meta tag never reaches a crawler: send it as a header.
+    '/test-maker/**': { ssr: false, prerender: true, headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
     '/user/**': { ssr: false },
     '/admin/**': { ssr: false },
     '/payments/**': { ssr: false },
@@ -272,8 +276,9 @@ export default defineNuxtConfig({
               return 'charts'
             if (normalizedId.includes('/node_modules/@ckeditor/ckeditor5-vue/'))
               return 'ckeditor'
-            if (normalizedId.includes('/node_modules/pdfjs-dist/'))
-              return 'pdfjs'
+            // No manual chunk for pdfjs-dist: it's only imported by the lazy PdfPreviewDialog, so Rollup
+            // already keeps it out of the shared bundle. A 'pdfjs' manual chunk pulled shared helpers
+            // (ufo) into it, which made every page download the whole PDF library and its worker.
           },
         },
       },

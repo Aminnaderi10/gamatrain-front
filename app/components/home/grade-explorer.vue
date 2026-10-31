@@ -85,7 +85,7 @@
               flat
               size="30"
               class="slider-arrow-button"
-              color="white"
+              color="surface"
             >
               <v-icon
                 size="24"
@@ -104,7 +104,7 @@
               flat
               size="30"
               class="slider-arrow-button"
-              color="white"
+              color="surface"
             >
               <v-icon
                 size="24"
@@ -144,7 +144,7 @@
                     <span class="pl-1 d-block">
                       <v-icon
                         size="x-large"
-                        color="#D0D5DD"
+                        color="grey400"
                       >mdi-chevron-right</v-icon>
                     </span>
                   </div>
@@ -175,7 +175,7 @@
                   <span class="d-sm-none">
                     <v-icon
                       size="x-large"
-                      color="#D0D5DD"
+                      color="grey400"
                     >mdi-chevron-right</v-icon>
                   </span>
                 </div>
@@ -194,7 +194,7 @@
                     <span class="pl-1 d-none d-sm-block">
                       <v-icon
                         size="x-large"
-                        color="#D0D5DD"
+                        color="grey400"
                       >mdi-chevron-right</v-icon>
                     </span>
                   </div>
@@ -490,41 +490,41 @@ onMounted(() => {
   color: rgb(var(--v-theme-greenLight700));
 }
 .icon-teacher{
-  color : #7f56d9
+  color: rgb(var(--v-theme-generalSearchTeacher))
 }
 .icon-paper {
-  color: #2e90fa;
+  color: rgb(var(--v-theme-blue500));
 }
 .icon-exam {
-  color: #7c4dff;
+  color: rgb(var(--v-theme-generalSearchQuiz));
 }
 .icon-tutorial {
-  color: #2e90fa;
+  color: rgb(var(--v-theme-blue500));
 }
 .icon-school {
-  color: #a5673f;
+  color: rgb(var(--v-theme-generalSearchSchool));
 }
 .ex-category__card--title {
-  color: #344054;
+  color: rgb(var(--v-theme-grey700));
   font-size: 20px;
   font-weight: 700;
 }
 .ex-category__card--subtitle {
-  color: #667085;
+  color: rgb(var(--v-theme-grey500));
   font-size: 16px;
   font-weight: 500;
 }
 .ex-category__card {
   background: linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 1),
-    rgba(249, 250, 251, 1)
+    rgb(var(--v-theme-surface)),
+    rgb(var(--v-theme-grey50))
   );
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid rgba(242, 244, 247, 1);
+  border: 1px solid rgb(var(--v-theme-grey200));
   padding: 2rem 1.5rem;
   border-radius: 24px;
   transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s,
@@ -534,8 +534,8 @@ onMounted(() => {
   box-shadow: 0 8px 24px 0 rgba(76, 74, 255, 0.1),
     0 1.5px 6px 0 rgba(0, 0, 0, 0.04);
   transform: translateY(-6px) scale(1.03);
-  border-color: #ffb600;
-  background: #f8faff;
+  border-color: rgb(var(--v-theme-primary));
+  background: rgb(var(--v-theme-blue50));
   cursor: pointer;
 }
 .ex-select-board-label {
@@ -595,14 +595,14 @@ onMounted(() => {
   .ex-category__card {
     background: linear-gradient(
       90deg,
-      rgba(255, 255, 255, 1),
-      rgba(249, 250, 251, 1)
+      rgb(var(--v-theme-surface)),
+      rgb(var(--v-theme-grey50))
     );
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(242, 244, 247, 1);
+    border: 1px solid rgb(var(--v-theme-grey200));
     padding: 3rem 1rem;
     border-radius: 24px;
     min-width : 230px;

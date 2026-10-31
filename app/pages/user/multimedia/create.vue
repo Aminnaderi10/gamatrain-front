@@ -267,7 +267,7 @@
         rounded="pill"
         width="200"
         height="40"
-        class="text-h5 font-weight-medium text-grey800"
+        class="text-h5 font-weight-medium"
         color="primary"
         :loading="loadingAddItem"
         :disabled="!isFormValid || loadingUploadFile"

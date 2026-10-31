@@ -15,7 +15,7 @@
         :value="service.id"
         variant="flat"
         base-color="grey25"
-        color="brandNavy"
+        color="secondary"
         rounded="lg"
         class="services-navigation__tab d-flex text-none font-weight-semibold pa-1 pa-md-0 px-md-5"
         :class="{ 'text-brandNavy': selectedService !== service.id }"

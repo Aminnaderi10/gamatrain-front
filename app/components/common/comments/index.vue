@@ -100,7 +100,7 @@
         </span>
       </div>
       <v-divider
-        color="black"
+        color="grey900"
         thickness="2"
         class="my-2 d-flex d-sm-none"
       />
@@ -149,7 +149,6 @@ interface IComment {
 }
 
 const props = defineProps<IComment>()
-const { initCaptcha } = useRecaptcha()
 const { data: comments, getData, totalCount, loadingGetData } = usePostComment()
 
 const { xs } = useDisplay()
@@ -166,7 +165,6 @@ const openComments = () => {
 
 onMounted(() => {
   getData(params)
-  initCaptcha()
 })
 
 // const sendCommentSuccessfull = (comment: CommentPostDTO) => {

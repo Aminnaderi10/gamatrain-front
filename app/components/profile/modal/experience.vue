@@ -224,7 +224,7 @@
               <v-icon
                 size="x-large"
                 icon="md:subdirectory_arrow_left"
-                color="grey800"
+                color="on-primary"
               />
             </v-btn>
           </template>
@@ -261,7 +261,7 @@
         rounded="pill"
         height="38"
         width="220"
-        class="text-h5 text-grey800 font-weight-medium"
+        class="text-h5 font-weight-medium"
         flat
         :disabled="!isFormValid"
         :loading="loadingEditItem || loadingAddItem"

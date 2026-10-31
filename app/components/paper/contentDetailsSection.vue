@@ -55,7 +55,9 @@
       {{ contentData?.test_type_title }}
     </span>
     <span class="text-h5 d-flex align-center primary-gray-600 ga-1">
-      <v-icon color="#475467">md:update</v-icon>
+      <v-icon color="grey600">
+        md:update
+      </v-icon>
       {{ fromNowLocal(contentData?.up_date) }}
     </span>
   </div>
@@ -183,7 +185,7 @@ onBeforeUnmount(() => {
 .blur-div {
   height: 40px;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #ffffff 80%);
+  background: linear-gradient(180deg, rgba(var(--v-theme-background), 0) 0%, rgb(var(--v-theme-background)) 80%);
 }
 .detail-test-type-icon {
   width: 22.5px;

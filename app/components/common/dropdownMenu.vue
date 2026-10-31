@@ -11,9 +11,9 @@
       >
         <div
           :class="`text-h5 font-weight-medium mr-2 mt-1 ${
-            menuSetting.bgColor == '#FFFFFF'
-              ? 'text-grey800'
-              : 'text-white'
+            menuSetting.bgColor === 'transparent'
+              ? 'text-white'
+              : 'text-grey800'
           }`"
         >
           {{ user?.firstName || user?.lastName }}
@@ -60,7 +60,7 @@
       density="compact"
       min-width="250"
       nav
-      bg-color="#f9fafb"
+      bg-color="surface"
       class="rounded-lg"
     >
       <div
@@ -281,6 +281,10 @@ const items = computed(() => [
       },
     ],
   },
+  // Teacher invite program: teachers only (the backend refuses anyone else).
+  ...(canAddEducationalContent.value
+    ? [{ title: 'Invite & Earn', icon: 'md:redeem', link: '/user/invite', value: 'invite' }]
+    : []),
   {
     title: 'Messages',
     icon: 'md:mail',
@@ -330,7 +334,7 @@ const logout = async () => {
 .badge-messages {
   width: 24px;
   height: 24px;
-  background-color: #f50e0e;
+  background-color: rgb(var(--v-theme-lightError));
   top: 10px;
   right: 6px;
 }

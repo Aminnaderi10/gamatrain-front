@@ -123,7 +123,7 @@
 </template>
 
 <script setup>
-import defaultImage from '@/assets/images/default-school.png'
+import defaultImage from '@/assets/images/default-school.webp'
 
 const { formatLocal } = useDateTime()
 

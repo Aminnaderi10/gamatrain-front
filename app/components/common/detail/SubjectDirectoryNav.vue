@@ -32,7 +32,7 @@
             color="primary"
             variant="flat"
             size="small"
-            class="subject-directory-card__action d-md-none ms-auto flex-shrink-0 text-brandNavy font-weight-semibold"
+            class="subject-directory-card__action d-md-none ms-auto flex-shrink-0 font-weight-semibold"
           >
             Open directory →
           </v-chip>
@@ -46,7 +46,7 @@
       variant="flat"
       rounded="lg"
       height="40"
-      class="subject-directory-card__action d-none d-md-flex flex-shrink-0 text-none text-brandNavy font-weight-semibold"
+      class="subject-directory-card__action d-none d-md-flex flex-shrink-0 text-none font-weight-semibold"
     >
       Open directory →
     </v-btn>

@@ -297,7 +297,7 @@
           color="primary"
           rounded="pill"
           variant="flat"
-          class="text-grey900 font-weight-medium text-h5"
+          class="font-weight-medium text-h5"
           width="150"
           :loading="loadingCreatePost"
           @click="publish"
