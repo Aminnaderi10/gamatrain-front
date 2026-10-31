@@ -14,8 +14,6 @@ import type {
   DirectoryPaperResponse,
 } from '~/types/subject-directory'
 
-type LoadStatus = 'ok' | 'empty' | 'error'
-
 const getDirectoryInitialPapersKey = (subjectId: string | number) => `directory-papers:${subjectId}`
 
 // The subject's newest page of papers, rendered on the server. The page starts it
@@ -51,7 +49,6 @@ export const useDirectoryPapers = async (context: DirectoryPaperContext) => {
   const list = reactive(createDirectoryPaperList())
   const expandedYears = ref<number[]>([])
   const expandedSessions = reactive<Record<number, number[]>>({})
-  let controller: AbortController | null = null
 
   const years = computed(() => groupDirectoryPapers(list.items, getDirectorySessions(context.gradeId)))
 
@@ -99,35 +96,31 @@ export const useDirectoryPapers = async (context: DirectoryPaperContext) => {
     }
   }
 
-  // Load the next (older) page; v-infinite-scroll's manual "load more" calls it.
-  const loadMore = async (): Promise<LoadStatus> => {
-    if (!context.subjectId || !list.hasMore) return 'empty'
-    controller = new AbortController()
-    const { signal } = controller
+  // Load the next (older) page ("Load older papers"). A response that arrives
+  // after the subject or filters changed is ignored.
+  let request = 0
+  const loadMore = async () => {
+    if (!context.subjectId || !list.hasMore) return
+    const current = ++request
     list.loading = true
     list.error = false
     try {
       const response = await fetchPapers({
         ...query(), is_paper: true, directory: true, page: list.page + 1, perpage: DIRECTORY_PAGE_SIZE,
-      }, signal)
-      if (signal.aborted) return 'ok'
-      addPage(response)
-      if (list.error) return 'error'
-      return list.hasMore ? 'ok' : 'empty'
+      })
+      if (current === request) addPage(response)
     }
     catch {
-      if (signal.aborted) return 'ok'
-      list.error = true
-      return 'error'
+      if (current === request) list.error = true
     }
     finally {
-      if (!signal.aborted) list.loading = false
+      if (current === request) list.loading = false
     }
   }
 
   // Start the list over for a new subject or filter set, then open its newest session.
   const reload = async () => {
-    controller?.abort()
+    request++
     Object.assign(list, createDirectoryPaperList())
     openNewestSession()
     await loadMore()
@@ -153,7 +146,7 @@ export const useDirectoryPapers = async (context: DirectoryPaperContext) => {
     // The server payload was missing or failed: load the first page in the browser.
     if (context.subjectId && !list.loaded) reload()
   })
-  onScopeDispose(() => controller?.abort())
+  onScopeDispose(() => request++)
 
   if (context.subjectId) {
     const cached = useNuxtData<DirectoryPaperResponse | null>(getDirectoryInitialPapersKey(context.subjectId))

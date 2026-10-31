@@ -4,9 +4,9 @@ import type { DirectoryFetchPapers, DirectoryPaperResponse } from '~/types/subje
 
 export const useDirectoryPapersApi = () => {
   const nuxtApp = useNuxtApp()
-  const fetchPapers: DirectoryFetchPapers = (params, signal) =>
+  const fetchPapers: DirectoryFetchPapers = params =>
     nuxtApp.runWithContext(() => useApiService.get<DirectoryPaperResponse>(
-      '/api/v1/tests/search', { ...params }, { public: true, signal },
+      '/api/v1/tests/search', { ...params }, { public: true },
     ))
   return { fetchPapers }
 }

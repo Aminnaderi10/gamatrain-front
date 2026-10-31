@@ -100,7 +100,7 @@ export type DirectoryFetchPapers = (params: DirectoryPaperQuery & {
   directory: boolean
   page: number
   perpage: number
-}, signal?: AbortSignal) => Promise<DirectoryPaperResponse>
+}) => Promise<DirectoryPaperResponse>
 
 // The papers loaded so far for the current subject and filters, newest first.
 export interface DirectoryPaperList {
