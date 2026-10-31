@@ -193,7 +193,6 @@
 import { reactive, useId } from 'vue'
 import type { PropType } from 'vue'
 import type { DirectorySelection } from '~/types/subject-directory'
-import { useDirectoryStructuredData } from '~/composables/useDirectoryStructuredData'
 
 const accordionId = useId()
 const props = defineProps({
@@ -205,11 +204,9 @@ const props = defineProps({
 })
 
 const {
-  filterButtons, years, list, expandedYears, expandedSessions, openPapers,
+  filterButtons, years, list, expandedYears, expandedSessions,
   selectFilter, clearFilters, refreshPaperTypes, expandSessions, loadMore, reload,
 } = await useDirectoryPapers(props)
-
-useDirectoryStructuredData(() => props.selection, openPapers)
 
 const downloadState = useDirectoryPaperDownloads()
 const downloads = reactive(downloadState)

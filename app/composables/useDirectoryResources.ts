@@ -1,26 +1,17 @@
 import { computed } from 'vue'
 import type { Ref } from 'vue'
 import { useAsyncData } from '#app'
-import { useApiService } from '~/composables/useApiService'
+import { useSubjectDirectoryApi } from '~/composables/api/subject-directory/useSubjectDirectory.api'
 import { DIRECTORY_RESOURCE_PRESENTATION } from '~/constants/pastpaper/directory'
-import type { DirectoryResourceContext, DirectoryResourceGroup } from '~/types/subject-directory'
-
-interface DirectoryResourcesResponse {
-  data?: { list?: DirectoryResourceGroup[] }
-}
+import type { DirectoryResourceContext } from '~/types/subject-directory'
 
 // The subject's non-empty resource collections, each linking to the matching Search results.
 export const useDirectoryResources = async (context: Ref<DirectoryResourceContext>) => {
+  const { fetchResources } = useSubjectDirectoryApi()
   const key = computed(() => `directory-resources:${context.value.subjectId || 'none'}`)
-  const { data, pending, error, refresh } = await useAsyncData(key, () => {
-    const subjectId = context.value.subjectId
-    if (!subjectId) return Promise.resolve<DirectoryResourcesResponse>({ data: { list: [] } })
-    return useApiService.get<DirectoryResourcesResponse>('/api/v1/tests/search', {
-      is_paper: false,
-      directory: true,
-      lesson: subjectId,
-    }, { public: true })
-  })
+  const { data, pending, error, refresh } = await useAsyncData(key, () => context.value.subjectId
+    ? fetchResources(context.value.subjectId)
+    : Promise.resolve(null))
 
   const collections = computed(() => (data.value?.data?.list ?? [])
     .filter(group => group.items?.length)

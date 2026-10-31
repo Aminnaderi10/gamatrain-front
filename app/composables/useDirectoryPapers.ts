@@ -1,15 +1,17 @@
 import { computed, onMounted, onScopeDispose, reactive, ref, watch } from 'vue'
 import { useAsyncData, useNuxtData } from '#app'
-import { useDirectoryPapersApi } from '~/composables/api/subject-directory/useDirectoryPapers.api'
+import { useSubjectDirectoryApi } from '~/composables/api/subject-directory/useSubjectDirectory.api'
 import { useApiService } from '~/composables/useApiService'
 import { DIRECTORY_FILTERS, DIRECTORY_PAGE_SIZE, DIRECTORY_YEAR_OPTIONS, getDirectorySessions } from '~/constants/pastpaper/directory'
 import { PAPER_VARIANT_OPTIONS } from '~/constants/search'
 import { appendDirectoryPapers, createDirectoryPaperList, groupDirectoryPapers } from '~/utils/directoryPapers'
+import { getDirectoryStructuredData, serializeDirectoryStructuredData } from '~/utils/directorySeo'
 import type { DirectoryStructuredDataPaper } from '~/utils/directorySeo'
 import type {
   DirectoryFilterKey,
   DirectoryFilterOption,
   DirectoryPaperContext,
+  DirectorySelection,
   DirectoryPaperQuery,
   DirectoryPaperResponse,
 } from '~/types/subject-directory'
@@ -19,7 +21,7 @@ const getDirectoryInitialPapersKey = (subjectId: string | number) => `directory-
 // The subject's newest page of papers, rendered on the server. The page starts it
 // alongside Resources; useDirectoryPapers reads the same payload.
 export const useDirectoryInitialPapers = ({ subjectId }: { subjectId: string | number }) => {
-  const { fetchPapers } = useDirectoryPapersApi()
+  const { fetchPapers } = useSubjectDirectoryApi()
   return useAsyncData(getDirectoryInitialPapersKey(subjectId), () => subjectId
     ? fetchPapers({ lesson: subjectId, is_paper: true, directory: true, page: 1, perpage: DIRECTORY_PAGE_SIZE })
     : Promise.resolve(null))
@@ -27,7 +29,7 @@ export const useDirectoryInitialPapers = ({ subjectId }: { subjectId: string | n
 
 // One paginated, newest-first paper search per subject and filter set, grouped
 // into years and sessions in the browser. Only the newest session opens by itself.
-export const useDirectoryPapers = async (context: DirectoryPaperContext) => {
+export const useDirectoryPapers = async (context: DirectoryPaperContext & { selection?: DirectorySelection | null }) => {
   const filters = reactive<Record<DirectoryFilterKey, string>>({ year: '', series: '', paper: '', variant: '' })
   // Paper types depend on the board and are loaded on the server, so the inline
   // Paper row renders at full size; Year, Session and Variant are fixed lists.
@@ -44,7 +46,7 @@ export const useDirectoryPapers = async (context: DirectoryPaperContext) => {
     paper: paperTypes.data.value ?? [],
     variant: PAPER_VARIANT_OPTIONS,
   }))
-  const { fetchPapers } = useDirectoryPapersApi()
+  const { fetchPapers } = useSubjectDirectoryApi()
 
   const list = reactive(createDirectoryPaperList())
   const expandedYears = ref<number[]>([])
@@ -133,10 +135,17 @@ export const useDirectoryPapers = async (context: DirectoryPaperContext) => {
   const isSessionOpen = (year: number, month: number) => expandedYears.value.includes(year)
     && (expandedSessions[year] || []).includes(month)
 
-  // Papers in open sessions, for the page's structured data.
+  // CollectionPage + breadcrumb JSON-LD, listing the papers in open sessions.
+  const siteConfig = useSiteConfig()
   const openPapers = computed<DirectoryStructuredDataPaper[]>(() => years.value.flatMap(year => year.sessions
     .filter(session => isSessionOpen(year.id, session.id))
     .flatMap(session => session.papers.map(paper => ({ paper, year: year.title, session: session.title })))))
+  const schema = computed(() => getDirectoryStructuredData(context.selection ?? null, openPapers.value, siteConfig.url))
+  useHead(() => ({
+    script: schema.value
+      ? [{ key: 'directory-structured-data', type: 'application/ld+json', innerHTML: serializeDirectoryStructuredData(schema.value) }]
+      : [],
+  }))
 
   // A new subject clears the filters; the query watcher below then reloads once.
   watch(() => [context.subjectId, context.gradeId, context.boardId].join(':'), clearFilters)
@@ -162,7 +171,7 @@ export const useDirectoryPapers = async (context: DirectoryPaperContext) => {
   await paperTypes
 
   return {
-    filters, filterButtons, years, list, expandedYears, expandedSessions, openPapers,
+    filters, filterButtons, years, list, expandedYears, expandedSessions,
     selectFilter, clearFilters, refreshPaperTypes: paperTypes.refresh, expandSessions, loadMore, reload,
   }
 }

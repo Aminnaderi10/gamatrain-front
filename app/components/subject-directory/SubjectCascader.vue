@@ -144,7 +144,7 @@
 
 <script setup lang="ts">
 import { computed, toRef } from 'vue'
-import { useDirectoryPicker } from '~/composables/useDirectoryPicker'
+import { useDirectoryPicker } from '~/composables/useDirectorySelection'
 import type { DirectorySelection, DirectorySelectorSnapshot, DirectorySelectorStage } from '~/types/subject-directory'
 
 const props = defineProps<{
