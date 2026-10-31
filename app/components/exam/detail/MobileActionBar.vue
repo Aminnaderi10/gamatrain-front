@@ -16,7 +16,7 @@
       </v-btn>
       <v-btn
         v-if="canStart"
-        class="flex-1-1-0 text-h5 font-weight-heavy text-none text-brandNavy"
+        class="flex-1-1-0 text-h5 font-weight-heavy text-none"
         color="primary"
         size="large"
         rounded="lg"

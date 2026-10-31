@@ -100,7 +100,7 @@
         </span>
       </div>
       <v-divider
-        color="black"
+        color="grey900"
         thickness="2"
         class="my-2 d-flex d-sm-none"
       />

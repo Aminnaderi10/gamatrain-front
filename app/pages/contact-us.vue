@@ -105,7 +105,7 @@
             <div>
               <v-icon
                 size="x-large"
-                color="#97A2B2"
+                color="grey400"
                 class="icon"
                 icon="md:corporate_fare"
               />
@@ -115,7 +115,7 @@
             <div>
               <v-icon
                 size="x-large"
-                color="#97A2B2"
+                color="grey400"
                 class="icon"
                 icon="md:location_on"
               />
@@ -238,7 +238,7 @@ const submitForm = async () => {
 
 .address {
   width: calc(100% - 24px);
-  background-color: #f2f4f7;
+  background-color: rgb(var(--v-theme-grey100));
   margin: 0 24px;
   padding: 1rem 2rem;
   position: absolute;
@@ -253,6 +253,6 @@ const submitForm = async () => {
 .address span {
   font-size: 2rem;
   font-weight: 600;
-  color: #334053;
+  color: rgb(var(--v-theme-grey700));
 }
 </style>

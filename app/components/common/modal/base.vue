@@ -6,7 +6,7 @@
     @click="clickOnOverlay"
   >
     <div
-      class="w-100 d-flex flex-column bg-white rounded-xl overflow-y-auto mobile-style"
+      class="w-100 d-flex flex-column bg-surface rounded-xl overflow-y-auto mobile-style"
       :class="variant === 'publish' ? 'modal-panel--publish py-6 px-4 pa-sm-6 pa-md-8' : 'py-6 px-3 px-sm-6'"
       @click="clickOnModal"
     >

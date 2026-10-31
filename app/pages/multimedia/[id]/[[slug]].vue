@@ -4,7 +4,7 @@
     class="d-flex flex-column mt-16"
   >
     <lazy-widgets-breadcrumb
-      background-color="white"
+      background-color="transparent"
       :breads="breads"
     />
     <div

@@ -304,8 +304,8 @@ const shareContent = () => {
 
 <style scoped>
 .container-slider-button {
-  background-color: #fcfcfd;
-  border: 1px solid #f2f4f7;
+  background-color: rgb(var(--v-theme-surface));
+  border: 1px solid rgb(var(--v-theme-grey200));
   max-width: 360px;
   height: 100%;
   min-height: 400px;
@@ -313,7 +313,7 @@ const shareContent = () => {
 }
 .button-div {
   min-width: 60px;
-  border: 1px solid #f2f4f7;
+  border: 1px solid rgb(var(--v-theme-grey200));
 }
 .preview-div {
   width: 32px;

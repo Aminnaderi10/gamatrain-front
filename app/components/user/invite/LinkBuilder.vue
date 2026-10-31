@@ -58,7 +58,7 @@
         flat
         :disabled="!inviteLink"
         :prepend-icon="copied ? 'md:check' : 'md:content_copy'"
-        class="text-h5 font-weight-bold text-grey900 px-6"
+        class="text-h5 font-weight-bold px-6"
         @click="copyLink"
       >
         {{ copied ? 'Copied' : 'Copy link' }}
@@ -135,7 +135,7 @@
           rounded="pill"
           flat
           prepend-icon="md:download"
-          class="text-h5 font-weight-bold text-grey900"
+          class="text-h5 font-weight-bold"
           @click="downloadQr"
         >
           Download PNG

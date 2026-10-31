@@ -20,7 +20,7 @@
           </span>
           <v-icon
             size="18"
-            color="black"
+            color="grey900"
             class="mx-2"
           >
             mdi-menu-down
@@ -49,7 +49,7 @@
           <v-icon
             v-if="selectedBoard"
             size="18"
-            color="black"
+            color="grey900"
             class="mx-2"
           >
             mdi-menu-down
@@ -78,7 +78,7 @@
           <v-icon
             v-if="selectedSubject"
             size="18"
-            color="black"
+            color="grey900"
             class="mx-2"
           >
             mdi-menu-down

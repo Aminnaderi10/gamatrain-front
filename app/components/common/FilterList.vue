@@ -65,7 +65,7 @@
                 <v-icon
                   size="x-large"
                   icon="md:search"
-                  color="grey800"
+                  color="on-primary"
                 />
               </v-btn>
             </template>
@@ -442,7 +442,7 @@
               color="primary"
               rounded="xl"
               height="40"
-              class="mobile-filter-modal__show-results text-h5 text-grey800"
+              class="mobile-filter-modal__show-results text-h5"
               :loading="loading"
               @click="dialogFilterMobileModel = false"
             >
@@ -786,7 +786,7 @@ watch(activeFilterService, async (service, previousService) => {
     grid-row: 1;
     max-width: none;
     background: rgb(var(--v-theme-grey25));
-    box-shadow: 0 -8px 0 rgb(var(--v-theme-white));
+    box-shadow: 0 -8px 0 rgb(var(--v-theme-background));
   }
 
   .filter-list-sidebar-layout :deep(.services-navigation__items) {
