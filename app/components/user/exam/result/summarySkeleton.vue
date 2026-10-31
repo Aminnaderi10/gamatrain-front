@@ -73,7 +73,7 @@
             v-for="item in 2"
             :key="item"
             class="pa-2 d-flex flex-column ga-1 flex-grow-1"
-            color="white"
+            color="surface"
             flat
             rounded="lg"
             border

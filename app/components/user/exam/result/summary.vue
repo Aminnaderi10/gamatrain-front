@@ -76,7 +76,7 @@
             v-for="rankItem in rankItems"
             :key="rankItem.label"
             class="pa-2 d-flex flex-column ga-1 flex-grow-1"
-            color="white"
+            color="surface"
             flat
             rounded="lg"
             border
@@ -130,17 +130,17 @@
                   height="30"
                   @click="handleResultAnalyze"
                 >
-                  <span class="text-grey700 text-h6 font-weight-bold mt-1 mx-2">Get my analysis</span>
+                  <span class="text-h6 font-weight-bold mt-1 mx-2">Get my analysis</span>
 
                   <common-price-with-gem
                     v-if="!resultAnalyze?.purchased"
-                    class="text-grey700 text-h6 font-weight-bold mt-1"
+                    class="text-h6 font-weight-bold mt-1"
                     :price="resultAnalyze?.points"
-                    color="grey700"
+                    color="on-primary"
                   />
                   <span
                     v-else
-                    class="text-grey700 text-h6 font-weight-bold mt-1"
+                    class="text-h6 font-weight-bold mt-1"
                   >(Owned)</span>
                 </v-btn>
                 <span

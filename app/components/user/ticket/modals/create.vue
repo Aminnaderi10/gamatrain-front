@@ -119,7 +119,7 @@
         rounded="pill"
         height="38"
         width="220"
-        class="text-h5 text-grey800 font-weight-medium"
+        class="text-h5 font-weight-medium"
         flat
         type="submit"
         :disabled="!isFormValid || loading"

@@ -197,12 +197,12 @@
     >
       <span class="text-h5 font-weight-bold">
         <v-icon
-          color="black"
+          color="grey900"
           size="20"
         >md:download</v-icon>
         Download
       </span>
-      <v-icon color="black">
+      <v-icon color="grey900">
         md:keyboard_arrow_down
       </v-icon>
     </div>

@@ -30,7 +30,7 @@
           <v-icon
             size="x-large"
             icon="md:subdirectory_arrow_left"
-            color="grey800"
+            color="on-primary"
           />
         </v-btn>
       </template>

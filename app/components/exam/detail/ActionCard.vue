@@ -6,13 +6,13 @@
     elevation="0"
   >
     <template v-if="participation">
-      <div class="bg-generalSearchQuiz px-6 py-5">
-        <p class="text-h6 text-white opacity-80">
+      <div class="bg-quizFill px-6 py-5">
+        <p class="text-h6 text-white opacity-90">
           Take it online
         </p>
         <p class="gama-text-h4 text-white">
           {{ participation.price ? `${participation.price} Gems` : 'Free' }}
-          <span class="text-h6 font-weight-semibold opacity-80">· instant score</span>
+          <span class="text-h6 font-weight-semibold opacity-90">· instant score</span>
         </p>
       </div>
 
@@ -23,7 +23,7 @@
           size="x-large"
           rounded="lg"
           flat
-          class="text-h5 font-weight-heavy text-none text-brandNavy"
+          class="text-h5 font-weight-heavy text-none"
           prepend-icon="md:play_arrow"
           @click="startExam"
         >

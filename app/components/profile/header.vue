@@ -217,8 +217,8 @@ const userOnlineStatus = {
   },
   ActiveThisMonth: {
     text: 'Missing for days',
-    nameColor: 'blueGrey300',
-    color: theme.current.value.colors.blueGrey300,
+    nameColor: 'blueGray300',
+    color: theme.current.value.colors.blueGray300,
   },
   ActiveThisWeek: {
     text: 'Was here this week',

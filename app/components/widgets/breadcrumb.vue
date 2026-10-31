@@ -1,9 +1,7 @@
 <template>
-  <div
+  <v-sheet
     class="breadcrumbs-container"
-    :style="{
-      backgroundColor: backgroundColor,
-    }"
+    :color="backgroundColor"
   >
     <v-breadcrumbs
       v-if="breadItems.length"
@@ -14,7 +12,7 @@
         <v-icon>mdi-chevron-right</v-icon>
       </template>
     </v-breadcrumbs>
-  </div>
+  </v-sheet>
 </template>
 
 <script setup>
@@ -24,9 +22,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  // A theme colour name (e.g. 'surface', 'grey100') or 'transparent', so it follows light/dark mode.
   backgroundColor: {
     type: String,
-    default: '#f5f5f5',
+    default: 'grey100',
   },
 })
 

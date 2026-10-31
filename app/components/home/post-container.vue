@@ -15,7 +15,7 @@
           outlined
           size="large"
           to="/post"
-          color="black"
+          color="grey900"
           height="36"
           class="text-h5 d-none d-md-flex font-weight-bold"
         >

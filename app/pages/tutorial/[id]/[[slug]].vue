@@ -23,7 +23,7 @@
       >
         <v-row>
           <lazy-widgets-breadcrumb
-            background-color="white"
+            background-color="transparent"
             :breads="breads"
           />
         </v-row>
@@ -124,7 +124,7 @@
         @click="showLessonTree = !showLessonTree"
       >
         <v-icon
-          color="black"
+          color="on-primary"
           size="24"
         >
           md:format_list_bulleted

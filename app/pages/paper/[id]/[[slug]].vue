@@ -5,7 +5,7 @@
   >
     <v-row>
       <lazy-widgets-breadcrumb
-        background-color="white"
+        background-color="transparent"
         :breads="breads"
       />
     </v-row>
