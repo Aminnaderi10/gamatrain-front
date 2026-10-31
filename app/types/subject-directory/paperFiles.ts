@@ -1,12 +1,10 @@
-export type DirectoryFileAvailability = boolean | number | string | null
-
 export interface DirectoryFileInfo {
-  exist?: DirectoryFileAvailability
+  exist?: boolean
   price?: number | string | null
 }
 
 export interface DirectoryExtraFile extends DirectoryFileInfo {
-  id?: string | number | null
+  id: string | number
   type?: string | number | null
   type_title?: string | null
 }
@@ -17,12 +15,6 @@ export interface DirectoryPaperFileSource {
     answer?: DirectoryFileInfo
     extra?: DirectoryExtraFile[] | null
   } | null
-  q_file?: DirectoryFileAvailability
-  a_file?: DirectoryFileAvailability
-  in_file?: DirectoryFileAvailability
-  in_file_id?: string | number | boolean | null
-  sf_file?: DirectoryFileAvailability
-  sf_file_id?: string | number | boolean | null
 }
 
 export interface DirectoryPaper extends DirectoryPaperFileSource {
@@ -34,6 +26,8 @@ export interface DirectoryPaper extends DirectoryPaperFileSource {
   variant?: string | number | null
   variant_title?: string | null
   exam_id?: string | (string | number)[] | null
+  edu_year?: string | number
+  edu_month?: string | number
 }
 
 export interface DirectoryPaperDownload {
