@@ -1,23 +1,16 @@
 import { computed } from 'vue'
+import type { Ref } from 'vue'
 import type { DirectorySelection } from '~/types/subject-directory/cascader'
-import type { DirectoryStructuredDataSource } from '~/types/subject-directory/structuredData'
+import type { DirectoryStructuredDataPaper } from '~/types/subject-directory/structuredData'
 import { getDirectoryStructuredData, serializeDirectoryStructuredData } from '~/utils/directoryStructuredData'
 
+// CollectionPage + breadcrumb JSON-LD, listing the papers in open sessions.
 export const useDirectoryStructuredData = (
   selection: () => DirectorySelection | null,
-  source: DirectoryStructuredDataSource,
+  papers: Ref<DirectoryStructuredDataPaper[]>,
 ) => {
   const siteConfig = useSiteConfig()
-  const schema = computed(() => {
-    const papers = source.visibleYears.value.flatMap(year =>
-      source.displayedSessions(year.id)
-        .filter(session => source.isSessionOpen(year.id, session.id))
-        .flatMap(session => source.sessionState(year.id, session.id).items.map(paper => ({
-          paper, year: year.title, session: session.title,
-        }))),
-    )
-    return getDirectoryStructuredData(selection(), papers, siteConfig.url)
-  })
+  const schema = computed(() => getDirectoryStructuredData(selection(), papers.value, siteConfig.url))
 
   useHead(() => ({
     script: schema.value

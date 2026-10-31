@@ -1,7 +1,16 @@
+import { ALL_SEARCH_MONTHS, SEARCH_MONTHS_BY_LEVEL } from '../search'
+import { YEAR_LIST } from './index'
+
 export const DIRECTORY_DEFAULT_BOARD_CODE = 6659
 
-// How many years the first render checks at once while finding the newest available session.
-export const DIRECTORY_INITIAL_YEAR_BATCH = 3
+export const DIRECTORY_YEAR_OPTIONS = YEAR_LIST.map(id => ({ id, title: String(id) }))
+
+// The grade's exam sessions, as on Search, newest first.
+export const getDirectorySessions = (gradeId: string | number) =>
+  [...(SEARCH_MONTHS_BY_LEVEL[Number(gradeId)] ?? ALL_SEARCH_MONTHS)].sort((first, second) => second.id - first.id)
+
+// Papers per request; the API caps a page at 50.
+export const DIRECTORY_PAGE_SIZE = 50
 
 export const DIRECTORY_FILTERS = [
   { key: 'year', title: 'Year', icon: 'md:calendar_today_outlined' },

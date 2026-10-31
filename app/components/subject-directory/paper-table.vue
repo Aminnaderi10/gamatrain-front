@@ -25,101 +25,127 @@
     >
       Select a subject to browse past papers.
     </p>
-    <v-expansion-panels
-      v-else
-      :model-value="expandedYears"
-      class="directory-years"
-      variant="accordion"
-      multiple
-      @update:model-value="expandYears"
-    >
-      <v-expansion-panel
-        v-for="year in visibleYears"
-        :key="year.id"
-        :value="year.id"
-        elevation="0"
+    <template v-else>
+      <v-expansion-panels
+        v-if="years.length"
+        v-model="expandedYears"
+        class="directory-years"
+        variant="accordion"
+        multiple
       >
-        <h3 class="directory-accordion-heading ma-0 pa-0">
-          <v-expansion-panel-title
-            :id="`${accordionId}-year-${year.id}-title`"
-            :aria-controls="`${accordionId}-year-${year.id}-panel`"
-            class="directory-year-title font-weight-bold rounded-0 justify-start"
-            static
-            expand-icon="md:keyboard_arrow_right"
-            collapse-icon="md:keyboard_arrow_down"
-          >
-            {{ year.title }}
-          </v-expansion-panel-title>
-        </h3>
-        <v-expansion-panel-text
-          :id="`${accordionId}-year-${year.id}-panel`"
+        <v-expansion-panel
+          v-for="year in years"
+          :key="year.id"
+          :value="year.id"
+          elevation="0"
         >
-          <div
-            v-if="yearAvailabilityLoading(year.id)"
-            class="d-flex align-center ga-3 py-4 text-grey600"
-            role="status"
-          >
-            <v-progress-circular
-              indeterminate
-              size="24"
-              width="2"
-              color="primary"
-            />
-            <span>Checking available sessions…</span>
-          </div>
-          <v-expansion-panels
-            v-if="displayedSessions(year.id).length"
-            :model-value="expandedSessions[year.id]"
-            class="directory-sessions"
-            variant="accordion"
-            multiple
-            @update:model-value="expandSessions(year.id, $event)"
-          >
-            <v-expansion-panel
-              v-for="session in displayedSessions(year.id)"
-              :key="session.id"
-              :value="session.id"
-              class="rounded-0"
-              elevation="0"
+          <h3 class="directory-accordion-heading ma-0 pa-0">
+            <v-expansion-panel-title
+              :id="`${accordionId}-year-${year.id}-title`"
+              :aria-controls="`${accordionId}-year-${year.id}-panel`"
+              class="directory-year-title font-weight-bold rounded-0 justify-start"
+              static
+              expand-icon="md:keyboard_arrow_right"
+              collapse-icon="md:keyboard_arrow_down"
             >
-              <h4 class="directory-accordion-heading ma-0 pa-0">
-                <v-expansion-panel-title
-                  :id="`${accordionId}-year-${year.id}-session-${session.id}-title`"
-                  :aria-controls="`${accordionId}-year-${year.id}-session-${session.id}-panel`"
-                  class="directory-session-title text-brandNavy font-weight-bold rounded-0 justify-start"
-                  color="surfaceTertiary"
-                  static
-                  expand-icon="md:keyboard_arrow_right"
-                  collapse-icon="md:keyboard_arrow_down"
-                >
-                  {{ session.title }}
-                </v-expansion-panel-title>
-              </h4>
-              <v-expansion-panel-text
-                :id="`${accordionId}-year-${year.id}-session-${session.id}-panel`"
+              {{ year.title }}
+            </v-expansion-panel-title>
+          </h3>
+          <v-expansion-panel-text :id="`${accordionId}-year-${year.id}-panel`">
+            <v-expansion-panels
+              :model-value="expandedSessions[year.id]"
+              class="directory-sessions"
+              variant="accordion"
+              multiple
+              @update:model-value="expandSessions(year.id, $event)"
+            >
+              <v-expansion-panel
+                v-for="session in year.sessions"
+                :key="session.id"
+                :value="session.id"
+                class="rounded-0"
+                elevation="0"
               >
-                <subject-directory-paper-session
-                  :key="`${sessionKey(year.id, session.id)}:${filters.year}:${filters.series}`"
-                  :state="sessionState(year.id, session.id)"
-                  :active="isSessionOpen(year.id, session.id)"
-                  :label="`${year.title} ${session.title} papers`"
-                  :subject-title="subjectTitle"
-                  :downloads="downloads"
-                  :load-page="() => loadSession(year.id, session.id)"
-                />
-              </v-expansion-panel-text>
-            </v-expansion-panel>
-          </v-expansion-panels>
-          <p
-            v-else-if="!yearAvailabilityLoading(year.id)"
-            class="py-6 ma-0 text-grey600"
-            role="status"
-          >
-            No papers are available for this year.
-          </p>
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-    </v-expansion-panels>
+                <h4 class="directory-accordion-heading ma-0 pa-0">
+                  <v-expansion-panel-title
+                    :id="`${accordionId}-year-${year.id}-session-${session.id}-title`"
+                    :aria-controls="`${accordionId}-year-${year.id}-session-${session.id}-panel`"
+                    class="directory-session-title text-brandNavy font-weight-bold rounded-0 justify-start"
+                    color="surfaceTertiary"
+                    static
+                    expand-icon="md:keyboard_arrow_right"
+                    collapse-icon="md:keyboard_arrow_down"
+                  >
+                    {{ session.title }}
+                  </v-expansion-panel-title>
+                </h4>
+                <v-expansion-panel-text :id="`${accordionId}-year-${year.id}-session-${session.id}-panel`">
+                  <subject-directory-paper-row
+                    v-for="paper in session.papers"
+                    :key="paper.id"
+                    :paper="paper"
+                    :subject-title="subjectTitle"
+                    :downloads="downloads"
+                  />
+                </v-expansion-panel-text>
+              </v-expansion-panel>
+            </v-expansion-panels>
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
+
+      <div
+        v-if="list.loading && !years.length"
+        class="d-flex align-center justify-center ga-3 pa-6 text-grey600"
+        role="status"
+      >
+        <v-progress-circular
+          indeterminate
+          size="24"
+          width="2"
+          color="primary"
+        />
+        <span>Loading papers…</span>
+      </div>
+      <p
+        v-else-if="list.loaded && !list.items.length && !list.error"
+        class="pa-6 ma-0 text-grey600 text-center"
+        role="status"
+      >
+        No papers match these filters.
+      </p>
+
+      <div
+        v-if="list.error"
+        class="d-flex align-center justify-center flex-wrap ga-3 pa-4"
+        role="alert"
+      >
+        <span class="text-grey600">Unable to load papers.</span>
+        <v-btn
+          variant="text"
+          color="brandNavy"
+          class="text-none"
+          @click="list.loaded ? loadMore() : reload()"
+        >
+          Retry
+        </v-btn>
+      </div>
+      <div
+        v-else-if="list.loaded && list.hasMore"
+        class="d-flex justify-center py-4"
+      >
+        <v-btn
+          variant="outlined"
+          color="brandNavy"
+          rounded="lg"
+          class="directory-load-more text-none"
+          :loading="list.loading"
+          @click="loadMore"
+        >
+          Load older papers
+        </v-btn>
+      </div>
+    </template>
   </section>
 
   <!-- Coin Payment Modal -->
@@ -179,14 +205,11 @@ const props = defineProps({
 })
 
 const {
-  filters, filterButtons, visibleYears, expandedYears, expandedSessions,
-  selectFilter, clearFilters, fetchOptions, expandYears, expandSessions, sessionKey, sessionState, loadSession, isSessionOpen,
-  displayedSessions, yearAvailabilityLoading,
+  filterButtons, years, list, expandedYears, expandedSessions, openPapers,
+  selectFilter, clearFilters, fetchOptions, expandSessions, loadMore, reload,
 } = await useDirectoryPapers(props)
 
-useDirectoryStructuredData(() => props.selection, {
-  visibleYears, displayedSessions, isSessionOpen, sessionState,
-})
+useDirectoryStructuredData(() => props.selection, openPapers)
 
 const downloadState = useDirectoryPaperDownloads()
 const downloads = reactive(downloadState)
@@ -248,6 +271,12 @@ const {
   padding: 8px var(--directory-session-padding);
   font-size: 16px;
   line-height: 24px;
+}
+
+/* px size: the app's 10px root font size makes Vuetify's rem-based button text too small */
+.directory-load-more {
+  font-size: 14px;
+  letter-spacing: normal;
 }
 
 @media (prefers-reduced-motion: reduce) {

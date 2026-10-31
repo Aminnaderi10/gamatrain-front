@@ -1,37 +1,47 @@
+import { computed, onMounted, reactive, watch } from 'vue'
 import { useAsyncData } from '#app'
-import { getDirectoryPaperSessions, PAST_PAPER_YEAR_OPTIONS } from '~/constants/pastpaper/sessions'
 import { useApiService } from '~/composables/useApiService'
-import { getDirectoryVariantOptions } from '~/utils/directoryFilterOptions'
+import { DIRECTORY_YEAR_OPTIONS, getDirectorySessions } from '~/constants/pastpaper/directory'
+import { getDirectoryVariantOptions } from '~/utils/directoryPapers'
+import type { DirectoryFilterKey, DirectoryFilterOption, DirectoryPaperContext } from '~/types/subject-directory/papers'
+
+interface DirectoryOptionsResponse {
+  status: number | string
+  data: DirectoryFilterOption[]
+}
+
+type CatalogueFilter = 'paper' | 'variant'
 
 // Directory catalogue loading is kept outside the shared filter presentation.
-export const useDirectoryFilterOptions = (context) => {
-  const catalogues = reactive({})
-  const loading = reactive({})
-  const errors = reactive({})
-  const requests = new Map()
-  const catalogueKey = key => key === 'paper' ? `papers:${context.boardId}` : 'variants'
+export const useDirectoryFilterOptions = (context: DirectoryPaperContext) => {
+  const catalogues = reactive<Record<string, DirectoryFilterOption[]>>({})
+  const loading = reactive<Record<string, boolean>>({})
+  const errors = reactive<Record<string, string>>({})
+  const requests = new Map<string, Promise<void>>()
+  const catalogueKey = (key: CatalogueFilter) => key === 'paper' ? `papers:${context.boardId}` : 'variants'
 
-  const optionLists = computed(() => ({
-    year: PAST_PAPER_YEAR_OPTIONS,
-    series: getDirectoryPaperSessions(context.gradeId),
+  const optionLists = computed<Record<DirectoryFilterKey, readonly { id: string | number, title: string }[]>>(() => ({
+    year: DIRECTORY_YEAR_OPTIONS,
+    series: getDirectorySessions(context.gradeId),
     paper: catalogues[catalogueKey('paper')] || [],
     variant: catalogues.variants || [],
   }))
-  const optionLoading = computed(() => ({
+  const optionLoading = computed<Partial<Record<DirectoryFilterKey, boolean>>>(() => ({
     paper: Boolean(loading[catalogueKey('paper')]),
     variant: Boolean(loading.variants),
   }))
-  const optionErrors = computed(() => ({
+  const optionErrors = computed<Partial<Record<DirectoryFilterKey, string>>>(() => ({
     paper: errors[catalogueKey('paper')] || '',
     variant: errors.variants || '',
   }))
 
-  const fetchOptions = async (filter) => {
-    if (!['paper', 'variant'].includes(filter) || !context.subjectId) return
+  const fetchOptions = async (filter: string): Promise<void> => {
+    if ((filter !== 'paper' && filter !== 'variant') || !context.subjectId) return
     if (filter === 'paper' && !context.boardId) return
     const key = catalogueKey(filter)
     if (catalogues[key]) return
-    if (requests.has(key)) return requests.get(key)
+    const existing = requests.get(key)
+    if (existing) return existing
 
     loading[key] = true
     errors[key] = ''
@@ -40,7 +50,7 @@ export const useDirectoryFilterOptions = (context) => {
       : { type: 'variant' }
     const request = (async () => {
       try {
-        const response = await useApiService.get('/api/v1/types/list', params, { public: true })
+        const response = await useApiService.get<DirectoryOptionsResponse>('/api/v1/types/list', params, { public: true })
         if (Number(response?.status) !== 1 || !Array.isArray(response.data)) throw new Error('Invalid options')
         catalogues[key] = filter === 'paper'
           ? response.data.filter(item => item.is_paper === true || item.is_paper === '1' || item.is_paper === 1)
@@ -59,7 +69,7 @@ export const useDirectoryFilterOptions = (context) => {
   }
 
   let mounted = false
-  const preloadOptions = () => Promise.all(['paper', 'variant'].map(fetchOptions))
+  const preloadOptions = () => Promise.all((['paper', 'variant'] as const).map(fetchOptions))
   onMounted(() => {
     mounted = true
     preloadOptions()

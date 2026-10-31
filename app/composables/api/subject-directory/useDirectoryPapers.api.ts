@@ -1,10 +1,10 @@
 import { useNuxtApp } from '#app'
 import { useApiService } from '~/composables/useApiService'
-import type { DirectoryInitialPapersOptions, DirectoryPaperResponse } from '~/types/subject-directory/initialPapers'
+import type { DirectoryFetchPapers, DirectoryPaperResponse } from '~/types/subject-directory/papers'
 
 export const useDirectoryPapersApi = () => {
   const nuxtApp = useNuxtApp()
-  const fetchPapers: DirectoryInitialPapersOptions['fetchPapers'] = (params, signal) =>
+  const fetchPapers: DirectoryFetchPapers = (params, signal) =>
     nuxtApp.runWithContext(() => useApiService.get<DirectoryPaperResponse>(
       '/api/v1/tests/search', { ...params }, { public: true, signal },
     ))

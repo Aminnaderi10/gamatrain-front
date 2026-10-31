@@ -228,7 +228,7 @@ export const useDirectoryCascader = async () => {
   // One URL per subject: a bare, subject-only or outdated query answers with a 301 to the
   // full board/grade/subject path instead of a 200 duplicate (same rule as useCanonicalContentPath).
   if (import.meta.server && state.selection && pathKey(selectionPath(state.selection)) !== pathKey(initialPath)) {
-    const query = selectionPath(state.selection)
+    const query = { ...selectionPath(state.selection) }
     // The Nuxt context is lost after this composable's awaits, so restore it for navigateTo.
     await nuxtApp.runWithContext(() => navigateTo({ path: route.path, query }, { redirectCode: 301, replace: true }))
     // Stop rendering the throwaway page; Nuxt sends the recorded redirect ahead of the error.

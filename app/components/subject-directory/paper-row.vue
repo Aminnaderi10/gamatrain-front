@@ -19,7 +19,7 @@
       >
         <v-btn
           v-if="examIds.length === 1"
-          :to="`/exam/${examIds[0]}`"
+          :to="getDirectoryExamLink(examIds[0]!)"
           class="directory-action directory-exam-button text-none font-weight-regular"
           variant="outlined"
           aria-label="Take exam"
@@ -75,7 +75,7 @@
             <v-list-item
               v-for="(id, index) in examIds"
               :key="id"
-              :to="`/exam/${id}`"
+              :to="getDirectoryExamLink(id)"
               :title="`Online Exam ${index + 1}`"
             />
           </v-list>
@@ -127,7 +127,7 @@ import type { UnwrapRef } from 'vue'
 import type { DirectoryPaper } from '~/types/subject-directory/paperFiles'
 import type { useDirectoryPaperDownloads } from '~/composables/useDirectoryPaperDownloads'
 import {
-  getDirectoryExamIds, getDirectoryPaperCode, getDirectoryPaperLink, getDirectoryPaperTitle,
+  getDirectoryExamIds, getDirectoryExamLink, getDirectoryPaperCode, getDirectoryPaperLink, getDirectoryPaperTitle,
 } from '~/utils/directoryPapers'
 import { getDirectoryPaperDownloads } from '~/utils/directoryPaperFiles'
 
