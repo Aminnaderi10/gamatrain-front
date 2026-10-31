@@ -12,12 +12,13 @@ export const getDirectorySessions = (gradeId: string | number) =>
 // Papers per request; the API caps a page at 50.
 export const DIRECTORY_PAGE_SIZE = 50
 
+// The paper filters and the URL query key each one is kept in (the same keys as Search).
 export const DIRECTORY_FILTERS = [
-  { key: 'year', title: 'Year', icon: 'md:calendar_today_outlined' },
-  { key: 'series', title: 'Session' },
-  { key: 'paper', title: 'Paper', inline: true },
-  { key: 'variant', title: 'Variant', inline: true },
-]
+  { key: 'year', queryKey: 'edu_year', title: 'Year', icon: 'md:calendar_today_outlined' },
+  { key: 'series', queryKey: 'edu_month', title: 'Session' },
+  { key: 'paper', queryKey: 'test_type', title: 'Paper', inline: true },
+  { key: 'variant', queryKey: 'variant', title: 'Variant', inline: true },
+] as const
 
 // Design labels and icons for the Resources sidebar, by collection title.
 export const DIRECTORY_RESOURCE_PRESENTATION: Record<string, { label: string, title?: string, icon: string }> = {

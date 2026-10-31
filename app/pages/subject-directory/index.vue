@@ -50,7 +50,6 @@ import { computed } from 'vue'
 import ResourceCollections from '~/components/subject-directory/ResourceCollections.vue'
 import paperTable from '~/components/subject-directory/paper-table.vue'
 import SubjectCascader from '~/components/subject-directory/SubjectCascader.vue'
-import { useDirectoryInitialPapers } from '~/composables/useDirectoryPapers'
 import { useDirectorySelection } from '~/composables/useDirectorySelection'
 import { getDirectoryCanonicalUrl, getDirectoryIntroduction } from '~/utils/directorySeo'
 
@@ -62,11 +61,8 @@ const paperContext = computed(() => ({
   subjectTitle: selection.value?.subject.title || '',
 }))
 
-const [resourceState] = await Promise.all([
-  useDirectoryResources(paperContext),
-  useDirectoryInitialPapers(paperContext.value),
-])
-const { collections, isLoadingResources, resourceError, refreshResources } = resourceState
+// Not awaited: the server still waits for it, in parallel with the papers.
+const { collections, isLoadingResources, resourceError, refreshResources } = useDirectoryResources(paperContext)
 const hasResources = computed(() => Boolean(isLoadingResources.value || resourceError.value || collections.value.length))
 
 // SEO

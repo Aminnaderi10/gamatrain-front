@@ -95,7 +95,7 @@
       </v-expansion-panels>
 
       <div
-        v-if="list.loading && !years.length"
+        v-if="loading && !years.length"
         class="d-flex align-center justify-center ga-3 pa-6 text-grey600"
         role="status"
       >
@@ -125,7 +125,7 @@
           variant="text"
           color="brandNavy"
           class="text-none"
-          @click="list.loaded ? loadMore() : reload()"
+          @click="retry()"
         >
           Retry
         </v-btn>
@@ -202,7 +202,7 @@ const props = defineProps({
 
 const {
   filterButtons, years, list, expandedYears, expandedSessions,
-  selectFilter, clearFilters, refreshPaperTypes, expandSessions, loadMore, reload,
+  selectFilter, clearFilters, refreshPaperTypes, expandSessions, loadMore, retry, loading,
 } = await useDirectoryPapers(props)
 
 const downloads = reactive(useDirectoryPaperDownloads())

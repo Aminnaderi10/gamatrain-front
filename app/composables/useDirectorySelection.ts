@@ -44,7 +44,9 @@ export const useDirectorySelection = async () => {
     subject: readQuery(route.query.subject),
   }))
 
-  const request = useAsyncData('directory-selection', () => resolve(api, path.value), { watch: [path] })
+  // Keyed on the three ids only, so a filter change in the URL doesn't re-resolve.
+  const pathKey = computed(() => JSON.stringify(path.value))
+  const request = useAsyncData('directory-selection', () => resolve(api, path.value), { watch: [pathKey] })
   const { data: snapshot, refresh } = request
   const selection = computed<DirectorySelection | null>(() => {
     const { board, grade, subject } = snapshot.value ?? {}
