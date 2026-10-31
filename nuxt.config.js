@@ -30,6 +30,8 @@ export default defineNuxtConfig({
       BaseUrl2: process.env.NUXT_BASE_URL2,
       gamaedtechWalletAddress: process.env.NUXT_GAMAEDTECH_WALLET_ADDRESS,
       aiModelName: process.env.NUXT_PUBLIC_AI_MODEL_NAME,
+      // Shows the light/dark switch in the header (always on in development).
+      themeSwitch: process.env.NUXT_PUBLIC_THEME_SWITCH === 'true',
     },
   },
 

@@ -3,7 +3,7 @@
     class="w-100 main-header d-flex align-center justify-center"
     :class="[
       { 'position-fixed top-0': fixed },
-      isTransparentMenu ? 'bg-transparent' : 'bg-white elevation-2',
+      isTransparentMenu ? 'bg-transparent' : 'bg-surface elevation-2',
     ]"
   >
     <v-container class="d-flex align-center justify-space-between">
@@ -84,6 +84,19 @@
         class="d-flex align-center flex-shrink-0 ga-3 action-button"
         :class="{ 'search-header-actions': isSearchExperience }"
       >
+        <v-btn
+          v-if="isThemeSwitchEnabled"
+          :color="menuSetting.linkColor"
+          :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+          icon
+          variant="text"
+          size="40"
+          @click="toggleTheme"
+        >
+          <v-icon size="24">
+            {{ isDark ? 'md:light_mode' : 'md:dark_mode' }}
+          </v-icon>
+        </v-btn>
         <v-icon
           :color="menuSetting.linkColor"
           role="button"
@@ -114,7 +127,7 @@
           height="36"
           color="primary"
           flat
-          class="text-black text-h5 font-weight-bold "
+          class="text-black text-h5 font-weight-bold"
           @click="openLoginDialog"
         >
           Sign in
@@ -219,30 +232,36 @@ const menuLink = [
     action: () => openAddOption(),
   },
 ]
-const blackMenuSetting: MenuSetting = {
-  logo: 'gamatrain-logo.svg',
-  bgColor: 'transparent',
-  boxShadow: '',
-  linkColor: theme.current.value.colors['white']!,
-}
-const whiteMenuSetting: MenuSetting = {
-  logo: 'gamatrain-logo-black.svg',
-  bgColor: theme.current.value.colors['white']!,
-  boxShadow: '0px 1px 10px 0px rgba(var(--v-theme-shadowNeutral), 0.25)',
-  linkColor: theme.current.value.colors['grey800']!,
-}
-const menuSetting = ref<MenuSetting>(whiteMenuSetting)
+const { isDark, isSwitchEnabled: isThemeSwitchEnabled, toggleTheme } = useThemeMode()
+
 // Over the dark homepage hero the menu is transparent with white links.
-const isTransparentMenu = computed(() => menuSetting.value.bgColor === blackMenuSetting.bgColor)
+const isTransparentMenu = ref(false)
+const menuSetting = computed<MenuSetting>(() => {
+  const colors = theme.current.value.colors
+  if (isTransparentMenu.value) {
+    return {
+      logo: 'gamatrain-logo.svg',
+      bgColor: 'transparent',
+      boxShadow: '',
+      linkColor: colors['white']!,
+    }
+  }
+  return {
+    logo: isDark.value ? 'gamatrain-logo.svg' : 'gamatrain-logo-black.svg',
+    bgColor: colors['surface']!,
+    boxShadow: '0px 1px 10px 0px rgba(var(--v-theme-shadowNeutral), 0.25)',
+    linkColor: colors['grey800']!,
+  }
+})
 
 const routeNeedChangeMenuSetting = ['index', 'smart-learning', 'services', 'school-service', 'faq', 'governance', 'terms', 'about-us', 'earn-money', 'leader-board', 'get-token']
 
 const handleChnageMenuSetting = () => {
   if (routeNeedChangeMenuSetting.includes(route.name as string)) {
-    menuSetting.value = window.scrollY > 60 ? whiteMenuSetting : blackMenuSetting
+    isTransparentMenu.value = window.scrollY <= 60
   }
   else {
-    menuSetting.value = whiteMenuSetting
+    isTransparentMenu.value = false
   }
 }
 
