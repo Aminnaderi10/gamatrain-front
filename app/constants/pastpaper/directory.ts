@@ -19,14 +19,6 @@ export const DIRECTORY_FILTERS = [
   { key: 'variant', title: 'Variant', inline: true },
 ]
 
-export const getDirectoryFilterOptionTitle = (key: string, item: { title: string }) => key === 'paper'
-  ? String(item.title).replace(/^\s*paper\s+(\d+)\s*$/i, '$1')
-  : item.title
-
-export const getDirectoryFilterColumns = (key: string, boardId: string | number) => key === 'paper'
-  ? Number(boardId) === 6657 ? 2 : 4
-  : 3
-
 export const DIRECTORY_BOARD_ORDER = [
   'Cambridge',
   'Edexcel',
@@ -37,3 +29,14 @@ export const DIRECTORY_BOARD_ORDER = [
   'Nigerian',
   'Olympiad',
 ]
+
+// Design labels and icons for the Resources sidebar, by collection title.
+export const DIRECTORY_RESOURCE_PRESENTATION: Record<string, { label: string, title?: string, icon: string }> = {
+  'predicted papers': { label: 'Predicted Papers', icon: 'md:auto_awesome_outlined' },
+  'workbooks': { label: 'Workbooks', icon: 'md:edit_note_outlined' },
+  'study and revision guides': { label: 'Study & Revision', title: 'Study & Revision Guides', icon: 'md:menu_book_outlined' },
+  'coursebooks': { label: 'Coursebooks', icon: 'md:import_contacts_outlined' },
+  'topical questions': { label: 'Topical Questions', icon: 'md:checklist_outlined' },
+  'topical': { label: 'Topical Questions', icon: 'md:checklist_outlined' },
+  'solution manuals': { label: 'Solution Manuals', icon: 'md:verified_outlined' },
+}

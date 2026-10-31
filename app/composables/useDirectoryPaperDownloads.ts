@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import type { BillingInterval, UpgradeSuggestionsDTO } from '~/types'
-import type { DirectoryDownloadParams, DirectoryPaper } from '~/types/subject-directory/paperFiles'
-import { getDirectoryFileDownloadParams, getDirectoryPaperDownloads } from '~/utils/directoryPaperFiles'
+import type { DirectoryDownloadParams, DirectoryPaper } from '~/types/subject-directory'
+import { getDirectoryFileDownloadParams, getDirectoryPaperDownloads } from '~/utils/directoryPapers'
 import { useDownloadWithProgress } from '~/composables/useDownloadWithProgress'
 import { contentPath } from '~/utils/contentPath'
 

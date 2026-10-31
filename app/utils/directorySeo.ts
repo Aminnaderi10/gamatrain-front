@@ -1,8 +1,49 @@
-import type { DirectorySelection } from '~/types/subject-directory/cascader'
-import type { DirectoryStructuredDataPaper } from '~/types/subject-directory/structuredData'
-import { getDirectoryCanonicalUrl } from './directoryCanonicalUrl'
-import { getDirectoryIntroduction } from './directoryPresentation'
 import { getDirectoryPaperLink, getDirectoryPaperTitle } from './directoryPapers'
+import type { DirectoryPaper, DirectorySelection } from '../types/subject-directory'
+
+// Title, description, canonical URL and JSON-LD for the subject directory page.
+
+export interface DirectoryStructuredDataPaper {
+  paper: DirectoryPaper
+  year: string
+  session: string
+}
+
+export const getDirectoryIntroduction = (selection: DirectorySelection | null) => {
+  if (!selection) {
+    const description = 'Select a board, grade and subject to browse question papers, mark schemes and additional study resources.'
+    return {
+      title: 'Past Papers',
+      description,
+      seoTitle: 'Past Papers | GamaTrain',
+      metaDescription: description,
+    }
+  }
+
+  const selectedPath = [selection.board.title, selection.grade.title, selection.subject.title].join(' ')
+
+  return {
+    title: `${selectedPath} Past Papers`,
+    description: `Browse ${selectedPath} question papers and mark schemes, organised by year, session, paper and variant. Find additional study materials in the Resources section.`,
+    seoTitle: `${selectedPath} Past Papers | GamaTrain`,
+    metaDescription: `Browse ${selectedPath} question papers and mark schemes by year, session, paper and variant. Explore additional study resources.`,
+  }
+}
+
+export const getDirectoryCanonicalUrl = (selection: DirectorySelection | null, siteUrl: string): string | null => {
+  if (!selection) return null
+
+  const board = String(selection.board?.code ?? '').trim()
+  const grade = String(selection.grade?.id ?? '').trim()
+  const subject = String(selection.subject?.id ?? '').trim()
+  if (!board || !grade || !subject) return null
+
+  // Only the committed subject path identifies this collection. Request query
+  // parameters, tracking values and fragments must not enter its canonical URL.
+  const url = new URL('/subject-directory', siteUrl)
+  url.search = new URLSearchParams({ board, grade, subject }).toString()
+  return url.href
+}
 
 export const getDirectoryStructuredData = (
   selection: DirectorySelection | null,

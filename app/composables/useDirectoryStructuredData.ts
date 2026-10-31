@@ -1,8 +1,8 @@
 import { computed } from 'vue'
 import type { Ref } from 'vue'
-import type { DirectorySelection } from '~/types/subject-directory/cascader'
-import type { DirectoryStructuredDataPaper } from '~/types/subject-directory/structuredData'
-import { getDirectoryStructuredData, serializeDirectoryStructuredData } from '~/utils/directoryStructuredData'
+import type { DirectorySelection } from '~/types/subject-directory'
+import { getDirectoryStructuredData, serializeDirectoryStructuredData } from '~/utils/directorySeo'
+import type { DirectoryStructuredDataPaper } from '~/utils/directorySeo'
 
 // CollectionPage + breadcrumb JSON-LD, listing the papers in open sessions.
 export const useDirectoryStructuredData = (

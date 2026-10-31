@@ -1,6 +1,6 @@
 import { useNuxtApp } from '#app'
 import { useApiService } from '~/composables/useApiService'
-import type { DirectoryFetchPapers, DirectoryPaperResponse } from '~/types/subject-directory/papers'
+import type { DirectoryFetchPapers, DirectoryPaperResponse } from '~/types/subject-directory'
 
 export const useDirectoryPapersApi = () => {
   const nuxtApp = useNuxtApp()

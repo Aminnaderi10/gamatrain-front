@@ -17,13 +17,16 @@
         v-if="examIds.length"
         class="directory-exam-cell"
       >
+        <!-- One exam links straight to it; several open a menu of exams -->
         <v-btn
-          v-if="examIds.length === 1"
-          :to="getDirectoryExamLink(examIds[0]!)"
+          :to="examIds.length === 1 ? getDirectoryExamLink(examIds[0]!) : undefined"
           class="directory-action directory-exam-button text-none font-weight-regular"
           variant="outlined"
+          color="brandNavy"
+          height="40"
           aria-label="Take exam"
           title="Online Exam"
+          append-icon="md:arrow_forward"
         >
           <v-icon
             size="20"
@@ -33,53 +36,25 @@
             md:sensors
           </v-icon>
           Take exam
-          <v-icon
-            size="16"
-            class="ml-1"
-            aria-hidden="true"
+          <v-menu
+            v-if="examIds.length > 1"
+            activator="parent"
           >
-            md:arrow_forward
-          </v-icon>
-        </v-btn>
-        <v-menu v-else-if="examIds.length > 1">
-          <template #activator="{ props: menuProps }">
-            <v-btn
-              v-bind="menuProps"
-              class="directory-action directory-exam-button text-none font-weight-regular"
-              variant="outlined"
-              aria-label="Take exam"
-              title="Online Exam"
+            <v-list
+              bg-color="grey25"
+              class="border border-borderSubtle border-opacity-100"
+              rounded="lg"
+              aria-label="Connected online exams"
             >
-              <v-icon
-                size="20"
-                class="d-none d-md-inline-flex mr-1"
-                aria-hidden="true"
-              >
-                md:sensors
-              </v-icon>
-              Take exam
-              <v-icon
-                size="16"
-                class="ml-1"
-                aria-hidden="true"
-              >
-                md:arrow_forward
-              </v-icon>
-            </v-btn>
-          </template>
-          <v-list
-            class="directory-exam-menu text-brandNavy"
-            bg-color="grey25"
-            aria-label="Connected online exams"
-          >
-            <v-list-item
-              v-for="(id, index) in examIds"
-              :key="id"
-              :to="getDirectoryExamLink(id)"
-              :title="`Online Exam ${index + 1}`"
-            />
-          </v-list>
-        </v-menu>
+              <v-list-item
+                v-for="(id, index) in examIds"
+                :key="id"
+                :to="getDirectoryExamLink(id)"
+                :title="`Online Exam ${index + 1}`"
+              />
+            </v-list>
+          </v-menu>
+        </v-btn>
       </div>
 
       <div class="directory-downloads">
@@ -87,9 +62,9 @@
           v-for="file in files"
           :key="file.type"
           class="directory-action directory-download text-none font-weight-regular flex-shrink-0"
-          :class="`directory-download--${file.style}`"
+          :color="file.style === 'question' ? 'brandNavy' : 'surfaceTertiary'"
           variant="flat"
-          height="40"
+          min-height="40"
           :loading="downloads.isDownloading(paper, file.type)"
           :disabled="downloads.isBusy && !downloads.isDownloading(paper, file.type)"
           :title="file.title"
@@ -124,12 +99,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { UnwrapRef } from 'vue'
-import type { DirectoryPaper } from '~/types/subject-directory/paperFiles'
+import type { DirectoryPaper } from '~/types/subject-directory'
 import type { useDirectoryPaperDownloads } from '~/composables/useDirectoryPaperDownloads'
 import {
-  getDirectoryExamIds, getDirectoryExamLink, getDirectoryPaperCode, getDirectoryPaperLink, getDirectoryPaperTitle,
+  getDirectoryExamIds, getDirectoryExamLink, getDirectoryPaperCode, getDirectoryPaperDownloads,
+  getDirectoryPaperLink, getDirectoryPaperTitle,
 } from '~/utils/directoryPapers'
-import { getDirectoryPaperDownloads } from '~/utils/directoryPaperFiles'
 
 const props = withDefaults(defineProps<{
   paper: DirectoryPaper
@@ -203,12 +178,7 @@ const paperCode = computed(() => getDirectoryPaperCode(props.paper, props.subjec
 }
 
 .directory-exam-button {
-  width: auto;
-  height: 40px;
   padding-inline: 8px;
-  color: rgb(var(--v-theme-brandNavy));
-  background-color: rgb(var(--v-theme-white));
-  border: 1px solid rgb(var(--v-theme-brandNavy));
 }
 
 .directory-paper-actions {
@@ -235,23 +205,15 @@ const paperCode = computed(() => getDirectoryPaperCode(props.paper, props.subjec
   min-width: 0;
 }
 
-.directory-download,
-.directory-download.v-btn--disabled {
-  padding-inline: 8px;
-  border: 1px solid rgb(var(--v-theme-borderSubtle));
-  color: rgb(var(--v-theme-brandNavy));
-  background-color: rgb(var(--v-theme-white));
+.directory-download {
+  padding: 6px 8px;
   height: auto !important;
-  min-height: 40px;
-  padding-block: 6px;
+  border: 1px solid rgb(var(--v-theme-borderSubtle));
 }
 
+/* Other buttons stay readable while one file downloads */
 .directory-download.v-btn--disabled {
   opacity: 1;
-}
-
-.directory-download.v-btn--disabled :deep(.v-btn__overlay) {
-  opacity: 0;
 }
 
 .directory-download__title {
@@ -264,53 +226,16 @@ const paperCode = computed(() => getDirectoryPaperCode(props.paper, props.subjec
   white-space: nowrap;
 }
 
-.directory-download--extra,
-.directory-download--extra.v-btn--disabled {
-  background-color: rgb(var(--v-theme-surfaceTertiary));
-}
-
-.directory-download--answer,
-.directory-download--answer.v-btn--disabled {
-  background-color: rgb(var(--v-theme-surfaceTertiary));
-}
-
-.directory-download--question,
-.directory-download--question.v-btn--disabled {
-  color: rgb(var(--v-theme-white));
-  background-color: rgb(var(--v-theme-brandNavy));
-  border-color: rgb(var(--v-theme-brandNavy));
-}
-
-.directory-exam-menu {
-  border: 1px solid rgb(var(--v-theme-borderSubtle));
-  border-radius: 12px !important;
-  box-shadow: 0 20px 48px rgba(var(--v-theme-brandNavy), 0.16);
-}
-
 .directory-insert-icon {
   transform: rotate(45deg);
 }
 
 @media #{map.get(vuetify.$display-breakpoints, 'sm-and-down')} {
+  /* On phones "Take exam" is a plain text link beside the title */
   .directory-exam-button {
-    height: 32px;
+    height: 32px !important;
     padding-inline: 4px;
-    color: rgb(var(--v-theme-brandNavy));
-    background-color: transparent;
     border: 0;
-  }
-
-  .directory-exam-button :deep(.v-btn__overlay) {
-    opacity: 0 !important;
-  }
-
-  .directory-exam-button :deep(.v-ripple__container) {
-    display: none;
-  }
-
-  .directory-exam-button:focus-visible {
-    outline: 2px solid rgb(var(--v-theme-primary));
-    outline-offset: 2px;
   }
 
   .directory-paper-row {
@@ -345,15 +270,6 @@ const paperCode = computed(() => getDirectoryPaperCode(props.paper, props.subjec
     padding-block: 2px 4px;
     scrollbar-width: thin;
     scrollbar-color: rgb(var(--v-theme-borderSubtle)) transparent;
-  }
-
-  .directory-downloads::-webkit-scrollbar {
-    height: 3px;
-  }
-
-  .directory-downloads::-webkit-scrollbar-thumb {
-    background-color: rgb(var(--v-theme-borderSubtle));
-    border-radius: 4px;
   }
 
   .directory-download {

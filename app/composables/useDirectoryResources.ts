@@ -2,13 +2,15 @@ import { computed } from 'vue'
 import type { Ref } from 'vue'
 import { useAsyncData } from '#app'
 import { useApiService } from '~/composables/useApiService'
-import type { DirectoryResourceGroup } from '~/types/subject-directory/resources'
+import { DIRECTORY_RESOURCE_PRESENTATION } from '~/constants/pastpaper/directory'
+import type { DirectoryResourceContext, DirectoryResourceGroup } from '~/types/subject-directory'
 
 interface DirectoryResourcesResponse {
   data?: { list?: DirectoryResourceGroup[] }
 }
 
-export const useDirectoryResources = async (context: Ref<{ subjectId: string | number }>) => {
+// The subject's non-empty resource collections, each linking to the matching Search results.
+export const useDirectoryResources = async (context: Ref<DirectoryResourceContext>) => {
   const key = computed(() => `directory-resources:${context.value.subjectId || 'none'}`)
   const { data, pending, error, refresh } = await useAsyncData(key, () => {
     const subjectId = context.value.subjectId
@@ -20,13 +22,27 @@ export const useDirectoryResources = async (context: Ref<{ subjectId: string | n
     }, { public: true })
   })
 
-  return {
-    resourcesData: computed<DirectoryResourceGroup[]>(() => {
-      const list = data.value?.data?.list
-      return Array.isArray(list) ? list : []
-    }),
-    isLoadingResources: pending,
-    resourceError: error,
-    refreshResources: refresh,
-  }
+  const collections = computed(() => (data.value?.data?.list ?? [])
+    .filter(group => group.items?.length)
+    .map((group) => {
+      const presentation = DIRECTORY_RESOURCE_PRESENTATION[group.title?.trim().toLowerCase() ?? '']
+      return {
+        id: group.type_id,
+        label: presentation?.label || group.title,
+        icon: presentation?.icon || 'md:description_outlined',
+        count: group.items.length,
+        to: {
+          path: '/search',
+          query: {
+            type: 'study-materials',
+            section: context.value.boardId || undefined,
+            base: context.value.gradeId || undefined,
+            lesson: context.value.subjectId || undefined,
+            test_type: group.type_id,
+          },
+        },
+      }
+    }))
+
+  return { collections, isLoadingResources: pending, resourceError: error, refreshResources: refresh }
 }

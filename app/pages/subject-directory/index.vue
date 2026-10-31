@@ -14,18 +14,9 @@
       </header>
       <div class="directory-selector">
         <SubjectCascader
-          :state="selectorState"
-          :columns="columns"
-          :display-path="displayPath"
-          :search="searchState"
-          :search-results="searchResults"
-          @open="setOpen"
-          @select="selectOption"
-          @navigate="selectorState.stage = $event"
-          @retry="retry"
-          @search="searchState.query = $event"
-          @select-search="selectSearchResult"
-          @retry-search="retrySearch"
+          :snapshot="snapshot"
+          @select="select"
+          @retry="refreshSelection()"
         />
       </div>
       <aside
@@ -35,8 +26,7 @@
       >
         <ResourceCollections
           class="directory-sidebar__resources"
-          :context="paperContext"
-          :data="resourcesData"
+          :collections="collections"
           :is-loading="isLoadingResources"
           :error="Boolean(resourceError)"
           @retry="refreshResources()"
@@ -44,7 +34,7 @@
       </aside>
       <div class="directory-paper-content">
         <paperTable
-          :selection="selectorState.selection"
+          :selection="selection"
           :subject-id="paperContext.subjectId"
           :grade-id="paperContext.gradeId"
           :board-id="paperContext.boardId"
@@ -57,73 +47,46 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-
 import ResourceCollections from '~/components/subject-directory/ResourceCollections.vue'
 import paperTable from '~/components/subject-directory/paper-table.vue'
 import SubjectCascader from '~/components/subject-directory/SubjectCascader.vue'
-import { useDirectoryCascader } from '~/composables/useDirectoryCascader'
-import { useDirectoryInitialPapers } from '~/composables/useDirectoryInitialPapers'
-import { getDirectoryCanonicalUrl } from '~/utils/directoryCanonicalUrl'
-import { getDirectoryIntroduction } from '~/utils/directoryPresentation'
-import { getDirectoryResourceCollections } from '~/utils/directoryResources'
+import { useDirectoryInitialPapers } from '~/composables/useDirectoryPapers'
+import { useDirectorySelection } from '~/composables/useDirectorySelection'
+import { getDirectoryCanonicalUrl, getDirectoryIntroduction } from '~/utils/directorySeo'
 
-const {
-  state: selectorState, columns, displayPath, setOpen, selectOption, retry,
-  searchState, searchResults, retrySearch, selectSearchResult,
-} = await useDirectoryCascader()
+const { snapshot, selection, select, refresh: refreshSelection } = await useDirectorySelection()
 const paperContext = computed(() => ({
-  subjectId: selectorState.selection?.subject.id || '',
-  boardId: selectorState.selection?.board.code || '',
-  gradeId: selectorState.selection?.grade.id || '',
-  subjectTitle: selectorState.selection?.subject.title || '',
+  subjectId: selection.value?.subject.id || '',
+  boardId: selection.value?.board.code || '',
+  gradeId: selection.value?.grade.id || '',
+  subjectTitle: selection.value?.subject.title || '',
 }))
 
-const introduction = computed(() => getDirectoryIntroduction(selectorState.selection))
 const [resourceState] = await Promise.all([
   useDirectoryResources(paperContext),
   useDirectoryInitialPapers(paperContext.value),
 ])
-const { resourcesData, isLoadingResources, resourceError, refreshResources } = resourceState
-const hasResources = computed(() => Boolean(
-  isLoadingResources.value || resourceError.value || getDirectoryResourceCollections(resourcesData.value).length,
-))
+const { collections, isLoadingResources, resourceError, refreshResources } = resourceState
+const hasResources = computed(() => Boolean(isLoadingResources.value || resourceError.value || collections.value.length))
 
 // SEO
+const introduction = computed(() => getDirectoryIntroduction(selection.value))
 const siteConfig = useSiteConfig()
-const canonicalUrl = computed(() => getDirectoryCanonicalUrl(selectorState.selection, siteConfig.url))
+const canonicalUrl = computed(() => getDirectoryCanonicalUrl(selection.value, siteConfig.url))
 
-useHead(() => ({
+useSeoMeta({
   titleTemplate: '%s',
-  title: introduction.value.seoTitle,
+  title: () => introduction.value.seoTitle,
+  description: () => introduction.value.metaDescription,
+  ogTitle: () => introduction.value.seoTitle,
+  ogDescription: () => introduction.value.metaDescription,
+  ogUrl: () => canonicalUrl.value ?? undefined,
+  ogType: 'website',
+  ogSiteName: 'GamaTrain',
+  appleMobileWebAppTitle: () => introduction.value.seoTitle,
+})
+useHead(() => ({
   link: canonicalUrl.value ? [{ key: 'directory-canonical', rel: 'canonical', href: canonicalUrl.value }] : [],
-
-  meta: [
-    ...(canonicalUrl.value ? [{ key: 'directory-og-url', property: 'og:url', content: canonicalUrl.value }] : []),
-    {
-      name: 'apple-mobile-web-app-title',
-      content: introduction.value.seoTitle,
-    },
-    {
-      property: 'og:title',
-      content: introduction.value.seoTitle,
-    },
-    {
-      property: 'og:site_name',
-      content: 'GamaTrain',
-    },
-    {
-      property: 'og:type',
-      content: 'website',
-    },
-    {
-      name: 'description',
-      content: introduction.value.metaDescription,
-    },
-    {
-      property: 'og:description',
-      content: introduction.value.metaDescription,
-    },
-  ],
 }))
 </script>
 
